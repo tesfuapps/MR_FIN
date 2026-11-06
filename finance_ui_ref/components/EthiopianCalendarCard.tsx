@@ -220,13 +220,13 @@ const styles = StyleSheet.create({
   },
   ethDateTitle: {
     color: Colors.white,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '800',
     letterSpacing: -0.2,
   },
   ethDateSub: {
     color: Colors.tintColor,
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
     marginTop: 2,
   },
@@ -235,12 +235,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
     paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     borderRadius: 12,
   },
   toggleBtnText: {
     color: Colors.textMuted,
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '700',
   },
   countdownBanner: {

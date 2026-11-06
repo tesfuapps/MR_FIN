@@ -106,9 +106,9 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: Colors.textMuted,
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '700',
-    letterSpacing: 0.8,
+    letterSpacing: 0.6,
   },
   paceNumberRow: {
     flexDirection: 'row',
@@ -118,23 +118,23 @@ const styles = StyleSheet.create({
   },
   paceNumber: {
     color: Colors.white,
-    fontSize: 34,
+    fontSize: 30,
     fontWeight: '900',
     fontFamily: 'SpaceMono',
   },
   paceUnit: {
     color: Colors.textMuted,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
   },
   badge: {
     borderWidth: 1,
     paddingVertical: 4,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     borderRadius: 12,
   },
   badgeText: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '800',
     letterSpacing: 0.5,
   },

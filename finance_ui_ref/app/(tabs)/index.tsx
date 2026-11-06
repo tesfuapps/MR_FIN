@@ -49,12 +49,12 @@ const Page = () => {
           {/* Top Summary & Semi-Circle Donut Chart */}
           <View style={styles.topSummaryRow}>
             <View style={styles.summaryTextCol}>
-              <Text style={styles.summaryLabel}>የ{monthNameAm} ወር ወጪ (Spent)</Text>
-              <Text style={styles.summaryAmount}>
+              <Text style={styles.summaryLabel} numberOfLines={1}>የ{monthNameAm} ወር ወጪ (Spent)</Text>
+              <Text style={styles.summaryAmount} numberOfLines={1}>
                 {livingPoolSpent.toLocaleString()}
                 <Text style={styles.currencySub}> ETB</Text>
               </Text>
-              <Text style={styles.poolBaselineText}>
+              <Text style={styles.poolBaselineText} numberOfLines={1}>
                 of {livingPoolBaseline.toLocaleString()} ETB Baseline
               </Text>
             </View>
@@ -66,8 +66,8 @@ const Page = () => {
                 showGradient
                 sectionAutoFocus
                 semiCircle
-                radius={68}
-                innerRadius={52}
+                radius={58}
+                innerRadius={44}
                 innerCircleColor={Colors.black}
                 centerLabelComponent={() => {
                   return (
@@ -123,9 +123,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     width: "100%",
     maxWidth: 520,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingTop: 10,
-    paddingBottom: 90,
+    paddingBottom: 100,
     overflow: 'hidden',
   },
   topSummaryRow: {
@@ -140,41 +140,42 @@ const styles = StyleSheet.create({
   summaryLabel: {
     color: Colors.white,
     fontWeight: "700",
-    fontSize: 15,
+    fontSize: 14,
   },
   summaryAmount: {
     color: Colors.white,
     fontWeight: "900",
-    fontSize: 32,
+    fontSize: 28,
     fontFamily: "SpaceMono",
     marginTop: 2,
   },
   currencySub: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "400",
     color: Colors.textMuted,
   },
   poolBaselineText: {
     color: Colors.textMuted,
-    fontSize: 11,
+    fontSize: 10,
     marginTop: 2,
   },
   chartWrapper: {
-    paddingVertical: 10,
+    paddingVertical: 8,
     alignItems: "center",
+    marginLeft: 8,
   },
   chartCenterLabel: {
     justifyContent: "center",
     alignItems: "center",
   },
   chartCenterPct: {
-    fontSize: 18,
+    fontSize: 16,
     color: Colors.white,
     fontWeight: "bold",
     fontFamily: "SpaceMono",
   },
   chartCenterSub: {
-    fontSize: 9,
+    fontSize: 8,
     color: Colors.textMuted,
   },
 });
