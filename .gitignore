@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Expo & Build output
+.expo/
+**/.expo/
+dist/
+**/dist/
+web-build/
+**/web-build/
+expo-env.d.ts
+
+# Logs & Environment
+*.log
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+.env*.local
+
+# System & TypeScript
+.DS_Store
+Thumbs.db
+*.tsbuildinfo

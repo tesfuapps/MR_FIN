@@ -1,0 +1,17 @@
+[
+  {
+    "id": "1",
+    "name": "Salary",
+    "amount": 15000
+  },
+  {
+    "id": "2",
+    "name": "Freelancing",
+    "amount": 6000
+  },
+  {
+    "id": "3",
+    "name": "Equb Reserve",
+    "amount": 2000
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1",
+    "name": "Housing",
+    "amount": 3000,
+    "percentage": 42
+  },
+  {
+    "id": "2",
+    "name": "Food & Drinks",
+    "amount": 2340,
+    "percentage": 33
+  },
+  {
+    "id": "3",
+    "name": "Transit",
+    "amount": 980,
+    "percentage": 14
+  },
+  {
+    "id": "4",
+    "name": "Misc",
+    "amount": 824,
+    "percentage": 11
+  }
+]
