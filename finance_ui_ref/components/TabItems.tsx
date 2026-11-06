@@ -4,11 +4,13 @@ import Colors from "@/constants/Colors";
 
 interface TabItemsProps {
   focused: boolean;
-  color: string;
+  color?: string;
   children: ReactNode;
 }
 
 const TabItems: React.FC<TabItemsProps> = ({ focused, children }) => {
+  const iconColor = focused ? "#000000" : Colors.textMuted;
+
   return (
     <View
       style={{
@@ -16,13 +18,13 @@ const TabItems: React.FC<TabItemsProps> = ({ focused, children }) => {
         backgroundColor: focused ? Colors.tintColor : "transparent",
         alignItems: "center",
         justifyContent: "center",
-        width: 38,
-        height: 38,
+        width: 42,
+        height: 42,
       }}
     >
       {React.isValidElement(children)
         ? React.cloneElement(children as React.ReactElement<any>, {
-            color: focused ? Colors.black : Colors.textMuted,
+            color: iconColor,
           })
         : children}
     </View>

@@ -1,8 +1,8 @@
 import { Tabs } from "expo-router";
 import React from "react";
 import TabItems from "@/components/TabItems";
+import { PieChartIcon, SwapIcon, UserIcon } from "@/components/TabIcons";
 import Colors from "@/constants/Colors";
-import { FontAwesome, AntDesign, SimpleLineIcons } from "@expo/vector-icons";
 
 const Layout = () => {
   return (
@@ -32,15 +32,15 @@ const Layout = () => {
         },
         tabBarShowLabel: false,
         tabBarInactiveTintColor: Colors.textMuted,
-        tabBarActiveTintColor: Colors.black,
+        tabBarActiveTintColor: "#000000",
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          tabBarIcon: ({ color, focused }) => (
-            <TabItems focused={focused} color={color}>
-              <SimpleLineIcons name="pie-chart" size={18} color={color} />
+          tabBarIcon: ({ focused }) => (
+            <TabItems focused={focused}>
+              <PieChartIcon color={focused ? "#000000" : Colors.textMuted} size={19} />
             </TabItems>
           ),
         }}
@@ -48,9 +48,9 @@ const Layout = () => {
       <Tabs.Screen
         name="transaction"
         options={{
-          tabBarIcon: ({ color, focused }) => (
-            <TabItems focused={focused} color={color}>
-              <AntDesign name="swap" size={18} color={color} />
+          tabBarIcon: ({ focused }) => (
+            <TabItems focused={focused}>
+              <SwapIcon color={focused ? "#000000" : Colors.textMuted} size={19} />
             </TabItems>
           ),
           headerShown: false,
@@ -59,9 +59,9 @@ const Layout = () => {
       <Tabs.Screen
         name="profile"
         options={{
-          tabBarIcon: ({ color, focused }) => (
-            <TabItems focused={focused} color={color}>
-              <FontAwesome name="user-o" size={18} color={color} />
+          tabBarIcon: ({ focused }) => (
+            <TabItems focused={focused}>
+              <UserIcon color={focused ? "#000000" : Colors.textMuted} size={19} />
             </TabItems>
           ),
           headerShown: false,
