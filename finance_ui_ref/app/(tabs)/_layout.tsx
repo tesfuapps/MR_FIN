@@ -1,7 +1,7 @@
 import { Tabs } from "expo-router";
 import React from "react";
 import TabItems from "@/components/TabItems";
-import { PieChartIcon, SwapIcon, UserIcon } from "@/components/TabIcons";
+import { PieChartIcon, SwapIcon, UserIcon, SettingsIcon } from "@/components/TabIcons";
 import Colors from "@/constants/Colors";
 
 const Layout = () => {
@@ -15,8 +15,8 @@ const Layout = () => {
           left: 0,
           right: 0,
           height: 60,
-          width: 220,
-          maxWidth: "90%",
+          width: 288,
+          maxWidth: "92%",
           borderRadius: 22,
           borderWidth: 1,
           borderTopWidth: 1,
@@ -64,6 +64,17 @@ const Layout = () => {
           tabBarIcon: ({ focused }) => (
             <TabItems focused={focused}>
               <UserIcon color={focused ? "#000000" : Colors.textMuted} size={19} />
+            </TabItems>
+          ),
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabItems focused={focused}>
+              <SettingsIcon color={focused ? "#000000" : Colors.textMuted} size={19} />
             </TabItems>
           ),
           headerShown: false,

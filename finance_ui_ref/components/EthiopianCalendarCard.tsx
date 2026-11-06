@@ -16,6 +16,8 @@ export const EthiopianCalendarCard: React.FC = () => {
     transactions,
     selectedMonthIndex,
     setSelectedMonthIndex,
+    language,
+    t,
   } = useFinSpark();
 
   const [expanded, setExpanded] = useState(false);
@@ -49,7 +51,9 @@ export const EthiopianCalendarCard: React.FC = () => {
             <Text style={styles.ethDateTitle}>{ethDate.formattedAm}</Text>
           </View>
           <Text style={styles.ethDateSub}>
-            {monthNameAm} ({monthNameEn}) • {currentDay}ኛው ቀን
+            {language === 'am'
+              ? `${monthNameAm} • ${currentDay}ኛው ቀን`
+              : `${monthNameEn} • ${currentDay} / ${totalDays}`}
           </Text>
         </View>
 
@@ -59,7 +63,7 @@ export const EthiopianCalendarCard: React.FC = () => {
           activeOpacity={0.7}
         >
           <Text style={styles.toggleBtnText}>
-            {expanded ? '▲ ዝጋ (Hide)' : '▼ ቀን መቁጠሪያ (Calendar)'}
+            {expanded ? `▲ ${t('hide')}` : `▼ ${t('calendar')}`}
           </Text>
         </TouchableOpacity>
       </View>
@@ -67,8 +71,13 @@ export const EthiopianCalendarCard: React.FC = () => {
       {/* Cycle Countdown Pill */}
       <View style={styles.countdownBanner}>
         <Text style={styles.countdownText}>
-          ⏳ እስከ <Text style={styles.highlightNextMonth}>{nextMonthAm}</Text> ድረስ{' '}
-          <Text style={styles.highlightDays}>{daysRemaining} ቀናት</Text> ቀርተዋል ({daysRemaining} days left)
+          {language === 'am' ? (
+            <>⏳ እስከ <Text style={styles.highlightNextMonth}>{nextMonthAm}</Text> ድረስ{' '}
+              <Text style={styles.highlightDays}>{daysRemaining} ቀናት</Text> ቀርተዋል</>
+          ) : (
+            <>⏳ <Text style={styles.highlightDays}>{daysRemaining} {t('days')}</Text> left until{' '}
+              <Text style={styles.highlightNextMonth}>{nextMonthAm}</Text></>
+          )}
         </Text>
       </View>
 
@@ -81,7 +90,7 @@ export const EthiopianCalendarCard: React.FC = () => {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.monthScroll}
           >
-            {ETHIOPIAN_MONTHS.slice(0, 12).map(m => (
+            {ETHIOPIAN_MONTHS.map(m => (
               <TouchableOpacity
                 key={m.index}
                 style={[
@@ -97,7 +106,7 @@ export const EthiopianCalendarCard: React.FC = () => {
                     selectedMonthIndex === m.index && styles.monthPillTextActive,
                   ]}
                 >
-                  {m.am} ({m.en})
+                  {language === 'am' ? m.am : m.en}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -105,7 +114,9 @@ export const EthiopianCalendarCard: React.FC = () => {
 
           {/* 30-Day Grid */}
           <Text style={styles.gridHeaderLabel}>
-            የ{monthNameAm} ወር ቀናት (Days 1 – {totalDays}):
+            {language === 'am'
+              ? `የ${monthNameAm} ወር ቀናት (1 – ${totalDays})`
+              : t('monthDays', { n: totalDays })}
           </Text>
 
           <View style={styles.daysGrid}>
@@ -156,17 +167,21 @@ export const EthiopianCalendarCard: React.FC = () => {
             <View style={styles.dayDetailsBox}>
               <View style={styles.dayDetailsHeader}>
                 <Text style={styles.dayDetailsTitle}>
-                  {monthNameAm} {selectedDay} ቀን ወጪዎች ({selectedDayTx.length} items):
+                  {t('daySpendTitle', {
+                    month: language === 'am' ? monthNameAm : monthNameEn,
+                    day: selectedDay,
+                    n: selectedDayTx.length,
+                  })}
                 </Text>
                 {selectedDay === currentDay && (
                   <View style={styles.todayPill}>
-                    <Text style={styles.todayPillText}>ዛሬ (Today)</Text>
+                    <Text style={styles.todayPillText}>{t('today')}</Text>
                   </View>
                 )}
               </View>
 
               {selectedDayTx.length === 0 ? (
-                <Text style={styles.noTxText}>ምንም ወጪ አልተመዘገበም (No spending logged for this day)</Text>
+                <Text style={styles.noTxText}>{t('noSpendingDay')}</Text>
               ) : (
                 selectedDayTx.map(t => (
                   <View key={t.id} style={styles.dayTxRow}>

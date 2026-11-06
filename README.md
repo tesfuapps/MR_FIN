@@ -1,4 +1,4 @@
-# FinSpark Addis (Mr. Fin) 🇪🇹⚡
+# Mr. Fin 🇪🇹⚡
 
 > **A Real Solution for Ethiopian Daily Economics & Micro-Cash Flow Management**  
 > *Dynamic Daily Pace Budgeting • Dual-Ledger Isolation • Ethiopian Calendar (የኢትዮጵያ ዘመን አቆጣጠር)*
@@ -19,18 +19,18 @@ Most mainstream personal finance apps (YNAB, Mint, Copilot, Monarch) make assump
 
 ---
 
-## 💡 How FinSpark Addis Succeeds
+## 💡 How Mr. Fin Succeeds
 
-FinSpark Addis models how urban Ethiopians actually live through three core innovations:
+Mr. Fin models how urban Ethiopians actually live through three core innovations:
 
 ### 1. Dynamic Daily Pacing
-Instead of fixed daily budgets, FinSpark dynamically recalculates your daily living allowance after every purchase:
+Instead of fixed daily budgets, Mr. Fin dynamically recalculates your daily living allowance after every purchase:
 $$\text{Dynamic Daily Pace} = \frac{\text{Remaining Living Pool}}{\text{Remaining Days in Ethiopian Month}}$$
 
 If you overspend on Friday in Bole, tomorrow's target dynamically contracts for the remaining days of **ጥቅምት (Tikimt)** or **ኅዳር (Hidar)** without shame or manual re-budgeting.
 
 ### 2. Dual-Ledger Isolation
-FinSpark segregates your cash flow into two protected buckets:
+Mr. Fin segregates your cash flow into two protected buckets:
 * **🌿 Daily Living Pool**: Fares (minibus/bajaj), jebena buna, lunch (shiro/tibs), snacks, and daily pocket cash. Deducts directly from your dynamic daily pace.
 * **📦 Pantry / Sinks Buffer**: 5L cooking oil, berbere batches, teff sacks, monthly rent, grooming/haircut, and subscriptions. **Isolated from your daily meal money**, so a bulk restock never falsely zeroes out your dinner allowance.
 

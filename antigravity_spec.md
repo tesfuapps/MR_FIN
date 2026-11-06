@@ -1,6 +1,6 @@
-# FinSpark Addis — Google Antigravity Agent Project Specification & Evaluation
+# Mr. Fin — Google Antigravity Agent Project Specification & Evaluation
 
-> **Project Target:** FinSpark Addis (Ethiopian Daily Pace Budget & Dual-Ledger Cash Flow Manager)  
+> **Project Target:** Mr. Fin (Ethiopian Daily Pace Budget & Dual-Ledger Cash Flow Manager)  
 > **Platform Target:** Google Antigravity IDE / Agent Suite  
 > **Owner / Persona:** Tesfaye Tilahun ("Tesfish"), Printing Specialist & Creative Brand Strategist, Addis Ababa, Ethiopia  
 > **Current Prototype:** Standalone PWA (`fin_manager.html`) with dynamic pace recalculation, Addis one-tap presets, dual-ledger accounting, and real Tikimt cycle data.
@@ -9,7 +9,7 @@
 
 ## 1. Executive Summary & Vision
 
-FinSpark Addis is an agent-built financial management PWA designed specifically for the daily micro-economy of urban Ethiopia (Addis Ababa). Unlike Western budgeting apps (Mint, YNAB) that assume bi-weekly direct deposits and credit-card tracking, FinSpark solves the **daily liquidity survival problem**:
+Mr. Fin is an agent-built financial management PWA designed specifically for the daily micro-economy of urban Ethiopia (Addis Ababa). Unlike Western budgeting apps (Mint, YNAB) that assume bi-weekly direct deposits and credit-card tracking, Mr. Fin solves the **daily liquidity survival problem**:
 1. **Dynamic Daily Pace Engine:** Calculates `Daily Target = Remaining Living Pool ÷ Remaining Cycle Days`. If an individual spends 20 ETB today against a 271 ETB target, tomorrow's target automatically recalculates up, providing instant feedback without shame.
 2. **Dual-Ledger Isolation:** Separates operational micro-expenses (taxis, buna, injera) from bulk capital investments (1L cooking oil, 1kg onion, berbere, subscriptions, toiletries). This prevents pantry restocks from artificially wiping out daily meal allowances.
 3. **Micro-Transit & Peer Tab Integration:** One-tap logging for city transit nodes (Kera, Wello Sefer, Alem Cinema, Edna Mall) and coworker loan/tab tracking (e.g. Shime Shop tab, Abela/Natu reimbursements).
@@ -70,7 +70,7 @@ To continue developing this application in **Google Antigravity**, paste the fol
 
 ```markdown
 You are an autonomous engineering agent working in Google Antigravity.
-Your objective is to upgrade "FinSpark Addis" from a single-file prototype into a modular, production-ready Progressive Web App (PWA) with offline persistence.
+Your objective is to upgrade "Mr. Fin" from a single-file prototype into a modular, production-ready Progressive Web App (PWA) with offline persistence.
 
 ### Codebase Context
 - Primary prototype: artifacts/file_generation/ttl=63d/output/fin_manager.html
@@ -93,4 +93,4 @@ Your objective is to upgrade "FinSpark Addis" from a single-file prototype into 
 
 ## 5. Summary Recommendation
 
-The **FinSpark Addis** prototype is mathematically sound, deeply grounded in real Addis Ababa daily economics, and has already succeeded in keeping Tesfish's Tikimt budget on target. Feeding this into Google Antigravity provides the perfect foundation to turn a personal tracker into a scalable, high-performance product.
+The **Mr. Fin** prototype is mathematically sound, deeply grounded in real Addis Ababa daily economics, and has already succeeded in keeping Tesfish's Tikimt budget on target. Feeding this into Google Antigravity provides the perfect foundation to turn a personal tracker into a scalable, high-performance product.

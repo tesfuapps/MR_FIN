@@ -65,6 +65,33 @@ body{width:100%!important;margin:0!important;padding:0!important}
 svg{display:inline-block!important;vertical-align:middle!important}
 </style>"""
 
+# ---------------------------------------------------------------------------
+# PWA installability tags. Chrome only offers "Install app" when the page has
+# a valid manifest (name, standalone display, 192 + 512 icons) and a service
+# worker with a fetch handler. Expo does not emit any of these for a bare
+# static export, so we add the head tags here and ship the actual files from
+# finance_ui_ref/public/.
+# ---------------------------------------------------------------------------
+PWA_START = "<!-- finspark-pwa:start -->"
+PWA_END = "<!-- finspark-pwa:end -->"
+TITLE_TEXT = "Mr. Fin"
+
+PWA_TAGS = (
+    '<meta name="description" content="Mr. Fin — Ethiopian-calendar daily pace budget '
+    'for the Addis Ababa cash economy."/>'
+    '<meta name="theme-color" content="#0b0f19"/>'
+    '<meta name="application-name" content="Mr. Fin"/>'
+    '<meta name="mobile-web-app-capable" content="yes"/>'
+    '<meta name="apple-mobile-web-app-capable" content="yes"/>'
+    '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>'
+    '<meta name="apple-mobile-web-app-title" content="Mr. Fin"/>'
+    '<link rel="manifest" href="/manifest.webmanifest"/>'
+    '<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png"/>'
+    '<link rel="apple-touch-icon" href="/apple-touch-icon.png"/>'
+    '<script src="/pwa-register.js" defer></script>'
+)
+PWA_BLOCK = PWA_START + PWA_TAGS + PWA_END
+
 # Defensive single-property overrides. Class names are content hashes and can
 # change between builds, so match on the property/value instead of the name.
 STYLE_SHRINKS = [
@@ -83,6 +110,11 @@ EXPO_RESET_RE = re.compile(
     r'(?:\s*<style id="overflow-guard">.*?</style>)*',
     re.S,
 )
+PWA_RE = re.compile(
+    re.escape(PWA_START) + r".*?" + re.escape(PWA_END),
+    re.S,
+)
+PUBLIC_DIR = os.path.join(ROOT, "finance_ui_ref", "public")
 
 
 def patch_html(source: str) -> str:
@@ -114,6 +146,24 @@ def patch_html(source: str) -> str:
     else:
         html = html.replace("</head>", RESPONSIVE_GUARD + "</head>", 1)
 
+    # 6. Give the static pages a real document title (Expo emits an empty one).
+    if re.search(r"<title[^>]*>\s*</title>", html):
+        html = re.sub(
+            r"<title([^>]*)>\s*</title>",
+            lambda m: "<title" + m.group(1) + ">" + TITLE_TEXT + "</title>",
+            html,
+            count=1,
+        )
+    elif "<title" not in html:
+        html = html.replace("</head>", "<title>" + TITLE_TEXT + "</title></head>", 1)
+
+    # 7. PWA manifest / icons / service-worker registration. Idempotent so
+    #    re-running this script never stacks duplicate tags.
+    if PWA_RE.search(html):
+        html = PWA_RE.sub(lambda _m: PWA_BLOCK, html, count=1)
+    else:
+        html = html.replace("</head>", PWA_BLOCK + "</head>", 1)
+
     return html
 
 
@@ -122,6 +172,20 @@ def main() -> int:
         print(f"ERROR: export directory not found: {DIST}", file=sys.stderr)
         print("Run `npx expo export --platform web --output-dir dist` first.", file=sys.stderr)
         return 1
+
+    # Expo copies finance_ui_ref/public/ into dist/ during export. Mirror it
+    # here as well so the PWA files survive a re-patch of an older export.
+    if os.path.isdir(PUBLIC_DIR):
+        for base, _dirs, files in os.walk(PUBLIC_DIR):
+            rel_dir = os.path.relpath(base, PUBLIC_DIR)
+            target_dir = DIST if rel_dir == "." else os.path.join(DIST, rel_dir)
+            os.makedirs(target_dir, exist_ok=True)
+            for name in files:
+                shutil.copy2(
+                    os.path.join(base, name),
+                    os.path.join(target_dir, name),
+                )
+        print("synced  finance_ui_ref/public -> dist")
 
     html_files = []
     for base, _dirs, files in os.walk(DIST):

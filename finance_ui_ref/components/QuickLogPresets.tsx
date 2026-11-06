@@ -28,7 +28,7 @@ interface Props {
 }
 
 export const QuickLogPresets: React.FC<Props> = ({ onPressCustom }) => {
-  const { quickLog } = useFinSpark();
+  const { quickLog, t } = useFinSpark();
 
   const handlePress = (item: PresetItem) => {
     quickLog(item.desc, item.amount, item.category);
@@ -37,8 +37,8 @@ export const QuickLogPresets: React.FC<Props> = ({ onPressCustom }) => {
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>⚡ 1-Tap Addis Quick Log</Text>
-        <Text style={styles.subtitle}>Minibus &amp; Buna</Text>
+        <Text style={styles.title}>⚡ {t('quickLogTitle')}</Text>
+        <Text style={styles.subtitle}>{t('quickLogSub')}</Text>
       </View>
 
       {/* Exactly two rows of four. flexBasis 22% + gap leaves no room for a
@@ -69,8 +69,8 @@ export const QuickLogPresets: React.FC<Props> = ({ onPressCustom }) => {
       >
         <Text style={styles.customPlus}>＋</Text>
         <View style={styles.customTextWrap}>
-          <Text style={styles.customTitle}>Custom expense</Text>
-          <Text style={styles.customSub}>Any amount, category or ledger</Text>
+          <Text style={styles.customTitle}>{t('customExpense')}</Text>
+          <Text style={styles.customSub}>{t('customSub')}</Text>
         </View>
         <Text style={styles.customArrow}>›</Text>
       </TouchableOpacity>
