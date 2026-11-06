@@ -24,6 +24,13 @@ import sys
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 DIST = os.path.join(ROOT, "finance_ui_ref", "dist")
+MAX_BUNDLE_ALIASES = 3
+
+# Bundle hashes that were publicly deployed; keep these as aliases forever so
+# a cached index.html never hits a dead script URL.
+LEGACY_BUNDLE_HASHES = (
+    "entry-c252f6d7f392298190d873af943131a5.js",
+)
 
 VIEWPORT = (
     '<meta name="viewport" content="width=device-width, initial-scale=1.0, '
@@ -67,7 +74,13 @@ STYLE_SHRINKS = [
 ]
 
 VIEWPORT_RE = re.compile(r'<meta name="viewport"[^>]*/?>')
-EXPO_RESET_RE = re.compile(r'<style id="expo-reset">.*?</style>', re.S)
+# Match the reset plus any previously injected overflow guard so re-running
+# this script stays idempotent instead of stacking duplicate style blocks.
+EXPO_RESET_RE = re.compile(
+    r'<style id="expo-reset">.*?</style>'
+    r'(?:\s*<style id="overflow-guard">.*?</style>)*',
+    re.S,
+)
 
 
 def patch_html(source: str) -> str:
@@ -123,13 +136,49 @@ def main() -> int:
         rel = os.path.relpath(path, DIST)
         print(f"patched  {rel}  ({len(original)} -> {len(patched)} bytes)")
 
-    # Remove stale bundles before copying so the old hash is not served.
-    stale_js_dir = os.path.join(ROOT, "_expo", "static", "js", "web")
-    if os.path.isdir(stale_js_dir):
-        for name in os.listdir(stale_js_dir):
-            if name.endswith(".js"):
-                os.remove(os.path.join(stale_js_dir, name))
-                print(f"removed stale bundle {name}")
+    # Keep previous bundle filenames as aliases that serve the newest app.
+    #
+    # A phone that cached an older index.html still points at the older hash.
+    # If that file 404s the app never hydrates and no new features (e.g. the
+    # logging toast) appear, even though the deploy is correct. Identical file
+    # content means git stores just one blob, so aliases are cheap.
+    js_rel_dir = os.path.join("_expo", "static", "js", "web")
+    dist_js_dir = os.path.join(DIST, js_rel_dir)
+    root_js_dir = os.path.join(ROOT, js_rel_dir)
+    os.makedirs(root_js_dir, exist_ok=True)
+
+    new_bundles = sorted(
+        name for name in os.listdir(dist_js_dir)
+        if name.startswith("entry-") and name.endswith(".js")
+    ) if os.path.isdir(dist_js_dir) else []
+
+    if new_bundles:
+        with open(os.path.join(dist_js_dir, new_bundles[0]), "rb") as fh:
+            newest_bytes = fh.read()
+
+        legacy = [
+            name for name in os.listdir(root_js_dir)
+            if name.startswith("entry-") and name.endswith(".js")
+            and name != new_bundles[0]
+        ]
+        # Most recent first, keep a small rolling window plus any hashes that
+        # were shipped publicly (those are the ones a phone may still cache).
+        legacy.sort(
+            key=lambda n: os.path.getmtime(os.path.join(root_js_dir, n)),
+            reverse=True,
+        )
+        keep = set(legacy[:MAX_BUNDLE_ALIASES])
+        keep.update(
+            name for name in LEGACY_BUNDLE_HASHES if name != new_bundles[0]
+        )
+        for name in sorted(keep):
+            with open(os.path.join(root_js_dir, name), "wb") as fh:
+                fh.write(newest_bytes)
+            print(f"aliased {name} -> {new_bundles[0]}")
+        for name in legacy:
+            if name not in keep:
+                os.remove(os.path.join(root_js_dir, name))
+                print(f"removed old bundle alias {name}")
 
     copied = 0
     for base, _dirs, files in os.walk(DIST):
