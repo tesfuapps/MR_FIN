@@ -92,7 +92,7 @@ const Page = () => {
           <EthiopianCalendarCard />
 
           {/* 1-Tap Addis Micro-Transit & Buna */}
-          <QuickLogPresets />
+          <QuickLogPresets onPressCustom={() => setModalVisible(true)} />
 
           {/* Expense Categories with + Add Item */}
           <ExpenseBlock list={ExpenseList} onPressAdd={() => setModalVisible(true)} />

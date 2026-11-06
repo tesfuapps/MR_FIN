@@ -30,6 +30,8 @@ MAX_BUNDLE_ALIASES = 3
 # a cached index.html never hits a dead script URL.
 LEGACY_BUNDLE_HASHES = (
     "entry-c252f6d7f392298190d873af943131a5.js",
+    "entry-d5f5440a6b06dccaf5fd45ac551f4562.js",
+    "entry-cc517c36b841230e9d33093c2ddcb992.js",
 )
 
 VIEWPORT = (
