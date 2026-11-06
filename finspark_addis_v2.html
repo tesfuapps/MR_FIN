@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>FinSpark Addis - Smart Ethiopian Daily Pace Budget</title>
+  <!-- Tailwind CSS 3.4.17 -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <!-- Lucide Icons 0.344.0 -->
+  <script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+            },
+            ethiopia: {
+              gold: '#f59e0b',
+              red: '#ef4444',
+              green: '#10b981',
+              blue: '#3b82f6'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* ===== Design System Foundation ===== */
+   :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-card: rgba(30, 41, 59, 0.8);
+      --bg-card-hover: rgba(51, 65, 85, 0.6);
+      --border-color: rgba(51, 65, 85, 0.6);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --glass-blur: 16px;
+    }
+
+    html.light {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-card: rgba(255, 255, 255, 0.9);
+      --bg-card-hover: rgba(248, 250, 252, 0.95);
+      --border-color: rgba(226, 232, 240, 0.8);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+    }
+
+    body {
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: contain;
+      background: var(--bg-primary);
+      transition: background 0.4s ease;
+    }
+
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 16px); }
+
+    /* ===== Glassmorphism Cards ===== */
+    .glass-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--border-color);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+    }
+    .glass-card:active {
+      transform: scale(0.985);
+    }
+
+    /* ===== Animations ===== */
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.85; }
+    }
+    .animate-subtle { animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes countUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200px 0; }
+      100% { background-position: calc(200px + 100%) 0; }
+    }
+
+    .anim-slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .anim-slide-right { animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .anim-fade-in { animation: fadeIn 0.3s ease both; }
+    .anim-scale-in { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .anim-count { animation: countUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+    /* Staggered children */
+    .stagger > *:nth-child(1) { animation-delay: 0ms; }
+    .stagger > *:nth-child(2) { animation-delay: 50ms; }
+    .stagger > *:nth-child(3) { animation-delay: 100ms; }
+    .stagger > *:nth-child(4) { animation-delay: 150ms; }
+    .stagger > *:nth-child(5) { animation-delay: 200ms; }
+    .stagger > *:nth-child(6) { animation-delay: 250ms; }
+    .stagger > *:nth-child(7) { animation-delay: 300ms; }
+    .stagger > *:nth-child(8) { animation-delay: 350ms; }
+
+    /* ===== View Transitions ===== */
+    .view-enter {
+      animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    /* ===== Active Nav Indicator ===== */
+    .nav-active-indicator {
+      position: absolute;
+      top: 0;
+      height: 3px;
+      border-radius: 0 0 3px 3px;
+      background: linear-gradient(90deg, #10b981, #2dd4bf);
+      transition: left 0.35s cubic-bezier(0.16, 1, 0.3, 1), width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ===== Progress Ring ===== */
+    .pace-ring-bg {
+      stroke: rgba(100, 116, 139, 0.15);
+    }
+    .pace-ring-fill {
+      stroke: url(#paceGradient);
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ===== Sparkline Bar Chart ===== */
+    .spark-bar {
+      transition: height 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+    .spark-bar:hover { opacity: 0.8; }
+
+    /* ===== Shimmer Loading ===== */
+    .shimmer {
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
+      background-size: 200px 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    /* ===== Theme Toggle Switch ===== */
+    .theme-toggle {
+      transition: background-color 0.3s ease;
+    }
+    .theme-toggle-knob {
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    html.light .theme-toggle-knob {
+      transform: translateX(20px);
+    }
+
+    /* ===== Button Press Feedback ===== */
+    .btn-press {
+      transition: transform 0.15s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-press:active {
+      transform: scale(0.94);
+    }
+
+    /* ===== Modal Backdrop ===== */
+    .modal-backdrop {
+      animation: fadeIn 0.25s ease both;
+    }
+    .modal-content {
+      animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    /* ===== Cycle Progress ===== */
+    .cycle-progress-fill {
+      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ===== Swipe Container ===== */
+    .swipe-container {
+      touch-action: pan-y;
+    }
+
+    /* ===== Search Input ===== */
+    .search-input:focus {
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+    }
+
+    /* ===== Empty State ===== */
+    .empty-state-icon {
+      animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-start antialiased font-sans selection:bg-emerald-500 selection:text-white">
+
+  <!-- Desktop Wrapper / Mobile Device Frame -->
+  <div id="appContainer" class="w-full max-w-md min-h-screen bg-slate-900 shadow-2xl flex flex-col relative pb-24 border-x border-slate-800/80 overflow-hidden">
+
+    <!-- Decorative Background Glow -->
+    <div class="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-emerald-500/5 to-transparent pointer-events-none"></div>
+
+    <!-- Top App Header -->
+    <header class="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-xl px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white font-bold text-lg tracking-wider">
+          F
+        </div>
+        <div>
+          <div class="flex items-center space-x-1.5">
+            <h1 class="text-base font-bold tracking-tight text-white leading-none">FinSpark</h1>
+            <span class="text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20">Addis</span>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-tight mt-0.5">Tikimt Cycle • Day <span id="headerDayNum" class="text-emerald-400 font-semibold">26</span> of 30</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <!-- Theme Toggle -->
+        <button id="themeToggleBtn" class="w-8 h-8 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors border border-slate-700/60 relative" title="Toggle Theme">
+          <i data-lucide="moon" class="w-4 h-4 dark-icon"></i>
+          <i data-lucide="sun" class="w-4 h-4 light-icon hidden"></i>
+        </button>
+        <button id="openSettingsBtn" class="w-8 h-8 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors border border-slate-700/60 btn-press" title="Cycle Settings">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+        </button>
+        <button id="resetDataBtn" class="w-8 h-8 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors border border-slate-700/60 btn-press" title="Reset to Live Tracker Data">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Cycle Progress Bar -->
+    <div class="px-4 py-2 border-b border-slate-800/50">
+      <div class="flex items-center justify-between text-[10px] text-slate-500 mb-1">
+        <span>Cycle Progress</span>
+        <span id="cycleProgressLabel">87%</span>
+      </div>
+      <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+        <div id="cycleProgressBar" class="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 rounded-full cycle-progress-fill" style="width: 87%;"></div>
+      </div>
+    </div>
+
+    <!-- Main Dynamic Content Views -->
+    <main id="mainContent" class="flex-1 px-4 py-4 overflow-y-auto hide-scrollbar space-y-4 swipe-container">
+
+      <!-- ================= TAB 1: DASHBOARD ================= -->
+      <section id="viewDashboard" class="space-y-4 view-enter">
+
+        <!-- Hero: Dynamic Daily Pace Card with Progress Ring -->
+        <div class="relative overflow-hidden rounded-2xl glass-card p-4 shadow-xl">
+          <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+          <div class="flex items-start justify-between">
+            <div class="flex-1">
+              <span class="text-[11px] font-medium tracking-wide uppercase text-slate-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Today's Benchmark Pace
+              </span>
+              <div class="flex items-baseline space-x-1.5 mt-1">
+                <span id="heroDailyPace" class="text-4xl font-extrabold tracking-tight text-white font-mono anim-count">271</span>
+                <span class="text-sm font-semibold text-slate-400">ETB / day</span>
+              </div>
+              <div id="paceBadge" class="mt-2 inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                <span>On Target</span>
+              </div>
+            </div>
+
+            <!-- SVG Progress Ring -->
+            <div class="relative w-20 h-20 shrink-0">
+              <svg class="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
+                <defs>
+                  <linearGradient id="paceGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#10b981" />
+                    <stop offset="100%" stop-color="#2dd4bf" />
+                  </linearGradient>
+                </defs>
+                <circle cx="40" cy="40" r="34" fill="none" class="pace-ring-bg" stroke-width="6" />
+                <circle id="paceRingFill" cx="40" cy="40" r="34" fill="none" class="pace-ring-fill" stroke-width="6"
+                  stroke-dasharray="213.6" stroke-dashoffset="197.8" />
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span id="ringPercent" class="text-lg font-bold text-white font-mono leading-none">7%</span>
+                <span class="text-[8px] text-slate-400 mt-0.5">used</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress Bar & Spend Tracker -->
+          <div class="mt-4 pt-3 border-t border-slate-700/60 space-y-2">
+            <div class="flex justify-between text-xs">
+              <span class="text-slate-400">Spent Today: <strong id="heroSpentToday" class="text-white font-mono">20 ETB</strong></span>
+              <span class="text-slate-400">Remaining: <strong id="heroRemainingToday" class="text-emerald-400 font-mono">251 ETB</strong></span>
+            </div>
+            <div class="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden p-0.5 border border-slate-800">
+              <div id="heroProgressBar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-700 ease-out" style="width: 7.4%;"></div>
+            </div>
+          </div>
+
+          <!-- Bottom Micro Metrics -->
+          <div class="grid grid-cols-2 gap-2 mt-3 pt-2 text-[11px] text-slate-400">
+            <div class="bg-slate-900/60 rounded-lg p-2 border border-slate-800/80">
+              <span class="text-slate-400">Living Pool Remaining</span>
+              <p class="text-sm font-bold text-white font-mono mt-0.5"><span id="heroLivingPool">1,336</span> <span class="text-[10px] text-slate-400 font-normal">/ 8,500 ETB</span></p>
+            </div>
+            <div class="bg-slate-900/60 rounded-lg p-2 border border-slate-800/80">
+              <span class="text-slate-400">Days Remaining</span>
+              <p class="text-sm font-bold text-amber-400 font-mono mt-0.5"><span id="heroDaysLeft">5</span> <span class="text-[10px] text-slate-400 font-normal">days left</span></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7-Day Spending Trend Chart -->
+        <div class="rounded-2xl glass-card p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <i data-lucide="trending-up" class="w-3.5 h-3.5 text-emerald-400"></i>
+              7-Day Spending Trend
+            </h2>
+            <span class="text-[10px] text-slate-500">vs daily pace target</span>
+          </div>
+          <div id="sparkChartContainer" class="flex items-end justify-between gap-1.5 h-24 pb-4 relative">
+            <!-- Y-axis guideline -->
+            <div class="absolute left-0 right-0 border-t border-dashed border-slate-700/40" style="bottom: 50%;"></div>
+            <div class="absolute left-0 right-0 border-t border-dashed border-slate-700/20" style="bottom: 25%;"></div>
+            <!-- Bars populated by JS -->
+          </div>
+          <div class="flex items-center justify-between text-[10px] text-slate-500">
+            <div class="flex items-center gap-3">
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-emerald-500"></span> Under target</span>
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-rose-500"></span> Over target</span>
+            </div>
+            <span id="sparkAvgLabel" class="font-mono">Avg: — ETB</span>
+          </div>
+        </div>
+
+        <!-- One-Tap Quick Log Presets -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between px-0.5">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
+              One-Tap Quick Log
+            </h2>
+            <span class="text-[10px] text-slate-500">Tap to record instantly</span>
+          </div>
+          <div class="grid grid-cols-4 gap-2 stagger">
+            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-800 active:scale-90 border border-slate-700/60 transition-all text-center btn-press" data-amount="20" data-cat="Transit" data-desc="Kera to Wello Sefer Taxi">
+              <span class="text-lg">🚕</span>
+              <span class="text-[11px] font-semibold text-slate-200 mt-1">Kera-Wello</span>
+              <span class="text-[10px] font-mono text-emerald-400">20 ETB</span>
+            </button>
+            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-800 active:scale-90 border border-slate-700/60 transition-all text-center btn-press" data-amount="10" data-cat="Transit" data-desc="Wello Sefer to Alem Cinema">
+              <span class="text-lg">🚖</span>
+              <span class="text-[11px] font-semibold text-slate-200 mt-1">Alem Cinema</span>
+              <span class="text-[10px] font-mono text-emerald-400">10 ETB</span>
+            </button>
+            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-800 active:scale-90 border border-slate-700/60 transition-all text-center btn-press" data-amount="20" data-cat="Transit" data-desc="Taxi to Kera (Return)">
+              <span class="text-lg">🏠</span>
+              <span class="text-[11px] font-semibold text-slate-200 mt-1">Home Taxi</span>
+              <span class="text-[10px] font-mono text-emerald-400">20 ETB</span>
+            </button>
+            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-800 active:scale-90 border border-slate-700/60 transition-all text-center btn-press" data-amount="0" data-cat="Transit" data-desc="Lift / Morning Walk">
+              <span class="text-lg">🚶</span>
+              <span class="text-[11px] font-semibold text-slate-200 mt-1">Free Lift</span>
+              <span class="text-[10px] font-mono text-teal-400">0 ETB</span>
+            </button>
+            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-800 active:scale-90 border border-slate-700/60 transition-all text-center btn-press" data-amount="50" data-cat="Food" data-desc="Traditional Buna (Coffee)">
+              <span class="text-lg">☕</span>
+              <span class="text-[11px] font-semibold text-slate-200 mt-1">Buna</span>
+              <span class="text-[10px] font-mono text-emerald-400">50 ETB</span>
+            </button>
+            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-800 active:scale-90 border border-slate-700/60 transition-all text-center btn-press" data-amount="30" data-cat="Food" data-desc="Morning / Afternoon Shay (Tea)">
+              <span class="text-lg">🍵</span>
+              <span class="text-[11px] font-semibold text-slate-200 mt-1">Shay (Tea)</span>
+              <span class="text-[10px] font-mono text-emerald-400">30 ETB</span>
+            </button>
+            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-800 active:scale-90 border border-slate-700/60 transition-all text-center btn-press" data-amount="50" data-cat="Food" data-desc="Bought 2 Injeras">
+              <span class="text-lg">🫓</span>
+              <span class="text-[11px] font-semibold text-slate-200 mt-1">2 Injeras</span>
+              <span class="text-[10px] font-mono text-emerald-400">50 ETB</span>
+            </button>
+            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-800 active:scale-90 border border-slate-700/60 transition-all text-center btn-press" data-amount="20" data-cat="Food" data-desc="Fresh Bread (Dabo)">
+              <span class="text-lg">🥖</span>
+              <span class="text-[11px] font-semibold text-slate-200 mt-1">Bread</span>
+              <span class="text-[10px] font-mono text-emerald-400">20 ETB</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Today's Logged Items -->
+        <div class="space-y-2 pt-1">
+          <div class="flex items-center justify-between px-0.5">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-blue-400"></i>
+              Today's Expenses
+            </h2>
+            <span id="todayCountBadge" class="text-[11px] font-medium text-slate-400">1 item</span>
+          </div>
+          <div id="todayExpensesList" class="space-y-2">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Coach Tip Card -->
+        <div class="rounded-xl glass-card p-3.5 flex items-start space-x-3">
+          <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+            <i data-lucide="lightbulb" class="w-4 h-4"></i>
+          </div>
+          <div class="text-xs space-y-1">
+            <p class="font-semibold text-slate-200">Mr. Fin Insight: Packed Firfir Today!</p>
+            <p class="text-slate-400 leading-relaxed">Packing your homemade Firfir lunch saved you ~250 ETB today. You have <span class="text-emerald-400 font-semibold font-mono">251 ETB</span> remaining today for dinner or return transit without touching your pace.</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================= TAB 2: MANUAL LOG ================= -->
+      <section id="viewLog" class="space-y-4 hidden">
+        <div class="rounded-2xl glass-card p-4 space-y-4">
+          <h2 class="text-sm font-bold text-white flex items-center gap-2">
+            <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400"></i>
+            Log an Expense or Inflow
+          </h2>
+          <form id="expenseForm" class="space-y-3.5">
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1">Amount (ETB)</label>
+              <div class="relative">
+                <input type="number" id="inputAmount" step="1" min="0" placeholder="0" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xl font-bold font-mono text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder-slate-600">
+                <span class="absolute right-3.5 top-3 text-xs font-bold text-slate-500">ETB</span>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Account / Ledger Bucket</label>
+              <div class="grid grid-cols-2 gap-2">
+                <label class="cursor-pointer">
+                  <input type="radio" name="accountBucket" value="living" checked class="peer sr-only">
+                  <div class="p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 peer-checked:border-emerald-500 peer-checked:bg-emerald-500/10 peer-checked:text-emerald-300 transition-all text-center">
+                    <div class="text-xs font-bold text-slate-200 peer-checked:text-emerald-300">Daily Living Pool</div>
+                    <div class="text-[10px] text-slate-400">Affects dynamic daily pace</div>
+                  </div>
+                </label>
+                <label class="cursor-pointer">
+                  <input type="radio" name="accountBucket" value="savings" class="peer sr-only">
+                  <div class="p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 peer-checked:border-blue-500 peer-checked:bg-blue-500/10 peer-checked:text-blue-300 transition-all text-center">
+                    <div class="text-xs font-bold text-slate-200 peer-checked:text-blue-300">Savings Buffer</div>
+                    <div class="text-[10px] text-slate-400">Pantry, care, outings (0 pace impact)</div>
+                  </div>
+                </label>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1">Category</label>
+              <select id="inputCategory" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-medium text-slate-200 focus:outline-none focus:border-emerald-500">
+                <option value="Transportation & Rides">🚕 Transportation & Rides</option>
+                <option value="Food & Drinks" selected>🍲 Food & Drinks</option>
+                <option value="Pantry & Groceries">🛒 Pantry & Bulk Stock</option>
+                <option value="Personal Care & Services">💈 Personal Care & Grooming</option>
+                <option value="Entertainment">🎮 Entertainment & Social</option>
+                <option value="Subscriptions">📱 Subscriptions & Telecom</option>
+                <option value="Peer Loan / Tab">🤝 Peer Loan or Tab</option>
+                <option value="Work Inflow">💼 Freelance Inflow (+)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1">Description / Memo</label>
+              <input type="text" id="inputDesc" placeholder="e.g. Afternoon tea with Sami" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 placeholder-slate-600">
+            </div>
+            <button type="submit" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 active:scale-[0.99] text-white font-bold text-sm shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center space-x-2 btn-press">
+              <i data-lucide="check" class="w-4 h-4"></i>
+              <span>Save & Update Pace</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Fast Transfer Tool -->
+        <div class="rounded-2xl bg-gradient-to-r from-indigo-950/40 to-slate-900 border border-indigo-500/20 p-4 space-y-3">
+          <div class="flex items-center space-x-2 text-indigo-400">
+            <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
+            <h3 class="text-xs font-bold uppercase tracking-wider">Quick Liquidity Transfer</h3>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">Need to boost your daily pace? Inject funds from your Freelance Savings buffer into your Living Pool.</p>
+          <div class="flex items-center space-x-2 pt-1">
+            <button id="quickBooster500Btn" class="flex-1 py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 transition-colors text-center btn-press">+500 ETB</button>
+            <button id="quickBooster1000Btn" class="flex-1 py-2 px-3 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-xs font-bold text-indigo-300 transition-colors text-center btn-press">+1,000 ETB</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 3: HISTORY & LOGS ================= -->
+      <section id="viewHistory" class="space-y-3.5 hidden">
+        <div class="flex items-center justify-between px-0.5">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-400"></i>
+            Tikimt Cycle History (Days 1–26)
+          </h2>
+          <span id="historyStatsLabel" class="text-[11px] font-mono text-emerald-400">7,144 ETB Total</span>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative">
+          <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500"></i>
+          <input type="text" id="historySearchInput" placeholder="Search expenses (e.g. coffee, taxi, injera)..."
+            class="search-input w-full bg-slate-900/80 border border-slate-700/60 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 transition-all">
+        </div>
+
+        <!-- Filter Pill Bar -->
+        <div class="flex space-x-1.5 overflow-x-auto hide-scrollbar pb-1 text-xs">
+          <button class="history-filter-btn px-3 py-1 rounded-full bg-emerald-500 text-slate-950 font-bold transition-all btn-press" data-filter="all">All Logs</button>
+          <button class="history-filter-btn px-3 py-1 rounded-full bg-slate-800 text-slate-300 font-medium hover:bg-slate-700 transition-all btn-press" data-filter="living">Living Pool</button>
+          <button class="history-filter-btn px-3 py-1 rounded-full bg-slate-800 text-slate-300 font-medium hover:bg-slate-700 transition-all btn-press" data-filter="savings">Savings Buffer</button>
+        </div>
+
+        <!-- Day by Day Cards -->
+        <div id="historyDaysContainer" class="space-y-2.5">
+          <!-- Dynamically populated -->
+        </div>
+
+        <!-- Empty State for Search -->
+        <div id="historyEmptyState" class="hidden text-center py-12">
+          <div class="empty-state-icon w-16 h-16 mx-auto rounded-2xl bg-slate-800/60 border border-slate-700/60 flex items-center justify-center mb-3">
+            <i data-lucide="search-x" class="w-7 h-7 text-slate-500"></i>
+          </div>
+          <p class="text-sm font-semibold text-slate-300">No matching expenses</p>
+          <p class="text-xs text-slate-500 mt-1">Try a different keyword</p>
+        </div>
+      </section>
+
+      <!-- ================= TAB 4: SAVINGS & TABS ================= -->
+      <section id="viewSavings" class="space-y-4 hidden">
+
+        <!-- Macro Financial Blueprint -->
+        <div class="rounded-2xl glass-card p-4 space-y-3">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <i data-lucide="vault" class="w-3.5 h-3.5 text-amber-400"></i>
+            Macro Reserves & Allocations
+          </h2>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-slate-400 text-[11px]">House Rent</span>
+              <div class="font-bold text-white font-mono mt-0.5">3,000 ETB</div>
+              <span class="text-[10px] text-emerald-400 font-medium">100% Paid (Day 2) ✅</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-slate-400 text-[11px]">Equb Reserve</span>
+              <div class="font-bold text-white font-mono mt-0.5">2,000 ETB</div>
+              <span class="text-[10px] text-blue-400 font-medium">Intact in account ✅</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-slate-400 text-[11px]">Base Emergency Fund</span>
+              <div class="font-bold text-white font-mono mt-0.5">2,500 ETB</div>
+              <span class="text-[10px] text-emerald-400 font-medium">100% Protected ✅</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-slate-400 text-[11px]">Freelance Side Earnings</span>
+              <div class="font-bold text-amber-300 font-mono mt-0.5">+6,000 ETB</div>
+              <span class="text-[10px] text-slate-400 font-medium">Oct 25 & Nov 01 ✅</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Store Tabs & Peer Loans -->
+        <div class="rounded-2xl glass-card p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <i data-lucide="handshake" class="w-3.5 h-3.5 text-blue-400"></i>
+              Store Tabs & Peer Loans
+            </h2>
+            <button id="addPeerLoanBtn" class="text-[11px] font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 btn-press">
+              <i data-lucide="plus" class="w-3 h-3"></i> Add Tab
+            </button>
+          </div>
+          <div class="space-y-2">
+            <div id="shimeTabCard" class="p-3 rounded-xl bg-slate-900 border border-amber-500/30 flex items-center justify-between">
+              <div>
+                <div class="flex items-center space-x-1.5">
+                  <span class="font-semibold text-xs text-white">Shime Shop Grocery Tab</span>
+                  <span class="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-medium">Pending</span>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-0.5">Already counted in past budget • 0 living pool impact</p>
+              </div>
+              <div class="text-right">
+                <span class="text-sm font-bold font-mono text-amber-300">210 ETB</span>
+                <button id="settleShimeBtn" class="block mt-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/30 transition-colors btn-press">Mark Settled</button>
+              </div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-[11px] space-y-1.5">
+              <span class="text-slate-400 font-semibold block">Recovered Coworker Loans (100% Repaid):</span>
+              <div class="flex justify-between text-slate-300">
+                <span>Abela (Oct 16 & Nov 02)</span>
+                <span class="font-mono text-emerald-400 font-semibold">400 ETB [Paid ✅]</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>Natu Coffee (Nov 02)</span>
+                <span class="font-mono text-emerald-400 font-semibold">50 ETB [Paid ✅]</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>Sami & Sam OLY Coffee (Nov 03)</span>
+                <span class="font-mono text-emerald-400 font-semibold">100 ETB [Paid ✅]</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Savings Outflows -->
+        <div class="rounded-2xl glass-card p-4 space-y-2.5">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <i data-lucide="package" class="w-3.5 h-3.5 text-teal-400"></i>
+            Dedicated Savings Outflows (Pantry & Care)
+          </h2>
+          <div id="savingsOutflowsList" class="space-y-1.5 text-xs">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 5: COACH "MR. FIN" ================= -->
+      <section id="viewCoach" class="space-y-4 hidden">
+        <div class="rounded-2xl glass-card p-4 space-y-3 shadow-xl">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-emerald-500/20">
+              💎
+            </div>
+            <div>
+              <h2 class="text-sm font-bold text-white">Mr. Fin Strategic Advisor</h2>
+              <p class="text-[11px] text-emerald-400">Personalized for Tesfish • Addis Ababa</p>
+            </div>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            "You are in a prime spot to finish Tikimt with a solid surplus. With <strong>1,336 ETB</strong> remaining across 5 days, your daily target is an easy <strong>271 ETB/day</strong>. Stay disciplined on transit and keep leveraging homemade stews."
+          </p>
+        </div>
+
+        <!-- Strategy: Meal Economics -->
+        <div class="rounded-xl glass-card p-3.5 space-y-2">
+          <div class="flex items-center space-x-2 text-amber-400">
+            <i data-lucide="soup" class="w-4 h-4"></i>
+            <h3 class="text-xs font-bold">Batch-Cooking Stew Economics</h3>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Batch-cooking Dinich Wot or Misir uses cooking oil and onions once for dinner and the next day's packed lunch. This cuts your weekday meal expense by <strong>over 60%</strong> compared to buying 250 ETB office lunch!
+          </p>
+        </div>
+
+        <!-- What-If Calculator -->
+        <div class="rounded-xl glass-card p-3.5 space-y-3">
+          <div class="flex items-center space-x-2 text-blue-400">
+            <i data-lucide="calculator" class="w-4 h-4"></i>
+            <h3 class="text-xs font-bold">"What-If" Pace Simulator</h3>
+          </div>
+          <p class="text-[11px] text-slate-400">Test how a planned expense tonight will change your weekend daily pace:</p>
+          <div class="flex items-center space-x-2">
+            <input type="number" id="simExpenseInput" placeholder="Planned ETB (e.g. 200)" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-emerald-500">
+            <button id="simCalculateBtn" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-colors btn-press">Simulate</button>
+          </div>
+          <div id="simResultBox" class="text-xs p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300 hidden">
+            <!-- Result -->
+          </div>
+        </div>
+
+        <!-- Keep Note Link -->
+        <div class="rounded-xl glass-card p-3 flex items-center justify-between text-xs">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="external-link" class="w-4 h-4 text-emerald-400"></i>
+            <span class="text-slate-300 font-medium">Authoritative Google Keep Note</span>
+          </div>
+          <a href="https://keep.google.com/?note=1FRv9EnMB0RlyJZdr8XHsJLqBUcZcQxS3Bo9cqs9TRjmduMZkl3tPY_yTeeRxNJU" target="_blank" class="px-2.5 py-1 rounded bg-slate-700 hover:bg-slate-600 text-white font-semibold text-[11px] transition-colors">Open Note</a>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Navigation Bar with Active Indicator -->
+    <nav class="fixed bottom-0 max-w-md w-full bg-slate-900/95 backdrop-blur-lg border-t border-slate-800 px-2 py-2 flex items-center justify-around z-40 safe-bottom relative">
+      <div id="navIndicator" class="nav-active-indicator" style="left: 5%; width: 20%;"></div>
+      <button class="nav-tab-btn flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-emerald-400 transition-colors btn-press" data-target="viewDashboard" data-index="0">
+        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+        <span class="text-[10px] font-semibold mt-1">Today</span>
+      </button>
+      <button class="nav-tab-btn flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-slate-400 hover:text-slate-200 transition-colors btn-press" data-target="viewLog" data-index="1">
+        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium mt-1">Quick Log</span>
+      </button>
+      <button class="nav-tab-btn flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-slate-400 hover:text-slate-200 transition-colors btn-press" data-target="viewHistory" data-index="2">
+        <i data-lucide="history" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium mt-1">History</span>
+      </button>
+      <button class="nav-tab-btn flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-slate-400 hover:text-slate-200 transition-colors btn-press" data-target="viewSavings" data-index="3">
+        <i data-lucide="wallet" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium mt-1">Reserves</span>
+      </button>
+      <button class="nav-tab-btn flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-slate-400 hover:text-slate-200 transition-colors btn-press" data-target="viewCoach" data-index="4">
+        <i data-lucide="sparkles" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium mt-1">Coach</span>
+      </button>
+    </nav>
+
+    <!-- Toast Notification -->
+    <div id="toastNotification" class="fixed top-14 left-1/2 -translate-x-1/2 max-w-xs w-full bg-slate-800/95 border border-emerald-500/50 shadow-2xl rounded-xl px-3.5 py-2.5 flex items-center space-x-2.5 text-xs text-slate-100 z-50 transform -translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+      <div id="toastIcon" class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+        <i data-lucide="check" class="w-3.5 h-3.5"></i>
+      </div>
+      <span id="toastMessage" class="flex-1 font-medium">Logged successfully!</span>
+    </div>
+
+    <!-- Add Tab Modal -->
+    <div id="addTabModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="modal-content bg-slate-900 border border-slate-700 rounded-2xl max-w-xs w-full p-4 space-y-3.5 shadow-2xl">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-white">Add Peer Loan or Tab</h3>
+          <button id="closeTabModalBtn" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="space-y-2 text-xs">
+          <div>
+            <label class="block text-slate-400 mb-1">Name / Store</label>
+            <input type="text" id="tabNameInput" placeholder="e.g. Natu Coffee, Shime Tab" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Amount (ETB)</label>
+            <input type="number" id="tabAmountInput" placeholder="0" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-white font-mono">
+          </div>
+        </div>
+        <div class="flex space-x-2 pt-1">
+          <button id="cancelTabModalBtn" class="flex-1 py-2 rounded-lg bg-slate-800 text-slate-300 text-xs font-semibold btn-press">Cancel</button>
+          <button id="saveTabModalBtn" class="flex-1 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold btn-press">Save Tab</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="modal-content bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-4 space-y-3 shadow-2xl text-xs">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-white">Cycle Configuration</h3>
+          <button id="closeSettingsModalBtn" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="space-y-2 text-slate-300">
+          <p><strong>Cycle:</strong> Tikimt 04 – Hidar 03 (30 Days)</p>
+          <p><strong>Baseline Salary:</strong> 15,000 ETB</p>
+          <p><strong>Living Pool Baseline:</strong> 7,500 ETB (+1,000 ETB booster = 8,500 ETB)</p>
+          <p><strong>Location:</strong> Addis Ababa, Ethiopia</p>
+        </div>
+        <div class="pt-2 border-t border-slate-800 flex justify-end">
+          <button id="dismissSettingsBtn" class="py-1.5 px-3 rounded-lg bg-emerald-600 text-white font-bold text-xs btn-press">Done</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Client-side Application Logic -->
+  <script>
+    // --- State Model ---
+    const INITIAL_DATA = {
+      cycleName: "Tikimt Budget Tracker",
+      period: "Tikimt 04 – Hidar 03",
+      totalDays: 30,
+      currentDay: 26,
+      salary: 15000,
+      rent: 3000,
+      equb: 2000,
+      baseEmergency: 2500,
+      livingPoolBaseline: 8500,
+      sideIncomes: [
+        { date: "Oct 25", amount: 1500, desc: "Side work income" },
+        { date: "Nov 01", amount: 4500, desc: "Side work income (1.5K + 3K)" }
+      ],
+      savingsOutflows: [
+        { date: "Oct 14", amount: 160, desc: "Berbere pantry stock" },
+        { date: "Oct 16", amount: 280, desc: "Monthly Telecom package" },
+        { date: "Oct 24", amount: 110, desc: "1KG Onion pantry stock" },
+        { date: "Oct 24", amount: 450, desc: "Saturday Tibs & Coca lunch" },
+        { date: "Oct 28", amount: 270, desc: "Dinner with self" },
+        { date: "Oct 31", amount: 415, desc: "Saturday Tibs & Coca lunch" },
+        { date: "Nov 01", amount: 200, desc: "Shower Soap (grooming)" },
+        { date: "Nov 01", amount: 500, desc: "Storm Deodorant" },
+        { date: "Nov 01", amount: 200, desc: "Gift for friend Amane" },
+        { date: "Nov 01", amount: 340, desc: "Sunday Evening PS & Cake" },
+        { date: "Oct 31", amount: 480, desc: "Safaricom Data Packages" },
+        { date: "Nov 04", amount: 450, desc: "1L Cooking Oil pantry stock" },
+        { date: "Nov 05", amount: 1000, desc: "Living Pool booster transfer" },
+        { date: "Nov 05", amount: 150, desc: "Monthly Movie player sub" },
+        { date: "Nov 05", amount: 175, desc: "Berbere pantry stock" },
+        { date: "Nov 05", amount: 135, desc: "1KG Onion pantry stock" },
+        { date: "Nov 05", amount: 190, desc: "Dinner with friends" }
+      ],
+      dailyHistory: [
+        { day: 1, date: "Tikimt 04 (Oct 12)", target: 250, total: 140, items: ["Kera-Wello (20)", "Wello-Alem (10)", "Coffee (40)", "Wello-Kera (20)", "2 Injeras (50)"] },
+        { day: 2, date: "Tikimt 05 (Oct 13)", target: 254, total: 170, items: ["Commute (30)", "Breakfast (70)", "Coffee (50)", "Wello-Kera (20)"] },
+        { day: 3, date: "Tikimt 06 (Oct 14)", target: 257, total: 355, items: ["Commute (30)", "Lunch (230)", "Coffee (50)", "Injera (25)", "Taxi (20)"] },
+        { day: 4, date: "Tikimt 07 (Oct 15)", target: 253, total: 145, items: ["Commute (30)", "Bread (20)", "Coffee (50)", "Taxi (20)", "Injera (25)"] },
+        { day: 5, date: "Tikimt 08 (Oct 16)", target: 257, total: 300, items: ["Commute (30)", "Coffee (75)", "PS FIFA (90)", "Pasties (55)", "Sugar (50)"] },
+        { day: 6, date: "Tikimt 09 (Oct 17)", target: 256, total: 710, items: ["Commute (30)", "Group taxi (80)", "Saturday Lunch (450)", "Haircut (150)"] },
+        { day: 7, date: "Tikimt 10 (Oct 18)", target: 237, total: 510, items: ["Siga firfir (320)", "Coffee (70)", "Football & Fanta (70)", "2 Injeras (50)"] },
+        { day: 8, date: "Tikimt 11 (Oct 19)", target: 225, total: 215, items: ["Commute (30)", "Breakfast (85)", "Coffee (50)", "2 Injeras (50)"] },
+        { day: 9, date: "Tikimt 12 (Oct 20)", target: 225, total: 130, items: ["Commute (30)", "Injera (50)", "Dinich (50)"] },
+        { day: 10, date: "Tikimt 13 (Oct 21)", target: 230, total: 270, items: ["Commute (30)", "Breakfast (80)", "Coffee (50)", "Water (40)", "2 Injeras (50)", "Taxi (20)"] },
+        { day: 11, date: "Tikimt 14 (Oct 22)", target: 228, total: 140, items: ["Commute (30)", "Coffee (50)", "Taxi (20)", "Injera (25)", "Bread (15)"] },
+        { day: 12, date: "Tikimt 15 (Oct 23)", target: 232, total: 460, items: ["Commute (30)", "Coffee (75)", "Dabo (20)", "Taxi (20)", "Bread (65)", "PS FIFA (250)"] },
+        { day: 13, date: "Tikimt 16 (Oct 24)", target: 220, total: 315, items: ["Commute (30)", "Breakfast (130)", "Taxi (35)", "Shower (30)", "2 Injeras (50)", "Coffee (40)"] },
+        { day: 14, date: "Tikimt 17 (Oct 25)", target: 214, total: 360, items: ["City transit (85)", "Socks (70)", "Fanta (140)", "2 Injeras (50)", "Bus (15)"] },
+        { day: 15, date: "Tikimt 18 (Oct 26)", target: 205, total: 385, items: ["Commute (30)", "Breakfast & Tea (110)", "Taxi (20)", "Friends dinner (200)", "Injera (25)"] },
+        { day: 16, date: "Tikimt 19 (Oct 27)", target: 193, total: 215, items: ["Commute (30)", "Tea (40)", "Taxi (20)", "Injera (25)", "4 Eggs (100)"] },
+        { day: 17, date: "Tikimt 20 (Oct 28)", target: 191, total: 135, items: ["Commute (30)", "Bread & Tea (60)", "Taxi (20)", "Injera (25)"] },
+        { day: 18, date: "Tikimt 21 (Oct 29)", target: 196, total: 264, items: ["Commute (30)", "Breakfast & Tea (165)", "Taxi (20)", "Injera & Bread (49)"] },
+        { day: 19, date: "Tikimt 22 (Oct 30)", target: 190, total: 115, items: ["Commute (30)", "Tea (40)", "Taxi (20)", "Injera (25)"] },
+        { day: 20, date: "Tikimt 23 (Oct 31)", target: 197, total: 260, items: ["Commute (30)", "Breakfast (130)", "Cross-town transit (65)", "Biscuits (35)"] },
+        { day: 21, date: "Tikimt 24 (Nov 01)", target: 191, total: 510, items: ["Breakfast (350)", "Shower (30)", "Biscuits (60)", "Coca Cola (70)"] },
+        { day: 22, date: "Tikimt 25 (Nov 02)", target: 155, total: 235, items: ["Commute (30)", "Breakfast & Tea (60)", "Coffee (40)", "Taxi (20)", "Injera (25)", "Sossisoya (60)"] },
+        { day: 23, date: "Tikimt 26 (Nov 03)", target: 145, total: 405, items: ["Commute (30)", "Lunch (250)", "Coffee (50)", "Taxi (20)", "Injera & Bread (55)"] },
+        { day: 24, date: "Tikimt 27 (Nov 04)", target: 108, total: 130, items: ["Commute (30)", "Tea (30)", "Packed Lunch (0)", "Taxi (20)", "2 Injeras (50)"] },
+        { day: 25, date: "Tikimt 28 (Nov 05)", target: 271, total: 270, items: ["Commute (30)", "Breakfast (80)", "Afternoon Tea (40)", "Taxi (20)", "2 Injeras (50)", "Dinich (50)"] }
+      ],
+      todayExpenses: [
+        { id: "t1", amount: 20, category: "Transportation & Rides", desc: "Kera to Wello Sefer Taxi (Alem lift saved 10 ETB)", time: "8:49 AM", bucket: "living" }
+      ],
+      storeTabs: [
+        { id: "tab1", name: "Shime Shop Grocery Tab", amount: 210, settled: false, note: "Already counted in past budget" }
+      ]
+    };
+
+    let AppState = {};
+    let currentTheme = 'dark';
+
+    // --- Theme Management ---
+    function loadTheme() {
+      const saved = localStorage.getItem('finspark_theme');
+      if (saved === 'light') {
+        document.documentElement.classList.add('light');
+        currentTheme = 'light';
+        updateThemeIcons();
+      } else {
+        document.documentElement.classList.remove('light');
+        currentTheme = 'dark';
+        updateThemeIcons();
+      }
+    }
+
+    function toggleTheme() {
+      if (currentTheme === 'dark') {
+        document.documentElement.classList.add('light');
+        currentTheme = 'light';
+      } else {
+        document.documentElement.classList.remove('light');
+        currentTheme = 'dark';
+      }
+      localStorage.setItem('finspark_theme', currentTheme);
+      updateThemeIcons();
+    }
+
+    function updateThemeIcons() {
+      const darkIcon = document.querySelector('.dark-icon');
+      const lightIcon = document.querySelector('.light-icon');
+      if (currentTheme === 'light') {
+        darkIcon?.classList.add('hidden');
+        lightIcon?.classList.remove('hidden');
+      } else {
+        darkIcon?.classList.remove('hidden');
+        lightIcon?.classList.add('hidden');
+      }
+    }
+
+    // --- State Management ---
+    function loadState() {
+      try {
+        const saved = localStorage.getItem('finspark_state_v1');
+        if (saved) {
+          AppState = JSON.parse(saved);
+        } else {
+          AppState = JSON.parse(JSON.stringify(INITIAL_DATA));
+        }
+      } catch (e) {
+        AppState = JSON.parse(JSON.stringify(INITIAL_DATA));
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem('finspark_state_v1', JSON.stringify(AppState));
+      } catch (e) {
+        console.error("Storage error:", e);
+      }
+    }
+
+    // --- Core Calculations ---
+    function calculateMetrics() {
+      const pastTotal = AppState.dailyHistory.reduce((acc, d) => acc + d.total, 0);
+      const todaySpentLiving = AppState.todayExpenses
+        .filter(item => item.bucket === 'living')
+        .reduce((acc, item) => acc + item.amount, 0);
+
+      const totalSpentToDate = pastTotal + todaySpentLiving;
+      const remainingLivingPool = AppState.livingPoolBaseline - totalSpentToDate;
+      const daysRemaining = (AppState.totalDays - AppState.currentDay) + 1;
+      const benchmarkDailyPace = Math.round((AppState.livingPoolBaseline - pastTotal) / daysRemaining);
+      const remainingToday = Math.max(0, benchmarkDailyPace - todaySpentLiving);
+      const spentPercentToday = benchmarkDailyPace > 0 ? Math.min(100, Math.round((todaySpentLiving / benchmarkDailyPace) * 100)) : 0;
+
+      return { pastTotal, todaySpentLiving, totalSpentToDate, remainingLivingPool, daysRemaining, benchmarkDailyPace, remainingToday, spentPercentToday };
+    }
+
+    // --- Animated Number Counter ---
+    function animateNumber(el, target, duration = 600) {
+      const start = 0;
+      const startTime = performance.now();
+      function update(now) {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const value = Math.round(start + (target - start) * eased);
+        el.textContent = value.toLocaleString();
+        if (progress < 1) requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
+    }
+
+    // --- Sparkline Chart ---
+    function renderSparkChart() {
+      const container = document.getElementById('sparkChartContainer');
+      if (!container) return;
+
+      // Get last 7 days from history
+      const last7 = AppState.dailyHistory.slice(-7);
+      const todaySpent = AppState.todayExpenses
+        .filter(i => i.bucket === 'living')
+        .reduce((a, i) => a + i.amount, 0);
+
+      // Add today as the 8th data point
+      const allDays = [...last7, { day: 26, total: todaySpent, target: 271, date: 'Today' }];
+
+      // Clear existing bars (but keep guideline divs)
+      const existingBars = container.querySelectorAll('.spark-bar-group');
+      existingBars.forEach(b => b.remove());
+
+      const maxVal = Math.max(...allDays.map(d => d.total), 300);
+      const chartHeight = 80;
+      const avgSpend = Math.round(allDays.reduce((a, d) => a + d.total, 0) / allDays.length);
+
+      allDays.forEach((d, i) => {
+        const barHeight = Math.max(2, (d.total / maxVal) * chartHeight);
+        const isOver = d.total > d.target;
+        const isToday = i === allDays.length - 1;
+        const group = document.createElement('div');
+        group.className = 'spark-bar-group flex flex-col items-center justify-end gap-1 flex-1 anim-slide-up';
+        group.style.animationDelay = `${i * 40}ms`;
+
+        // Target line indicator
+        const targetHeight = Math.max(2, (d.target / maxVal) * chartHeight);
+
+        group.innerHTML = `
+          <div class="text-[8px] font-mono ${isOver ? 'text-rose-400' : 'text-emerald-400'} font-bold leading-none">${d.total}</div>
+          <div class="relative w-full flex justify-center" style="height: ${chartHeight}px;">
+            <!-- Target marker -->
+            <div class="absolute left-0 right-0 border-t border-dashed border-slate-500/40" style="bottom: ${targetHeight}px;"></div>
+            <!-- Bar -->
+            <div class="spark-bar w-5 sm:w-6 rounded-t-md ${isOver ? 'bg-gradient-to-t from-rose-600 to-rose-400' : 'bg-gradient-to-t from-emerald-600 to-teal-400'} ${isToday ? 'ring-2 ring-emerald-300/30' : ''}"
+              style="height: 0px; opacity: 0.8;"></div>
+          </div>
+          <span class="text-[8px] ${isToday ? 'text-emerald-400 font-bold' : 'text-slate-500'}">${isToday ? 'Today' : 'D' + d.day}</span>
+        `;
+        container.appendChild(group);
+
+        // Animate bar height
+        setTimeout(() => {
+          const bar = group.querySelector('.spark-bar');
+          if (bar) bar.style.height = barHeight + 'px';
+        }, 50 + i * 40);
+      });
+
+      document.getElementById('sparkAvgLabel').textContent = `Avg: ${avgSpend.toLocaleString()} ETB`;
+    }
+
+    // --- UI Renderers ---
+    function renderDashboard() {
+      const m = calculateMetrics();
+
+      document.getElementById('headerDayNum').textContent = AppState.currentDay;
+
+      // Animated pace number
+      const paceEl = document.getElementById('heroDailyPace');
+      animateNumber(paceEl, m.benchmarkDailyPace);
+
+      document.getElementById('heroSpentToday').textContent = `${m.todaySpentLiving} ETB`;
+      document.getElementById('heroRemainingToday').textContent = `${m.remainingToday} ETB`;
+      document.getElementById('heroLivingPool').textContent = m.remainingLivingPool.toLocaleString();
+      document.getElementById('heroDaysLeft').textContent = m.daysRemaining;
+
+      // Linear progress bar
+      const pBar = document.getElementById('heroProgressBar');
+      pBar.style.width = `${m.spentPercentToday}%`;
+
+      // Progress Ring
+      const ring = document.getElementById('paceRingFill');
+      const circumference = 2 * Math.PI * 34; // ~213.6
+      const offset = circumference - (m.spentPercentToday / 100) * circumference;
+      ring.style.strokeDashoffset = offset;
+      document.getElementById('ringPercent').textContent = `${m.spentPercentToday}%`;
+
+      // Cycle Progress
+      const cyclePercent = Math.round((AppState.currentDay / AppState.totalDays) * 100);
+      document.getElementById('cycleProgressBar').style.width = `${cyclePercent}%`;
+      document.getElementById('cycleProgressLabel').textContent = `${cyclePercent}%`;
+
+      // Dynamic Pace Badge
+      const badge = document.getElementById('paceBadge');
+      if (m.spentPercentToday > 100) {
+        badge.className = "mt-2 inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30";
+        badge.innerHTML = '<i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i><span>Over Pace</span>';
+      } else if (m.spentPercentToday > 80) {
+        badge.className = "mt-2 inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30";
+        badge.innerHTML = '<i data-lucide="clock" class="w-3.5 h-3.5"></i><span>Near Pace</span>';
+      } else {
+        badge.className = "mt-2 inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+        badge.innerHTML = '<i data-lucide="shield-check" class="w-3.5 h-3.5"></i><span>On Target</span>';
+      }
+
+      // Today's items
+      const listContainer = document.getElementById('todayExpensesList');
+      listContainer.innerHTML = '';
+
+      const countBadge = document.getElementById('todayCountBadge');
+      countBadge.textContent = `${AppState.todayExpenses.length} ${AppState.todayExpenses.length === 1 ? 'item' : 'items'}`;
+
+      if (AppState.todayExpenses.length === 0) {
+        listContainer.innerHTML = `
+          <div class="text-center py-6 rounded-xl bg-slate-900/40 border border-slate-800 text-slate-500 text-xs">
+            <div class="empty-state-icon w-12 h-12 mx-auto rounded-xl bg-slate-800/60 flex items-center justify-center mb-2">
+              <i data-lucide="check-circle" class="w-6 h-6 text-emerald-400/60"></i>
+            </div>
+            No expenses logged yet today. Super clean!
+          </div>
+        `;
+      } else {
+        AppState.todayExpenses.forEach((exp, idx) => {
+          const itemEl = document.createElement('div');
+          itemEl.className = "p-3 rounded-xl glass-card flex items-center justify-between transition-all anim-slide-up";
+          itemEl.style.animationDelay = `${idx * 50}ms`;
+
+          let icon = "coffee";
+          if (exp.category.includes('Transit')) icon = "car";
+          else if (exp.category.includes('Pantry')) icon = "shopping-bag";
+          else if (exp.category.includes('Personal')) icon = "scissors";
+
+          itemEl.innerHTML = `
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 rounded-lg bg-slate-700/60 text-slate-300 flex items-center justify-center shrink-0">
+                <i data-lucide="${icon}" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-100">${exp.desc}</p>
+                <div class="flex items-center space-x-2 text-[10px] text-slate-400 mt-0.5">
+                  <span>${exp.time || 'Today'}</span>
+                  <span>•</span>
+                  <span class="${exp.bucket === 'savings' ? 'text-blue-400' : 'text-emerald-400'} font-medium">
+                    ${exp.bucket === 'savings' ? 'Savings Buffer' : 'Living Pool'}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold font-mono text-white">${exp.amount} ETB</span>
+              <button class="delete-today-btn text-slate-500 hover:text-rose-400 p-1 transition-colors" data-index="${idx}" title="Delete item">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          `;
+          listContainer.appendChild(itemEl);
+        });
+      }
+
+      lucide.createIcons();
+    }
+
+    function renderHistory(searchQuery = '') {
+      const container = document.getElementById('historyDaysContainer');
+      const emptyState = document.getElementById('historyEmptyState');
+      container.innerHTML = '';
+
+      const reversed = [...AppState.dailyHistory].reverse();
+      const q = searchQuery.toLowerCase().trim();
+
+      let hasResults = false;
+
+      reversed.forEach((d) => {
+        // If searching, filter items by query
+        let itemsToShow = d.items;
+        if (q) {
+          itemsToShow = d.items.filter(it => it.toLowerCase().includes(q));
+          if (itemsToShow.length === 0) return; // Skip days with no matches
+        }
+
+        hasResults = true;
+        const diff = d.total - d.target;
+        const diffText = diff <= 0 ? `${diff} ETB under` : `+${diff} ETB over`;
+        const diffColor = diff <= 0 ? 'text-emerald-400' : 'text-rose-400';
+
+        const dayCard = document.createElement('div');
+        dayCard.className = "rounded-xl glass-card p-3 space-y-1.5 transition-all anim-slide-up";
+
+        // Calculate day progress bar
+        const dayPct = Math.min(100, Math.round((d.total / (d.target * 1.5)) * 100));
+
+        dayCard.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold text-white">Day ${d.day} • ${d.date}</span>
+              <span class="text-[10px] text-slate-400 ml-1.5 font-mono">Target: ${d.target} ETB</span>
+            </div>
+            <div class="text-right">
+              <span class="text-xs font-bold font-mono text-white">${d.total} ETB</span>
+              <span class="text-[10px] block ${diffColor} font-mono font-medium">${diffText}</span>
+            </div>
+          </div>
+          <!-- Day progress bar -->
+          <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
+            <div class="h-full rounded-full ${diff <= 0 ? 'bg-emerald-500' : 'bg-rose-500'}" style="width: ${dayPct}%; transition: width 0.6s ease;"></div>
+          </div>
+          <div class="text-[11px] text-slate-400 bg-slate-900/60 p-2 rounded-lg border border-slate-800/80 font-mono flex flex-wrap gap-1.5">
+            ${itemsToShow.map(it => {
+              const highlighted = q ? it.replace(new RegExp(`(${q})`, 'gi'), '<mark class="bg-emerald-500/30 text-emerald-200 rounded px-0.5">$1</mark>') : it;
+              return `<span class="bg-slate-800 px-1.5 py-0.5 rounded text-slate-300">${highlighted}</span>`;
+            }).join('')}
+          </div>
+        `;
+        container.appendChild(dayCard);
+      });
+
+      if (!hasResults && q) {
+        emptyState.classList.remove('hidden');
+        emptyState.classList.add('anim-fade-in');
+      } else {
+        emptyState.classList.add('hidden');
+      }
+
+      // Update total label
+      const total = AppState.dailyHistory.reduce((a, d) => a + d.total, 0);
+      document.getElementById('historyStatsLabel').textContent = `${total.toLocaleString()} ETB Total`;
+
+      lucide.createIcons();
+    }
+
+    function renderSavings() {
+      const outflowsList = document.getElementById('savingsOutflowsList');
+      outflowsList.innerHTML = '';
+
+      if (AppState.savingsOutflows.length === 0) {
+        outflowsList.innerHTML = `
+          <div class="text-center py-6 text-slate-500 text-xs">
+            <div class="empty-state-icon w-12 h-12 mx-auto rounded-xl bg-slate-800/60 flex items-center justify-center mb-2">
+              <i data-lucide="inbox" class="w-6 h-6 text-slate-500"></i>
+            </div>
+            No savings outflows recorded
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      AppState.savingsOutflows.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = "flex items-center justify-between p-2 rounded-lg bg-slate-900/60 border border-slate-800 transition-all anim-slide-up";
+        row.style.animationDelay = `${Math.min(idx, 8) * 30}ms`;
+        row.innerHTML = `
+          <div>
+            <p class="font-medium text-slate-200 text-xs">${item.desc}</p>
+            <span class="text-[10px] text-slate-400">${item.date} • Savings Ledger</span>
+          </div>
+          <span class="font-mono font-bold text-blue-300 text-xs">${item.amount} ETB</span>
+        `;
+        outflowsList.appendChild(row);
+      });
+    }
+
+    // --- Toast ---
+    function showToast(msg, isSuccess = true) {
+      const toast = document.getElementById('toastNotification');
+      const toastMsg = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastMsg.textContent = msg;
+      if (isSuccess) {
+        toastIcon.className = "w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0";
+        toastIcon.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5"></i>';
+      } else {
+        toastIcon.className = "w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0";
+        toastIcon.innerHTML = '<i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>';
+      }
+      lucide.createIcons();
+
+      toast.classList.remove('opacity-0', '-translate-y-20', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', '-translate-y-20', 'pointer-events-none');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 2500);
+    }
+
+    // --- Expense Actions ---
+    function addExpense(amount, category, desc, bucket = 'living') {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      AppState.todayExpenses.push({
+        id: "exp_" + Date.now(),
+        amount: Number(amount),
+        category, desc, time: timeStr, bucket
+      });
+
+      if (bucket === 'savings') {
+        AppState.savingsOutflows.unshift({
+          date: "Nov 06",
+          amount: Number(amount),
+          desc: desc
+        });
+      }
+
+      saveState();
+      renderDashboard();
+      renderSparkChart();
+      renderSavings();
+      showToast(`Logged ${amount} ETB for ${desc}!`);
+    }
+
+    // --- Navigation ---
+    function switchTab(targetView, navBtn) {
+      const views = ['viewDashboard', 'viewLog', 'viewHistory', 'viewSavings', 'viewCoach'];
+
+      views.forEach(v => {
+        const el = document.getElementById(v);
+        if (v === targetView) {
+          el.classList.remove('hidden');
+          el.classList.remove('view-enter');
+          // Trigger reflow for animation restart
+          void el.offsetWidth;
+          el.classList.add('view-enter');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      // Update nav button states
+      const navButtons = document.querySelectorAll('.nav-tab-btn');
+      navButtons.forEach(b => {
+        b.classList.remove('text-emerald-400');
+        b.classList.add('text-slate-400');
+        b.querySelector('span').classList.remove('font-semibold');
+        b.querySelector('span').classList.add('font-medium');
+      });
+
+      if (navBtn) {
+        navBtn.classList.add('text-emerald-400');
+        navBtn.classList.remove('text-slate-400');
+        navBtn.querySelector('span').classList.add('font-semibold');
+        navBtn.querySelector('span').classList.remove('font-medium');
+
+        // Move indicator
+        const indicator = document.getElementById('navIndicator');
+        const btnIndex = parseInt(navBtn.dataset.index);
+        const btnWidth = 100 / navButtons.length;
+        indicator.style.left = `${btnIndex * btnWidth + 2}%`;
+        indicator.style.width = `${btnWidth - 4}%`;
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // --- Swipe Gestures ---
+    function initSwipeGestures() {
+      const main = document.getElementById('mainContent');
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchEndX = 0;
+      let touchEndY = 0;
+
+      const views = ['viewDashboard', 'viewLog', 'viewHistory', 'viewSavings', 'viewCoach'];
+
+      main.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+      }, { passive: true });
+
+      main.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+        handleSwipe();
+      }, { passive: true });
+
+      function handleSwipe() {
+        const deltaX = touchEndX - touchStartX;
+        const deltaY = touchEndY - touchStartY;
+
+        // Only handle horizontal swipes (ignore vertical scrolling)
+        if (Math.abs(deltaX) < 60 || Math.abs(deltaY) > Math.abs(deltaX)) return;
+
+        // Find current visible view
+        let currentIndex = 0;
+        views.forEach((v, i) => {
+          if (!document.getElementById(v).classList.contains('hidden')) currentIndex = i;
+        });
+
+        let newIndex;
+        if (deltaX > 0) {
+          // Swipe right → previous tab
+          newIndex = Math.max(0, currentIndex - 1);
+        } else {
+          // Swipe left → next tab
+          newIndex = Math.min(views.length - 1, currentIndex + 1);
+        }
+
+        if (newIndex !== currentIndex) {
+          const targetBtn = document.querySelector(`.nav-tab-btn[data-index="${newIndex}"]`);
+          switchTab(views[newIndex], targetBtn);
+        }
+      }
+    }
+
+    // --- Init ---
+    document.addEventListener('DOMContentLoaded', () => {
+      loadTheme();
+      loadState();
+      renderDashboard();
+      renderSparkChart();
+      renderHistory();
+      renderSavings();
+      lucide.createIcons();
+
+      // Set initial nav indicator
+      const indicator = document.getElementById('navIndicator');
+      const firstBtn = document.querySelector('.nav-tab-btn[data-index="0"]');
+      if (firstBtn) {
+        indicator.style.left = '2%';
+        indicator.style.width = '16%';
+      }
+
+      // Nav tab clicks
+      document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          switchTab(btn.dataset.target, btn);
+        });
+      });
+
+      // Swipe gestures
+      initSwipeGestures();
+
+      // Theme toggle
+      document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+
+      // One-Tap Presets
+      document.querySelectorAll('.quick-preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          addExpense(btn.dataset.amount, btn.dataset.cat, btn.dataset.desc, 'living');
+        });
+      });
+
+      // Manual form
+      document.getElementById('expenseForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const amount = document.getElementById('inputAmount').value;
+        const cat = document.getElementById('inputCategory').value;
+        const desc = document.getElementById('inputDesc').value;
+        const bucket = document.querySelector('input[name="accountBucket"]:checked').value;
+
+        if (!amount || Number(amount) < 0) return;
+
+        addExpense(amount, cat, desc, bucket);
+        document.getElementById('inputAmount').value = '';
+        document.getElementById('inputDesc').value = '';
+        switchTab('viewDashboard', document.querySelector('.nav-tab-btn[data-target="viewDashboard"]'));
+      });
+
+      // Delete today's item
+      document.getElementById('todayExpensesList').addEventListener('click', (e) => {
+        const delBtn = e.target.closest('.delete-today-btn');
+        if (delBtn) {
+          const idx = parseInt(delBtn.dataset.index, 10);
+          if (!isNaN(idx) && AppState.todayExpenses[idx]) {
+            const removed = AppState.todayExpenses.splice(idx, 1);
+            saveState();
+            renderDashboard();
+            renderSparkChart();
+            showToast(`Deleted ${removed[0].desc}`, false);
+          }
+        }
+      });
+
+      // Quick boosters
+      document.getElementById('quickBooster500Btn').addEventListener('click', () => {
+        AppState.livingPoolBaseline += 500;
+        AppState.savingsOutflows.unshift({ date: "Nov 06", amount: 500, desc: "Living Pool liquidity injection" });
+        saveState();
+        renderDashboard();
+        renderSavings();
+        showToast("Injected +500 ETB into Living Pool!");
+      });
+
+      document.getElementById('quickBooster1000Btn').addEventListener('click', () => {
+        AppState.livingPoolBaseline += 1000;
+        AppState.savingsOutflows.unshift({ date: "Nov 06", amount: 1000, desc: "Living Pool liquidity injection" });
+        saveState();
+        renderDashboard();
+        renderSavings();
+        showToast("Injected +1,000 ETB into Living Pool!");
+      });
+
+      // Shime settlement
+      const settleShimeBtn = document.getElementById('settleShimeBtn');
+      if (settleShimeBtn) {
+        settleShimeBtn.addEventListener('click', () => {
+          const shimeCard = document.getElementById('shimeTabCard');
+          shimeCard.classList.add('opacity-50');
+          settleShimeBtn.textContent = "Settled ✅";
+          settleShimeBtn.className = "block mt-1 text-[10px] font-bold text-slate-400 bg-slate-800 px-2 py-0.5 rounded cursor-default";
+          settleShimeBtn.disabled = true;
+          showToast("Shime Shop tab settled!");
+        });
+      }
+
+      // What-If Simulator
+      document.getElementById('simCalculateBtn').addEventListener('click', () => {
+        const val = Number(document.getElementById('simExpenseInput').value);
+        const resBox = document.getElementById('simResultBox');
+        if (isNaN(val) || val < 0) return;
+
+        const m = calculateMetrics();
+        const simulatedRemaining = Math.max(0, m.remainingLivingPool - val);
+        const daysLeftAfterToday = Math.max(1, m.daysRemaining - 1);
+        const simPace = Math.round(simulatedRemaining / daysLeftAfterToday);
+
+        resBox.classList.remove('hidden');
+        resBox.classList.add('anim-scale-in');
+        resBox.innerHTML = `
+          <div class="space-y-1">
+            <div class="flex justify-between">
+              <span class="text-slate-400">Post-expense Pool:</span>
+              <span class="font-mono font-bold text-white">${simulatedRemaining.toLocaleString()} ETB</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Weekend Pace (Days 27–30):</span>
+              <span class="font-mono font-bold ${simPace > m.benchmarkDailyPace ? 'text-rose-400' : 'text-emerald-400'}">${simPace} ETB / day</span>
+            </div>
+          </div>
+        `;
+      });
+
+      // Settings modal
+      const settingsModal = document.getElementById('settingsModal');
+      document.getElementById('openSettingsBtn').addEventListener('click', () => settingsModal.classList.remove('hidden'));
+      document.getElementById('closeSettingsModalBtn').addEventListener('click', () => settingsModal.classList.add('hidden'));
+      document.getElementById('dismissSettingsBtn').addEventListener('click', () => settingsModal.classList.add('hidden'));
+
+      // Add tab modal
+      const addTabModal = document.getElementById('addTabModal');
+      document.getElementById('addPeerLoanBtn').addEventListener('click', () => addTabModal.classList.remove('hidden'));
+      document.getElementById('closeTabModalBtn').addEventListener('click', () => addTabModal.classList.add('hidden'));
+      document.getElementById('cancelTabModalBtn').addEventListener('click', () => addTabModal.classList.add('hidden'));
+      document.getElementById('saveTabModalBtn').addEventListener('click', () => {
+        const name = document.getElementById('tabNameInput').value;
+        const amt = document.getElementById('tabAmountInput').value;
+        if (name && amt) {
+          showToast(`Tab of ${amt} ETB for ${name} saved!`);
+          addTabModal.classList.add('hidden');
+          document.getElementById('tabNameInput').value = '';
+          document.getElementById('tabAmountInput').value = '';
+        }
+      });
+
+      // History search
+      const searchInput = document.getElementById('historySearchInput');
+      let searchTimer;
+      searchInput.addEventListener('input', (e) => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+          renderHistory(e.target.value);
+        }, 200);
+      });
+
+      // History filter pills
+      document.querySelectorAll('.history-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.history-filter-btn').forEach(b => {
+            b.classList.remove('bg-emerald-500', 'text-slate-950', 'font-bold');
+            b.classList.add('bg-slate-800', 'text-slate-300', 'font-medium');
+          });
+          btn.classList.add('bg-emerald-500', 'text-slate-950', 'font-bold');
+          btn.classList.remove('bg-slate-800', 'text-slate-300', 'font-medium');
+        });
+      });
+
+      // Reset
+      document.getElementById('resetDataBtn').addEventListener('click', () => {
+        AppState = JSON.parse(JSON.stringify(INITIAL_DATA));
+        saveState();
+        renderDashboard();
+        renderSparkChart();
+        renderHistory();
+        renderSavings();
+        showToast("Restored live Tikimt tracker state!");
+      });
+    });
+  </script>
+</body>
+</html>

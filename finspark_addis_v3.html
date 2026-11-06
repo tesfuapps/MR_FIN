@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>FinSpark Addis - Smart Ethiopian Daily Pace Budget</title>
+  <!-- Tailwind CSS 3.4.17 -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <!-- Lucide Icons 0.344.0 -->
+  <script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+            },
+            ethiopia: {
+              gold: '#f59e0b',
+              red: '#ef4444',
+              green: '#10b981',
+              blue: '#3b82f6'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* ===== FinSpark v3 — Design Language from finance-app-ui repo ===== */
+    /* Pure black bg, floating pill tab bar, semi-circle donut, horizontal card carousels */
+
+    :root {
+      --color-black: #000000;
+      --color-grey: #1a1a1a;
+      --color-grey-light: #2a2a2a;
+      --color-grey-border: #333333;
+      --color-white: #ffffff;
+      --color-tint: #10b981;
+      --color-tint-dark: #059669;
+      --color-blue: #3b82f6;
+      --color-muted: #999999;
+      --color-red: #ef4444;
+      --color-amber: #f59e0b;
+    }
+
+    * { -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background: var(--color-black);
+      color: var(--color-white);
+      overscroll-behavior-y: contain;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* ===== Animations ===== */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes countUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.3); }
+    }
+    @keyframes barGrow {
+      from { height: 0; }
+    }
+    @keyframes ringDraw {
+      from { stroke-dashoffset: 213.6; }
+    }
+
+    .anim-slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .anim-fade-in { animation: fadeIn 0.3s ease both; }
+    .anim-scale-in { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .anim-count { animation: countUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .anim-pulse-dot { animation: pulseDot 2s ease infinite; }
+
+    /* Staggered children */
+    .stagger > *:nth-child(1) { animation-delay: 0ms; }
+    .stagger > *:nth-child(2) { animation-delay: 50ms; }
+    .stagger > *:nth-child(3) { animation-delay: 100ms; }
+    .stagger > *:nth-child(4) { animation-delay: 150ms; }
+    .stagger > *:nth-child(5) { animation-delay: 200ms; }
+    .stagger > *:nth-child(6) { animation-delay: 250ms; }
+    .stagger > *:nth-child(7) { animation-delay: 300ms; }
+    .stagger > *:nth-child(8) { animation-delay: 350ms; }
+
+    /* ===== View Transitions ===== */
+    .view-enter { animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+    /* ===== Floating Pill Tab Bar (from finance-app-ui) ===== */
+    .floating-tab-bar {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      max-width: 260px;
+      height: 60px;
+      background: var(--color-grey);
+      border: 1px solid var(--color-grey-border);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      z-index: 50;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    }
+
+    .tab-item {
+      width: 40px;
+      height: 40px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s ease, transform 0.15s ease;
+      cursor: pointer;
+    }
+    .tab-item:active { transform: scale(0.9); }
+    .tab-item.active {
+      background: var(--color-tint);
+    }
+    .tab-item.active svg { color: var(--color-black) !important; }
+    .tab-item:not(.active) svg { color: var(--color-muted); }
+    .tab-item:not(.active):hover svg { color: var(--color-white); }
+
+    /* ===== Cards ===== */
+    .card-base {
+      background: var(--color-grey);
+      border-radius: 20px;
+      transition: transform 0.15s ease;
+    }
+    .card-base:active { transform: scale(0.98); }
+
+    /* ===== Horizontal Scroll Cards ===== */
+    .h-scroll-card {
+      width: 100px;
+      padding: 15px;
+      border-radius: 15px;
+      margin-right: 20px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 110px;
+    }
+
+    .h-scroll-card-income {
+      width: 150px;
+      padding: 20px;
+      border-radius: 20px;
+      margin-right: 20px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 130px;
+    }
+
+    /* ===== Percentage Badge ===== */
+    .pct-badge {
+      background: rgba(0,0,0,0.2);
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+
+    /* ===== Icon Circle ===== */
+    .icon-circle {
+      border: 1px solid #444;
+      border-radius: 50%;
+      padding: 5px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .icon-circle-solid {
+      background: var(--color-grey);
+      padding: 15px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===== Button Press ===== */
+    .btn-press { transition: transform 0.15s ease; }
+    .btn-press:active { transform: scale(0.94); }
+
+    /* ===== Donut Chart ===== */
+    .donut-bg { stroke: rgba(255,255,255,0.05); }
+    .donut-fill { transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+
+    /* ===== Spark Bars ===== */
+    .spark-bar { transition: height 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+
+    /* ===== Modal ===== */
+    .modal-backdrop { animation: fadeIn 0.25s ease both; }
+    .modal-content { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+    /* ===== Progress Bar Fill ===== */
+    .progress-fill { transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+
+    /* ===== Search ===== */
+    .search-input:focus { box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
+
+    /* ===== Empty State ===== */
+    .empty-icon { animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+    /* ===== Toast ===== */
+    .toast-show { transform: translateY(0) !important; opacity: 1 !important; }
+    .toast-hide { transform: translateY(-80px) !important; opacity: 0 !important; }
+
+    /* ===== Avatar Ring ===== */
+    .avatar-ring {
+      border: 2px solid var(--color-tint);
+      border-radius: 50%;
+      padding: 2px;
+    }
+  </style>
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col items-center antialiased">
+
+  <!-- Mobile Device Frame -->
+  <div id="appContainer" class="w-full max-w-md min-h-screen bg-black flex flex-col relative overflow-hidden pb-32">
+
+    <!-- ================= HEADER (from finance-app-ui) ================= -->
+    <header class="px-5 pt-12 pb-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="avatar-ring">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-black font-black text-lg">
+            T
+          </div>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-white leading-tight">Hi, Tesfish</h1>
+          <p class="text-sm text-gray-400">Tikimt Cycle • Day <span class="text-emerald-400 font-semibold">26</span> / 30</p>
+        </div>
+      </div>
+      <button id="openSettingsBtn" class="border border-gray-700 px-3 py-2 rounded-xl text-sm text-white hover:bg-gray-900 transition-colors btn-press">
+        Settings
+      </button>
+    </header>
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <main id="mainContent" class="flex-1 px-5 overflow-y-auto hide-scrollbar">
+
+      <!-- ============ TAB 1: HOME (from finance-app-ui index.tsx) ============ -->
+      <section id="viewHome" class="view-enter pt-2">
+
+        <!-- Expense Summary + Semi-Circle Donut (from finance-app-ui) -->
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <p class="text-base font-bold text-white">My Expenses</p>
+            <p class="text-4xl font-bold text-white font-mono">
+              <span id="totalSpentDisplay">7,144</span><span class="text-2xl font-normal text-gray-500"> ETB</span>
+            </p>
+            <p class="text-xs text-gray-500 mt-1">of 8,500 ETB Living Pool</p>
+          </div>
+
+          <!-- Semi-circle Donut Chart -->
+          <div class="relative w-36 h-20 flex items-end justify-center">
+            <svg class="w-36 h-20" viewBox="0 0 144 80">
+              <defs>
+                <linearGradient id="donutGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#10b981" />
+                  <stop offset="100%" stop-color="#2dd4bf" />
+                </linearGradient>
+                <linearGradient id="donutGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#3b82f6" />
+                  <stop offset="100%" stop-color="#60a5fa" />
+                </linearGradient>
+              </defs>
+              <!-- Background arc -->
+              <path d="M 12 72 A 60 60 0 0 1 132 72" fill="none" stroke="#1a1a1a" stroke-width="16" stroke-linecap="round" />
+              <!-- Housing slice: 61% of expenses → proportion of total 7144 -->
+              <!-- Food: 19%, Other: 20% -->
+              <!-- Housing arc (61% of spent, spent=84% of pool) -->
+              <path id="donutHousing" d="M 12 72 A 60 60 0 0 1 132 72" fill="none"
+                stroke="url(#donutGrad1)" stroke-width="16" stroke-linecap="round"
+                stroke-dasharray="188.5" stroke-dashoffset="188.5"
+                class="donut-fill" />
+              <!-- Food arc -->
+              <path id="donutFood" d="M 12 72 A 60 60 0 0 1 132 72" fill="none"
+                stroke="url(#donutGrad2)" stroke-width="16" stroke-linecap="round"
+                stroke-dasharray="188.5" stroke-dashoffset="188.5"
+                class="donut-fill" />
+              <!-- Other arc -->
+              <path id="donutOther" d="M 12 72 A 60 60 0 0 1 132 72" fill="none"
+                stroke="#444" stroke-width="16" stroke-linecap="round"
+                stroke-dasharray="188.5" stroke-dashoffset="188.5"
+                class="donut-fill" />
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-end pb-1">
+              <span id="donutCenterPct" class="text-2xl font-bold text-white font-mono">84%</span>
+              <span class="text-[9px] text-gray-500">used</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== Expense Blocks (horizontal scroll, from ExpenseBlock.tsx) ===== -->
+        <div class="mb-2">
+          <p class="text-base font-bold text-white mb-4">My Expenses</p>
+          <div class="flex overflow-x-auto hide-scrollbar gap-0 pb-2">
+            <!-- Add Item (dashed border, from ExpenseBlock first item) -->
+            <button id="addExpenseQuickBtn" class="h-scroll-card border border-dashed border-gray-500 items-center justify-center text-center btn-press flex">
+              <span class="text-3xl text-white">+</span>
+              <span class="text-sm text-white">Add Item</span>
+            </button>
+            <!-- Housing -->
+            <div class="h-scroll-card bg-emerald-500">
+              <span class="text-sm text-black">Housing</span>
+              <span class="text-base font-bold text-black font-mono">3,000 ETB</span>
+              <span class="pct-badge text-black">42%</span>
+            </div>
+            <!-- Food -->
+            <div class="h-scroll-card bg-blue-500">
+              <span class="text-sm text-black">Food & Drinks</span>
+              <span class="text-base font-bold text-black font-mono">2,340 ETB</span>
+              <span class="pct-badge text-black">33%</span>
+            </div>
+            <!-- Transit -->
+            <div class="h-scroll-card bg-white">
+              <span class="text-sm text-black">Transit</span>
+              <span class="text-base font-bold text-black font-mono">980 ETB</span>
+              <span class="pct-badge text-black">14%</span>
+            </div>
+            <!-- Misc -->
+            <div class="h-scroll-card bg-emerald-500">
+              <span class="text-sm text-black">Misc</span>
+              <span class="text-base font-bold text-black font-mono">824 ETB</span>
+              <span class="pct-badge text-black">11%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== Income Blocks (horizontal scroll, from IncomeBlock.tsx) ===== -->
+        <div class="mb-2">
+          <p class="text-base font-bold text-white mt-6 mb-4">My Income</p>
+          <div class="flex overflow-x-auto hide-scrollbar gap-0 pb-2 stagger">
+            <!-- Salary -->
+            <div class="h-scroll-card-income bg-gray-900 border border-gray-800">
+              <div class="flex justify-between items-start">
+                <div class="icon-circle">
+                  <i data-lucide="banknote" class="w-5 h-5 text-white"></i>
+                </div>
+                <button class="text-gray-400 hover:text-white"><i data-lucide="more-horizontal" class="w-5 h-5"></i></button>
+              </div>
+              <div>
+                <p class="text-sm text-white">Salary</p>
+                <p class="text-lg font-bold text-white font-mono">15,000 ETB</p>
+              </div>
+            </div>
+            <!-- Freelancing -->
+            <div class="h-scroll-card-income bg-gray-900 border border-gray-800">
+              <div class="flex justify-between items-start">
+                <div class="icon-circle">
+                  <i data-lucide="credit-card" class="w-5 h-5 text-white"></i>
+                </div>
+                <button class="text-gray-400 hover:text-white"><i data-lucide="more-horizontal" class="w-5 h-5"></i></button>
+              </div>
+              <div>
+                <p class="text-sm text-white">Freelancing</p>
+                <p class="text-lg font-bold text-white font-mono">6,000 ETB</p>
+              </div>
+            </div>
+            <!-- Equb -->
+            <div class="h-scroll-card-income bg-gray-900 border border-gray-800">
+              <div class="flex justify-between items-start">
+                <div class="icon-circle">
+                  <i data-lucide="wallet" class="w-5 h-5 text-white"></i>
+                </div>
+                <button class="text-gray-400 hover:text-white"><i data-lucide="more-horizontal" class="w-5 h-5"></i></button>
+              </div>
+              <div>
+                <p class="text-sm text-white">Equb Reserve</p>
+                <p class="text-lg font-bold text-white font-mono">2,000 ETB</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== Latest Spending (from SpendingBlock.tsx) ===== -->
+        <div class="mt-6 mb-4">
+          <p class="text-base font-bold text-white mb-4">Latest Spending</p>
+          <div id="latestSpendingList" class="space-y-3">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- ===== Pace Hero Card (FinSpark unique feature) ===== -->
+        <div class="card-base p-4 mt-6 mb-4 relative overflow-hidden">
+          <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl"></div>
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <span class="text-xs font-medium uppercase tracking-wide text-gray-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 anim-pulse-dot"></span>
+                Today's Pace
+              </span>
+              <div class="flex items-baseline gap-1.5 mt-1">
+                <span id="heroDailyPace" class="text-4xl font-extrabold text-white font-mono anim-count">271</span>
+                <span class="text-sm font-semibold text-gray-400">ETB / day</span>
+              </div>
+            </div>
+            <div id="paceBadge" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              On Target
+            </div>
+          </div>
+          <div class="space-y-2">
+            <div class="flex justify-between text-xs">
+              <span class="text-gray-400">Spent: <strong class="text-white font-mono" id="heroSpentToday">20 ETB</strong></span>
+              <span class="text-gray-400">Remaining: <strong class="text-emerald-400 font-mono" id="heroRemainingToday">251 ETB</strong></span>
+            </div>
+            <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+              <div id="heroProgressBar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full progress-fill" style="width: 7%;"></div>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-gray-800 text-[11px]">
+            <div>
+              <span class="text-gray-500">Pool Remaining</span>
+              <p class="text-sm font-bold text-white font-mono"><span id="heroLivingPool">1,336</span> ETB</p>
+            </div>
+            <div>
+              <span class="text-gray-500">Days Left</span>
+              <p class="text-sm font-bold text-amber-400 font-mono"><span id="heroDaysLeft">5</span> days</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== Quick Log Presets ===== -->
+        <div class="mb-4">
+          <p class="text-base font-bold text-white mb-3">Quick Log</p>
+          <div class="grid grid-cols-4 gap-2 stagger">
+            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 btn-press text-center" data-amount="20" data-cat="Transit" data-desc="Kera to Wello Sefer Taxi">
+              <span class="text-lg">🚕</span>
+              <span class="text-[10px] font-semibold text-gray-200 mt-1">Kera-Wello</span>
+              <span class="text-[10px] font-mono text-emerald-400">20</span>
+            </button>
+            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 btn-press text-center" data-amount="10" data-cat="Transit" data-desc="Wello to Alem Cinema">
+              <span class="text-lg">🚖</span>
+              <span class="text-[10px] font-semibold text-gray-200 mt-1">Alem</span>
+              <span class="text-[10px] font-mono text-emerald-400">10</span>
+            </button>
+            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 btn-press text-center" data-amount="20" data-cat="Transit" data-desc="Taxi to Kera (Return)">
+              <span class="text-lg">🏠</span>
+              <span class="text-[10px] font-semibold text-gray-200 mt-1">Home</span>
+              <span class="text-[10px] font-mono text-emerald-400">20</span>
+            </button>
+            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 btn-press text-center" data-amount="0" data-cat="Transit" data-desc="Lift / Walk">
+              <span class="text-lg">🚶</span>
+              <span class="text-[10px] font-semibold text-gray-200 mt-1">Free</span>
+              <span class="text-[10px] font-mono text-teal-400">0</span>
+            </button>
+            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 btn-press text-center" data-amount="50" data-cat="Food" data-desc="Traditional Buna">
+              <span class="text-lg">☕</span>
+              <span class="text-[10px] font-semibold text-gray-200 mt-1">Buna</span>
+              <span class="text-[10px] font-mono text-emerald-400">50</span>
+            </button>
+            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 btn-press text-center" data-amount="30" data-cat="Food" data-desc="Shay (Tea)">
+              <span class="text-lg">🍵</span>
+              <span class="text-[10px] font-semibold text-gray-200 mt-1">Shay</span>
+              <span class="text-[10px] font-mono text-emerald-400">30</span>
+            </button>
+            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 btn-press text-center" data-amount="50" data-cat="Food" data-desc="2 Injeras">
+              <span class="text-lg">🫓</span>
+              <span class="text-[10px] font-semibold text-gray-200 mt-1">Injera</span>
+              <span class="text-[10px] font-mono text-emerald-400">50</span>
+            </button>
+            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 btn-press text-center" data-amount="20" data-cat="Food" data-desc="Bread (Dabo)">
+              <span class="text-lg">🥖</span>
+              <span class="text-[10px] font-semibold text-gray-200 mt-1">Bread</span>
+              <span class="text-[10px] font-mono text-emerald-400">20</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== 7-Day Trend Chart ===== -->
+        <div class="card-base p-4 mb-4">
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-sm font-bold text-white flex items-center gap-1.5">
+              <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i>
+              7-Day Trend
+            </p>
+            <span class="text-[10px] text-gray-500" id="sparkAvgLabel">Avg: — ETB</span>
+          </div>
+          <div id="sparkChartContainer" class="flex items-end justify-between gap-1.5 h-24 relative">
+            <div class="absolute left-0 right-0 border-t border-dashed border-gray-800/60" style="bottom: 50%;"></div>
+            <div class="absolute left-0 right-0 border-t border-dashed border-gray-800/30" style="bottom: 25%;"></div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ============ TAB 2: TRANSACTIONS (from transaction.tsx — expanded) ============ -->
+      <section id="viewTransactions" class="hidden pt-2">
+        <p class="text-2xl font-bold text-white mb-1">Transactions</p>
+        <p class="text-sm text-gray-500 mb-4">Tikimt 04 – Hidar 03 • All daily logs</p>
+
+        <!-- Search Bar -->
+        <div class="relative mb-3">
+          <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
+          <input type="text" id="historySearchInput" placeholder="Search expenses..."
+            class="search-input w-full bg-gray-900 border border-gray-800 rounded-xl pl-10 pr-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 transition-all">
+        </div>
+
+        <!-- Filter Pills -->
+        <div class="flex space-x-2 overflow-x-auto hide-scrollbar pb-2 mb-2 text-xs">
+          <button class="history-filter-btn px-3 py-1.5 rounded-full bg-emerald-500 text-black font-bold transition-all btn-press" data-filter="all">All</button>
+          <button class="history-filter-btn px-3 py-1.5 rounded-full bg-gray-900 text-gray-400 font-medium hover:bg-gray-800 transition-all btn-press border border-gray-800" data-filter="under">Under Target</button>
+          <button class="history-filter-btn px-3 py-1.5 rounded-full bg-gray-900 text-gray-400 font-medium hover:bg-gray-800 transition-all btn-press border border-gray-800" data-filter="over">Over Target</button>
+        </div>
+
+        <!-- Day Cards -->
+        <div id="historyDaysContainer" class="space-y-3"></div>
+
+        <!-- Empty State -->
+        <div id="historyEmptyState" class="hidden text-center py-12">
+          <div class="empty-icon w-16 h-16 mx-auto rounded-2xl bg-gray-900 border border-gray-800 flex items-center justify-center mb-3">
+            <i data-lucide="search-x" class="w-7 h-7 text-gray-600"></i>
+          </div>
+          <p class="text-sm font-semibold text-gray-300">No matching expenses</p>
+          <p class="text-xs text-gray-600 mt-1">Try a different keyword</p>
+        </div>
+      </section>
+
+      <!-- ============ TAB 3: PROFILE / RESERVES & COACH ============ -->
+      <section id="viewProfile" class="hidden pt-2">
+
+        <!-- Profile Header -->
+        <div class="flex items-center space-x-4 mb-6">
+          <div class="avatar-ring">
+            <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-black font-black text-2xl">
+              T
+            </div>
+          </div>
+          <div>
+            <p class="text-xl font-bold text-white">Tesfish</p>
+            <p class="text-sm text-gray-500">Addis Ababa, Ethiopia</p>
+          </div>
+        </div>
+
+        <!-- Macro Reserves -->
+        <div class="card-base p-4 mb-4">
+          <p class="text-base font-bold text-white mb-3 flex items-center gap-2">
+            <i data-lucide="vault" class="w-4 h-4 text-amber-400"></i>
+            Macro Reserves
+          </p>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="p-3 rounded-xl bg-gray-900 border border-gray-800">
+              <span class="text-gray-500">House Rent</span>
+              <p class="text-sm font-bold text-white font-mono mt-0.5">3,000 ETB</p>
+              <span class="text-[10px] text-emerald-400">Paid ✅</span>
+            </div>
+            <div class="p-3 rounded-xl bg-gray-900 border border-gray-800">
+              <span class="text-gray-500">Equb Reserve</span>
+              <p class="text-sm font-bold text-white font-mono mt-0.5">2,000 ETB</p>
+              <span class="text-[10px] text-blue-400">Intact ✅</span>
+            </div>
+            <div class="p-3 rounded-xl bg-gray-900 border border-gray-800">
+              <span class="text-gray-500">Emergency Fund</span>
+              <p class="text-sm font-bold text-white font-mono mt-0.5">2,500 ETB</p>
+              <span class="text-[10px] text-emerald-400">Protected ✅</span>
+            </div>
+            <div class="p-3 rounded-xl bg-gray-900 border border-gray-800">
+              <span class="text-gray-500">Side Earnings</span>
+              <p class="text-sm font-bold text-amber-300 font-mono mt-0.5">+6,000 ETB</p>
+              <span class="text-[10px] text-gray-500">Oct–Nov ✅</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Store Tabs & Peer Loans -->
+        <div class="card-base p-4 mb-4">
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-base font-bold text-white flex items-center gap-2">
+              <i data-lucide="handshake" class="w-4 h-4 text-blue-400"></i>
+              Store Tabs & Peer Loans
+            </p>
+            <button id="addPeerLoanBtn" class="text-xs font-bold text-emerald-400 flex items-center gap-1 btn-press">
+              <i data-lucide="plus" class="w-3 h-3"></i> Add
+            </button>
+          </div>
+          <div class="space-y-2">
+            <div id="shimeTabCard" class="p-3 rounded-xl bg-gray-900 border border-amber-500/30 flex items-center justify-between">
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-semibold text-sm text-white">Shime Shop Tab</span>
+                  <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">Pending</span>
+                </div>
+                <p class="text-[11px] text-gray-500 mt-0.5">Counted in past budget</p>
+              </div>
+              <div class="text-right">
+                <span class="text-sm font-bold font-mono text-amber-300">210 ETB</span>
+                <button id="settleShimeBtn" class="block mt-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30 btn-press">Settle</button>
+              </div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-gray-900/60 border border-gray-800 text-[11px] space-y-1.5">
+              <span class="text-gray-500 font-semibold block">Settled Loans:</span>
+              <div class="flex justify-between text-gray-300"><span>Abela</span><span class="font-mono text-emerald-400">400 ✅</span></div>
+              <div class="flex justify-between text-gray-300"><span>Natu Coffee</span><span class="font-mono text-emerald-400">50 ✅</span></div>
+              <div class="flex justify-between text-gray-300"><span>Sami & Sam OLY</span><span class="font-mono text-emerald-400">100 ✅</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Savings Outflows -->
+        <div class="card-base p-4 mb-4">
+          <p class="text-base font-bold text-white mb-3 flex items-center gap-2">
+            <i data-lucide="package" class="w-4 h-4 text-teal-400"></i>
+            Savings Outflows
+          </p>
+          <div id="savingsOutflowsList" class="space-y-1.5 text-xs"></div>
+        </div>
+
+        <!-- Mr. Fin Coach -->
+        <div class="card-base p-4 mb-4">
+          <div class="flex items-center space-x-2.5 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-black font-black text-xl">💎</div>
+            <div>
+              <p class="text-sm font-bold text-white">Mr. Fin Advisor</p>
+              <p class="text-[11px] text-emerald-400">Personalized for Tesfish</p>
+            </div>
+          </div>
+          <p class="text-xs text-gray-400 leading-relaxed mb-3">
+            "With 1,336 ETB across 5 days, your pace is 271 ETB/day. Stay disciplined on transit and leverage homemade stews to finish Tikimt with a surplus."
+          </p>
+
+          <!-- What-If Simulator -->
+          <div class="border-t border-gray-800 pt-3">
+            <p class="text-xs font-bold text-white mb-2 flex items-center gap-1.5">
+              <i data-lucide="calculator" class="w-3.5 h-3.5 text-blue-400"></i>
+              "What-If" Pace Simulator
+            </p>
+            <div class="flex gap-2 mb-2">
+              <input type="number" id="simExpenseInput" placeholder="Planned ETB" class="flex-1 bg-gray-900 border border-gray-800 rounded-lg px-3 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-emerald-500">
+              <button id="simCalculateBtn" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-xs btn-press">Simulate</button>
+            </div>
+            <div id="simResultBox" class="text-xs p-2.5 rounded-lg bg-gray-900 border border-gray-800 text-gray-300 hidden"></div>
+          </div>
+        </div>
+
+        <!-- Quick Liquidity Transfer -->
+        <div class="card-base p-4 mb-4 border border-indigo-500/20">
+          <p class="text-sm font-bold text-white mb-2 flex items-center gap-2">
+            <i data-lucide="arrow-left-right" class="w-4 h-4 text-indigo-400"></i>
+            Quick Liquidity Transfer
+          </p>
+          <p class="text-xs text-gray-500 mb-3">Inject funds from Savings into Living Pool to boost daily pace.</p>
+          <div class="flex gap-2">
+            <button id="quickBooster500Btn" class="flex-1 py-2.5 rounded-xl bg-gray-900 border border-gray-800 text-xs font-bold text-white btn-press">+500 ETB</button>
+            <button id="quickBooster1000Btn" class="flex-1 py-2.5 rounded-xl bg-indigo-600/30 border border-indigo-500/40 text-xs font-bold text-indigo-300 btn-press">+1,000 ETB</button>
+          </div>
+        </div>
+
+        <!-- App Actions -->
+        <div class="flex gap-2 mb-4">
+          <button id="resetDataBtn" class="flex-1 py-2.5 rounded-xl bg-gray-900 border border-gray-800 text-xs font-bold text-gray-300 btn-press flex items-center justify-center gap-1.5">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Reset Data
+          </button>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- ================= FLOATING PILL TAB BAR (from _layout.tsx) ================= -->
+    <nav class="floating-tab-bar">
+      <button class="tab-item active" data-target="viewHome" data-index="0" title="Home">
+        <i data-lucide="pie-chart" class="w-5 h-5"></i>
+      </button>
+      <button class="tab-item" data-target="viewTransactions" data-index="1" title="Transactions">
+        <i data-lucide="arrow-left-right" class="w-5 h-5"></i>
+      </button>
+      <button class="tab-item" data-target="viewProfile" data-index="2" title="Profile">
+        <i data-lucide="user" class="w-5 h-5"></i>
+      </button>
+    </nav>
+
+    <!-- ================= MANUAL LOG MODAL ================= -->
+    <div id="logModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="modal-content bg-gray-900 border border-gray-800 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold text-white">Log Expense</h3>
+          <button id="closeLogModalBtn" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <form id="expenseForm" class="space-y-3">
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">Amount (ETB)</label>
+            <input type="number" id="inputAmount" step="1" min="0" placeholder="0" required class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xl font-bold font-mono text-white focus:outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">Bucket</label>
+            <div class="grid grid-cols-2 gap-2">
+              <label class="cursor-pointer">
+                <input type="radio" name="accountBucket" value="living" checked class="peer sr-only">
+                <div class="p-2.5 rounded-xl border border-gray-700 bg-gray-800 peer-checked:border-emerald-500 peer-checked:bg-emerald-500/10 text-center text-xs text-white transition-all">Living Pool</div>
+              </label>
+              <label class="cursor-pointer">
+                <input type="radio" name="accountBucket" value="savings" class="peer sr-only">
+                <div class="p-2.5 rounded-xl border border-gray-700 bg-gray-800 peer-checked:border-blue-500 peer-checked:bg-blue-500/10 text-center text-xs text-white transition-all">Savings Buffer</div>
+              </label>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">Category</label>
+            <select id="inputCategory" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+              <option value="Transportation">🚕 Transportation</option>
+              <option value="Food" selected>🍲 Food & Drinks</option>
+              <option value="Pantry">🛒 Pantry & Bulk Stock</option>
+              <option value="Personal Care">💈 Personal Care</option>
+              <option value="Entertainment">🎮 Entertainment</option>
+              <option value="Subscriptions">📱 Subscriptions</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">Description</label>
+            <input type="text" id="inputDesc" placeholder="e.g. Afternoon tea" required class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+          </div>
+          <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm btn-press">Save & Update Pace</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add Tab Modal -->
+    <div id="addTabModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="modal-content bg-gray-900 border border-gray-800 rounded-2xl max-w-xs w-full p-4 space-y-3.5 shadow-2xl">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-white">Add Peer Loan / Tab</h3>
+          <button id="closeTabModalBtn" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="space-y-2 text-xs">
+          <input type="text" id="tabNameInput" placeholder="Name / Store" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-white">
+          <input type="number" id="tabAmountInput" placeholder="Amount ETB" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-white font-mono">
+        </div>
+        <div class="flex gap-2">
+          <button id="cancelTabModalBtn" class="flex-1 py-2 rounded-lg bg-gray-800 text-gray-300 text-xs font-semibold btn-press">Cancel</button>
+          <button id="saveTabModalBtn" class="flex-1 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold btn-press">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="modal-content bg-gray-900 border border-gray-800 rounded-2xl max-w-sm w-full p-4 space-y-3 shadow-2xl text-xs">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-white">Cycle Configuration</h3>
+          <button id="closeSettingsModalBtn" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="space-y-1.5 text-gray-300">
+          <p><strong class="text-white">Cycle:</strong> Tikimt 04 – Hidar 03 (30 Days)</p>
+          <p><strong class="text-white">Baseline Salary:</strong> 15,000 ETB</p>
+          <p><strong class="text-white">Living Pool:</strong> 8,500 ETB (7,500 + 1,000 booster)</p>
+          <p><strong class="text-white">Location:</strong> Addis Ababa, Ethiopia</p>
+        </div>
+        <div class="pt-2 border-t border-gray-800 flex justify-end">
+          <button id="dismissSettingsBtn" class="py-1.5 px-3 rounded-lg bg-emerald-600 text-white font-bold text-xs btn-press">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 max-w-xs w-full bg-gray-900/95 border border-emerald-500/50 shadow-2xl rounded-xl px-3.5 py-2.5 flex items-center gap-2.5 text-xs text-white z-50 toast-hide transition-all duration-300 pointer-events-none">
+      <div id="toastIcon" class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+        <i data-lucide="check" class="w-3.5 h-3.5"></i>
+      </div>
+      <span id="toastMsg" class="flex-1 font-medium">Done!</span>
+    </div>
+
+  </div>
+
+  <!-- ================= APP LOGIC ================= -->
+  <script>
+    // --- State Model (same as v2) ---
+    const INITIAL_DATA = {
+      cycleName: "Tikimt Budget Tracker",
+      period: "Tikimt 04 – Hidar 03",
+      totalDays: 30,
+      currentDay: 26,
+      salary: 15000,
+      rent: 3000,
+      equb: 2000,
+      baseEmergency: 2500,
+      livingPoolBaseline: 8500,
+      sideIncomes: [
+        { date: "Oct 25", amount: 1500, desc: "Side work income" },
+        { date: "Nov 01", amount: 4500, desc: "Side work income (1.5K + 3K)" }
+      ],
+      savingsOutflows: [
+        { date: "Oct 14", amount: 160, desc: "Berbere pantry stock" },
+        { date: "Oct 16", amount: 280, desc: "Monthly Telecom package" },
+        { date: "Oct 24", amount: 110, desc: "1KG Onion pantry stock" },
+        { date: "Oct 24", amount: 450, desc: "Saturday Tibs & Coca lunch" },
+        { date: "Oct 28", amount: 270, desc: "Dinner with self" },
+        { date: "Oct 31", amount: 415, desc: "Saturday Tibs & Coca lunch" },
+        { date: "Nov 01", amount: 200, desc: "Shower Soap (grooming)" },
+        { date: "Nov 01", amount: 500, desc: "Storm Deodorant" },
+        { date: "Nov 01", amount: 200, desc: "Gift for friend Amane" },
+        { date: "Nov 01", amount: 340, desc: "Sunday Evening PS & Cake" },
+        { date: "Oct 31", amount: 480, desc: "Safaricom Data Packages" },
+        { date: "Nov 04", amount: 450, desc: "1L Cooking Oil pantry stock" },
+        { date: "Nov 05", amount: 1000, desc: "Living Pool booster transfer" },
+        { date: "Nov 05", amount: 150, desc: "Monthly Movie player sub" },
+        { date: "Nov 05", amount: 175, desc: "Berbere pantry stock" },
+        { date: "Nov 05", amount: 135, desc: "1KG Onion pantry stock" },
+        { date: "Nov 05", amount: 190, desc: "Dinner with friends" }
+      ],
+      dailyHistory: [
+        { day: 1, date: "Tikimt 04 (Oct 12)", target: 250, total: 140, items: ["Kera-Wello (20)", "Wello-Alem (10)", "Coffee (40)", "Wello-Kera (20)", "2 Injeras (50)"] },
+        { day: 2, date: "Tikimt 05 (Oct 13)", target: 254, total: 170, items: ["Commute (30)", "Breakfast (70)", "Coffee (50)", "Wello-Kera (20)"] },
+        { day: 3, date: "Tikimt 06 (Oct 14)", target: 257, total: 355, items: ["Commute (30)", "Lunch (230)", "Coffee (50)", "Injera (25)", "Taxi (20)"] },
+        { day: 4, date: "Tikimt 07 (Oct 15)", target: 253, total: 145, items: ["Commute (30)", "Bread (20)", "Coffee (50)", "Taxi (20)", "Injera (25)"] },
+        { day: 5, date: "Tikimt 08 (Oct 16)", target: 257, total: 300, items: ["Commute (30)", "Coffee (75)", "PS FIFA (90)", "Pasties (55)", "Sugar (50)"] },
+        { day: 6, date: "Tikimt 09 (Oct 17)", target: 256, total: 710, items: ["Commute (30)", "Group taxi (80)", "Saturday Lunch (450)", "Haircut (150)"] },
+        { day: 7, date: "Tikimt 10 (Oct 18)", target: 237, total: 510, items: ["Siga firfir (320)", "Coffee (70)", "Football & Fanta (70)", "2 Injeras (50)"] },
+        { day: 8, date: "Tikimt 11 (Oct 19)", target: 225, total: 215, items: ["Commute (30)", "Breakfast (85)", "Coffee (50)", "2 Injeras (50)"] },
+        { day: 9, date: "Tikimt 12 (Oct 20)", target: 225, total: 130, items: ["Commute (30)", "Injera (50)", "Dinich (50)"] },
+        { day: 10, date: "Tikimt 13 (Oct 21)", target: 230, total: 270, items: ["Commute (30)", "Breakfast (80)", "Coffee (50)", "Water (40)", "2 Injeras (50)", "Taxi (20)"] },
+        { day: 11, date: "Tikimt 14 (Oct 22)", target: 228, total: 140, items: ["Commute (30)", "Coffee (50)", "Taxi (20)", "Injera (25)", "Bread (15)"] },
+        { day: 12, date: "Tikimt 15 (Oct 23)", target: 232, total: 460, items: ["Commute (30)", "Coffee (75)", "Dabo (20)", "Taxi (20)", "Bread (65)", "PS FIFA (250)"] },
+        { day: 13, date: "Tikimt 16 (Oct 24)", target: 220, total: 315, items: ["Commute (30)", "Breakfast (130)", "Taxi (35)", "Shower (30)", "2 Injeras (50)", "Coffee (40)"] },
+        { day: 14, date: "Tikimt 17 (Oct 25)", target: 214, total: 360, items: ["City transit (85)", "Socks (70)", "Fanta (140)", "2 Injeras (50)", "Bus (15)"] },
+        { day: 15, date: "Tikimt 18 (Oct 26)", target: 205, total: 385, items: ["Commute (30)", "Breakfast & Tea (110)", "Taxi (20)", "Friends dinner (200)", "Injera (25)"] },
+        { day: 16, date: "Tikimt 19 (Oct 27)", target: 193, total: 215, items: ["Commute (30)", "Tea (40)", "Taxi (20)", "Injera (25)", "4 Eggs (100)"] },
+        { day: 17, date: "Tikimt 20 (Oct 28)", target: 191, total: 135, items: ["Commute (30)", "Bread & Tea (60)", "Taxi (20)", "Injera (25)"] },
+        { day: 18, date: "Tikimt 21 (Oct 29)", target: 196, total: 264, items: ["Commute (30)", "Breakfast & Tea (165)", "Taxi (20)", "Injera & Bread (49)"] },
+        { day: 19, date: "Tikimt 22 (Oct 30)", target: 190, total: 115, items: ["Commute (30)", "Tea (40)", "Taxi (20)", "Injera (25)"] },
+        { day: 20, date: "Tikimt 23 (Oct 31)", target: 197, total: 260, items: ["Commute (30)", "Breakfast (130)", "Cross-town transit (65)", "Biscuits (35)"] },
+        { day: 21, date: "Tikimt 24 (Nov 01)", target: 191, total: 510, items: ["Breakfast (350)", "Shower (30)", "Biscuits (60)", "Coca Cola (70)"] },
+        { day: 22, date: "Tikimt 25 (Nov 02)", target: 155, total: 235, items: ["Commute (30)", "Breakfast & Tea (60)", "Coffee (40)", "Taxi (20)", "Injera (25)", "Sossisoya (60)"] },
+        { day: 23, date: "Tikimt 26 (Nov 03)", target: 145, total: 405, items: ["Commute (30)", "Lunch (250)", "Coffee (50)", "Taxi (20)", "Injera & Bread (55)"] },
+        { day: 24, date: "Tikimt 27 (Nov 04)", target: 108, total: 130, items: ["Commute (30)", "Tea (30)", "Packed Lunch (0)", "Taxi (20)", "2 Injeras (50)"] },
+        { day: 25, date: "Tikimt 28 (Nov 05)", target: 271, total: 270, items: ["Commute (30)", "Breakfast (80)", "Afternoon Tea (40)", "Taxi (20)", "2 Injeras (50)", "Dinich (50)"] }
+      ],
+      todayExpenses: [
+        { id: "t1", amount: 20, category: "Transportation", desc: "Kera to Wello Sefer Taxi", time: "8:49 AM", bucket: "living" }
+      ],
+      storeTabs: [
+        { id: "tab1", name: "Shime Shop Grocery Tab", amount: 210, settled: false }
+      ]
+    };
+
+    let AppState = {};
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem('finspark_state_v1');
+        if (saved) AppState = JSON.parse(saved);
+        else AppState = JSON.parse(JSON.stringify(INITIAL_DATA));
+      } catch (e) { AppState = JSON.parse(JSON.stringify(INITIAL_DATA)); }
+    }
+
+    function saveState() {
+      try { localStorage.setItem('finspark_state_v1', JSON.stringify(AppState)); } catch(e) {}
+    }
+
+    // --- Calculations ---
+    function calc() {
+      const pastTotal = AppState.dailyHistory.reduce((a, d) => a + d.total, 0);
+      const todaySpent = AppState.todayExpenses.filter(i => i.bucket === 'living').reduce((a, i) => a + i.amount, 0);
+      const totalSpent = pastTotal + todaySpent;
+      const remaining = AppState.livingPoolBaseline - totalSpent;
+      const daysLeft = (AppState.totalDays - AppState.currentDay) + 1;
+      const pace = Math.round((AppState.livingPoolBaseline - pastTotal) / daysLeft);
+      const remainingToday = Math.max(0, pace - todaySpent);
+      const pct = pace > 0 ? Math.min(100, Math.round((todaySpent / pace) * 100)) : 0;
+      const poolPct = Math.round((totalSpent / AppState.livingPoolBaseline) * 100);
+      return { pastTotal, todaySpent, totalSpent, remaining, daysLeft, pace, remainingToday, pct, poolPct };
+    }
+
+    // --- Animated Number ---
+    function animateNum(el, target, dur = 600) {
+      const startTime = performance.now();
+      function upd(now) {
+        const p = Math.min((now - startTime) / dur, 1);
+        const e = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(target * e).toLocaleString();
+        if (p < 1) requestAnimationFrame(upd);
+      }
+      requestAnimationFrame(upd);
+    }
+
+    // --- Donut Chart ---
+    function renderDonut() {
+      const m = calc();
+      const arcLen = 188.5; // half circle circumference for r=60
+      const poolUsed = Math.min(100, m.poolPct);
+
+      // Break into 3 segments proportionally
+      // Housing: 42% of total, Food: 33%, Other: 25%
+      const housingPct = 42, foodPct = 33, otherPct = 25;
+      const housingLen = (poolUsed / 100) * (housingPct / (housingPct + foodPct + otherPct)) * arcLen;
+      const foodLen = (poolUsed / 100) * (foodPct / (housingPct + foodPct + otherPct)) * arcLen;
+      const otherLen = (poolUsed / 100) * (otherPct / (housingPct + foodPct + otherPct)) * arcLen;
+
+      // Set dasharray and offset for each segment
+      const housing = document.getElementById('donutHousing');
+      const food = document.getElementById('donutFood');
+      const other = document.getElementById('donutOther');
+
+      housing.setAttribute('stroke-dasharray', `${housingLen} ${arcLen}`);
+      housing.setAttribute('stroke-dashoffset', '0');
+
+      food.setAttribute('stroke-dasharray', `${foodLen} ${arcLen}`);
+      food.setAttribute('stroke-dashoffset', `${-housingLen}`);
+
+      other.setAttribute('stroke-dasharray', `${otherLen} ${arcLen}`);
+      other.setAttribute('stroke-dashoffset', `${-(housingLen + foodLen)}`);
+
+      document.getElementById('donutCenterPct').textContent = `${poolUsed}%`;
+      document.getElementById('totalSpentDisplay').textContent = m.totalSpent.toLocaleString();
+    }
+
+    // --- Latest Spending List (SpendingBlock style) ---
+    function renderLatestSpending() {
+      const container = document.getElementById('latestSpendingList');
+      container.innerHTML = '';
+
+      // Get last 5 days of spending items
+      const recentDays = AppState.dailyHistory.slice(-5).reverse();
+      let allItems = [];
+
+      recentDays.forEach(d => {
+        d.items.forEach(item => {
+          const match = item.match(/\((\d+)\)/);
+          const amount = match ? parseInt(match[1]) : 0;
+          const name = item.replace(/\s*\(\d+\)/, '');
+          if (amount > 0) {
+            allItems.push({
+              name: name,
+              amount: amount,
+              date: d.date.split('(')[1]?.replace(')', '') || d.date
+            });
+          }
+        });
+      });
+
+      // Add today's
+      AppState.todayExpenses.forEach(e => {
+        allItems.unshift({ name: e.desc, amount: e.amount, date: 'Today' });
+      });
+
+      // Take top 6
+      const top = allItems.slice(0, 6);
+
+      top.forEach((item, idx) => {
+        let icon = 'shopping-cart';
+        let iconColor = 'text-white';
+        if (item.name.toLowerCase().includes('coffee') || item.name.toLowerCase().includes('buna')) { icon = 'coffee'; }
+        else if (item.name.toLowerCase().includes('taxi') || item.name.toLowerCase().includes('commute') || item.name.toLowerCase().includes('kera') || item.name.toLowerCase().includes('wello')) { icon = 'car'; }
+        else if (item.name.toLowerCase().includes('injera') || item.name.toLowerCase().includes('bread') || item.name.toLowerCase().includes('breakfast') || item.name.toLowerCase().includes('lunch') || item.name.toLowerCase().includes('firfir') || item.name.toLowerCase().includes('dinner')) { icon = 'utensils'; }
+        else if (item.name.toLowerCase().includes('tea') || item.name.toLowerCase().includes('shay')) { icon = 'mug-hot'; }
+        else if (item.name.toLowerCase().includes('haircut')) { icon = 'scissors'; }
+
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between anim-slide-up';
+        row.style.animationDelay = `${idx * 40}ms`;
+        row.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="icon-circle-solid">
+              <i data-lucide="${icon}" class="w-5 h-5 text-white"></i>
+            </div>
+            <div>
+              <p class="text-sm font-bold text-white">${item.name}</p>
+              <p class="text-xs text-gray-500">${item.date}</p>
+            </div>
+          </div>
+          <span class="text-base font-bold text-white font-mono">${item.amount} ETB</span>
+        `;
+        container.appendChild(row);
+      });
+
+      lucide.createIcons();
+    }
+
+    // --- Pace Hero ---
+    function renderPaceHero() {
+      const m = calc();
+      animateNum(document.getElementById('heroDailyPace'), m.pace);
+      document.getElementById('heroSpentToday').textContent = `${m.todaySpent} ETB`;
+      document.getElementById('heroRemainingToday').textContent = `${m.remainingToday} ETB`;
+      document.getElementById('heroLivingPool').textContent = m.remaining.toLocaleString();
+      document.getElementById('heroDaysLeft').textContent = m.daysLeft;
+      document.getElementById('heroProgressBar').style.width = `${m.pct}%`;
+
+      const badge = document.getElementById('paceBadge');
+      if (m.pct > 100) {
+        badge.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/20 text-red-300 border border-red-500/30';
+        badge.textContent = 'Over Pace';
+      } else if (m.pct > 80) {
+        badge.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30';
+        badge.textContent = 'Near Pace';
+      } else {
+        badge.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+        badge.textContent = 'On Target';
+      }
+    }
+
+    // --- Spark Chart ---
+    function renderSparkChart() {
+      const container = document.getElementById('sparkChartContainer');
+      if (!container) return;
+      container.querySelectorAll('.spark-group').forEach(b => b.remove());
+
+      const last7 = AppState.dailyHistory.slice(-7);
+      const todaySpent = AppState.todayExpenses.filter(i => i.bucket === 'living').reduce((a, i) => a + i.amount, 0);
+      const allDays = [...last7, { day: 26, total: todaySpent, target: 271, date: 'Today' }];
+
+      const maxVal = Math.max(...allDays.map(d => d.total), 300);
+      const chartHeight = 80;
+      const avg = Math.round(allDays.reduce((a, d) => a + d.total, 0) / allDays.length);
+
+      allDays.forEach((d, i) => {
+        const barH = Math.max(2, (d.total / maxVal) * chartHeight);
+        const isOver = d.total > d.target;
+        const isToday = i === allDays.length - 1;
+        const targetH = Math.max(2, (d.target / maxVal) * chartHeight);
+
+        const group = document.createElement('div');
+        group.className = 'spark-group flex flex-col items-center justify-end gap-1 flex-1 anim-slide-up';
+        group.style.animationDelay = `${i * 40}ms`;
+        group.innerHTML = `
+          <div class="text-[8px] font-mono ${isOver ? 'text-red-400' : 'text-emerald-400'} font-bold">${d.total}</div>
+          <div class="relative w-full flex justify-center" style="height:${chartHeight}px;">
+            <div class="absolute left-0 right-0 border-t border-dashed border-gray-700/40" style="bottom:${targetH}px;"></div>
+            <div class="spark-bar w-5 rounded-t-md ${isOver ? 'bg-red-500' : 'bg-emerald-500'} ${isToday ? 'ring-2 ring-emerald-300/30' : ''}" style="height:0;opacity:0.8;"></div>
+          </div>
+          <span class="text-[8px] ${isToday ? 'text-emerald-400 font-bold' : 'text-gray-600'}">${isToday ? 'Now' : 'D' + d.day}</span>
+        `;
+        container.appendChild(group);
+
+        setTimeout(() => {
+          const bar = group.querySelector('.spark-bar');
+          if (bar) bar.style.height = barH + 'px';
+        }, 50 + i * 40);
+      });
+
+      document.getElementById('sparkAvgLabel').textContent = `Avg: ${avg.toLocaleString()} ETB`;
+    }
+
+    // --- History (Transactions tab) ---
+    function renderHistory(query = '') {
+      const container = document.getElementById('historyDaysContainer');
+      const emptyState = document.getElementById('historyEmptyState');
+      container.innerHTML = '';
+      const reversed = [...AppState.dailyHistory].reverse();
+      const q = query.toLowerCase().trim();
+      let hasResults = false;
+
+      reversed.forEach(d => {
+        let items = d.items;
+        if (q) {
+          items = d.items.filter(it => it.toLowerCase().includes(q));
+          if (!items.length) return;
+        }
+        hasResults = true;
+        const diff = d.total - d.target;
+        const diffText = diff <= 0 ? `${diff} under` : `+${diff} over`;
+        const diffColor = diff <= 0 ? 'text-emerald-400' : 'text-red-400';
+        const dayPct = Math.min(100, Math.round((d.total / (d.target * 1.5)) * 100));
+
+        const card = document.createElement('div');
+        card.className = 'card-base p-3 space-y-2 anim-slide-up';
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-sm font-bold text-white">Day ${d.day}</span>
+              <span class="text-xs text-gray-600 ml-2">${d.date}</span>
+            </div>
+            <div class="text-right">
+              <span class="text-sm font-bold font-mono text-white">${d.total} ETB</span>
+              <span class="text-[10px] block ${diffColor} font-mono">${diffText}</span>
+            </div>
+          </div>
+          <div class="w-full h-1 bg-gray-800 rounded-full overflow-hidden">
+            <div class="h-full rounded-full ${diff <= 0 ? 'bg-emerald-500' : 'bg-red-500'} progress-fill" style="width:${dayPct}%"></div>
+          </div>
+          <div class="text-[11px] text-gray-500 flex flex-wrap gap-1.5 pt-1">
+            ${items.map(it => {
+              const hl = q ? it.replace(new RegExp(`(${q})`, 'gi'), '<mark class="bg-emerald-500/30 text-emerald-200 rounded px-0.5">$1</mark>') : it;
+              return `<span class="bg-gray-800 px-1.5 py-0.5 rounded text-gray-400">${hl}</span>`;
+            }).join('')}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      if (!hasResults && q) {
+        emptyState.classList.remove('hidden');
+        emptyState.classList.add('anim-fade-in');
+      } else {
+        emptyState.classList.add('hidden');
+      }
+      lucide.createIcons();
+    }
+
+    // --- Savings Outflows ---
+    function renderSavings() {
+      const list = document.getElementById('savingsOutflowsList');
+      list.innerHTML = '';
+      if (!AppState.savingsOutflows.length) {
+        list.innerHTML = '<p class="text-center text-gray-600 py-4 text-xs">No savings outflows</p>';
+        return;
+      }
+      AppState.savingsOutflows.slice(0, 10).forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = 'flex justify-between p-2 rounded-lg bg-gray-900 border border-gray-800 anim-slide-up';
+        row.style.animationDelay = `${Math.min(idx, 8) * 30}ms`;
+        row.innerHTML = `
+          <div><p class="text-white text-xs font-medium">${item.desc}</p><span class="text-[10px] text-gray-600">${item.date}</span></div>
+          <span class="font-mono font-bold text-blue-300">${item.amount} ETB</span>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    // --- Toast ---
+    function toast(msg, ok = true) {
+      const t = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      const icon = document.getElementById('toastIcon');
+      icon.className = ok
+        ? 'w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0'
+        : 'w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0';
+      icon.innerHTML = ok ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : '<i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>';
+      lucide.createIcons();
+      t.classList.remove('toast-hide');
+      t.classList.add('toast-show');
+      setTimeout(() => { t.classList.add('toast-hide'); t.classList.remove('toast-show'); }, 2500);
+    }
+
+    // --- Add Expense ---
+    function addExpense(amount, cat, desc, bucket = 'living') {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      AppState.todayExpenses.push({ id: "exp_" + Date.now(), amount: Number(amount), category: cat, desc, time: timeStr, bucket });
+      if (bucket === 'savings') {
+        AppState.savingsOutflows.unshift({ date: "Nov 06", amount: Number(amount), desc });
+      }
+      saveState();
+      renderAll();
+      toast(`Logged ${amount} ETB — ${desc}`);
+    }
+
+    function renderAll() {
+      renderDonut();
+      renderPaceHero();
+      renderLatestSpending();
+      renderSparkChart();
+      renderHistory();
+      renderSavings();
+      lucide.createIcons();
+    }
+
+    // --- Tab Navigation ---
+    function switchTab(targetId, btn) {
+      ['viewHome', 'viewTransactions', 'viewProfile'].forEach(v => {
+        const el = document.getElementById(v);
+        if (v === targetId) {
+          el.classList.remove('hidden');
+          el.classList.remove('view-enter');
+          void el.offsetWidth;
+          el.classList.add('view-enter');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      document.querySelector('main').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // --- Swipe Gestures ---
+    function initSwipe() {
+      const main = document.getElementById('mainContent');
+      let sx, sy;
+      const views = ['viewHome', 'viewTransactions', 'viewProfile'];
+
+      main.addEventListener('touchstart', e => {
+        sx = e.changedTouches[0].screenX;
+        sy = e.changedTouches[0].screenY;
+      }, { passive: true });
+
+      main.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].screenX - sx;
+        const dy = e.changedTouches[0].screenY - sy;
+        if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx)) return;
+        let ci = 0;
+        views.forEach((v, i) => { if (!document.getElementById(v).classList.contains('hidden')) ci = i; });
+        const ni = dx > 0 ? Math.max(0, ci - 1) : Math.min(views.length - 1, ci + 1);
+        if (ni !== ci) {
+          const btn = document.querySelector(`.tab-item[data-index="${ni}"]`);
+          switchTab(views[ni], btn);
+        }
+      }, { passive: true });
+    }
+
+    // --- Init ---
+    document.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      renderAll();
+      lucide.createIcons();
+      initSwipe();
+
+      // Tab clicks
+      document.querySelectorAll('.tab-item').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.target, btn));
+      });
+
+      // Quick presets
+      document.querySelectorAll('.quick-preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => addExpense(btn.dataset.amount, btn.dataset.cat, btn.dataset.desc, 'living'));
+      });
+
+      // Add expense modal
+      const logModal = document.getElementById('logModal');
+      document.getElementById('addExpenseQuickBtn').addEventListener('click', () => logModal.classList.remove('hidden'));
+      document.getElementById('closeLogModalBtn').addEventListener('click', () => logModal.classList.add('hidden'));
+      document.getElementById('expenseForm').addEventListener('submit', e => {
+        e.preventDefault();
+        const amt = document.getElementById('inputAmount').value;
+        const cat = document.getElementById('inputCategory').value;
+        const desc = document.getElementById('inputDesc').value;
+        const bucket = document.querySelector('input[name="accountBucket"]:checked').value;
+        if (!amt || Number(amt) < 0) return;
+        addExpense(amt, cat, desc, bucket);
+        logModal.classList.add('hidden');
+        document.getElementById('inputAmount').value = '';
+        document.getElementById('inputDesc').value = '';
+      });
+
+      // Boosters
+      document.getElementById('quickBooster500Btn').addEventListener('click', () => {
+        AppState.livingPoolBaseline += 500;
+        AppState.savingsOutflows.unshift({ date: "Nov 06", amount: 500, desc: "Living Pool booster" });
+        saveState(); renderAll();
+        toast("Injected +500 ETB into Living Pool!");
+      });
+      document.getElementById('quickBooster1000Btn').addEventListener('click', () => {
+        AppState.livingPoolBaseline += 1000;
+        AppState.savingsOutflows.unshift({ date: "Nov 06", amount: 1000, desc: "Living Pool booster" });
+        saveState(); renderAll();
+        toast("Injected +1,000 ETB into Living Pool!");
+      });
+
+      // Shime settle
+      const settleBtn = document.getElementById('settleShimeBtn');
+      if (settleBtn) {
+        settleBtn.addEventListener('click', () => {
+          document.getElementById('shimeTabCard').classList.add('opacity-50');
+          settleBtn.textContent = 'Settled ✅';
+          settleBtn.disabled = true;
+          settleBtn.className = 'block mt-1 text-[10px] font-bold text-gray-500 bg-gray-800 px-2 py-0.5 rounded cursor-default';
+          toast("Shime Shop tab settled!");
+        });
+      }
+
+      // Simulator
+      document.getElementById('simCalculateBtn').addEventListener('click', () => {
+        const val = Number(document.getElementById('simExpenseInput').value);
+        if (isNaN(val) || val < 0) return;
+        const m = calc();
+        const simRemain = Math.max(0, m.remaining - val);
+        const simDays = Math.max(1, m.daysLeft - 1);
+        const simPace = Math.round(simRemain / simDays);
+        const box = document.getElementById('simResultBox');
+        box.classList.remove('hidden');
+        box.classList.add('anim-scale-in');
+        box.innerHTML = `
+          <div class="space-y-1">
+            <div class="flex justify-between"><span class="text-gray-500">Post-expense Pool:</span><span class="font-mono font-bold text-white">${simRemain.toLocaleString()} ETB</span></div>
+            <div class="flex justify-between"><span class="text-gray-500">Weekend Pace:</span><span class="font-mono font-bold ${simPace > m.pace ? 'text-red-400' : 'text-emerald-400'}">${simPace} ETB/day</span></div>
+          </div>`;
+      });
+
+      // Settings modal
+      const sModal = document.getElementById('settingsModal');
+      document.getElementById('openSettingsBtn').addEventListener('click', () => sModal.classList.remove('hidden'));
+      document.getElementById('closeSettingsModalBtn').addEventListener('click', () => sModal.classList.add('hidden'));
+      document.getElementById('dismissSettingsBtn').addEventListener('click', () => sModal.classList.add('hidden'));
+
+      // Add tab modal
+      const tabModal = document.getElementById('addTabModal');
+      document.getElementById('addPeerLoanBtn').addEventListener('click', () => tabModal.classList.remove('hidden'));
+      document.getElementById('closeTabModalBtn').addEventListener('click', () => tabModal.classList.add('hidden'));
+      document.getElementById('cancelTabModalBtn').addEventListener('click', () => tabModal.classList.add('hidden'));
+      document.getElementById('saveTabModalBtn').addEventListener('click', () => {
+        const name = document.getElementById('tabNameInput').value;
+        const amt = document.getElementById('tabAmountInput').value;
+        if (name && amt) {
+          toast(`Tab of ${amt} ETB for ${name} saved!`);
+          tabModal.classList.add('hidden');
+          document.getElementById('tabNameInput').value = '';
+          document.getElementById('tabAmountInput').value = '';
+        }
+      });
+
+      // History search
+      let searchTimer;
+      document.getElementById('historySearchInput').addEventListener('input', e => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => renderHistory(e.target.value), 200);
+      });
+
+      // Filter pills
+      document.querySelectorAll('.history-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.history-filter-btn').forEach(b => {
+            b.classList.remove('bg-emerald-500', 'text-black', 'font-bold');
+            b.classList.add('bg-gray-900', 'text-gray-400', 'font-medium', 'border', 'border-gray-800');
+          });
+          btn.classList.add('bg-emerald-500', 'text-black', 'font-bold');
+          btn.classList.remove('bg-gray-900', 'text-gray-400', 'font-medium', 'border', 'border-gray-800');
+        });
+      });
+
+      // Reset
+      document.getElementById('resetDataBtn').addEventListener('click', () => {
+        AppState = JSON.parse(JSON.stringify(INITIAL_DATA));
+        saveState(); renderAll();
+        toast("Restored live Tikimt tracker state!");
+      });
+    });
+  </script>
+</body>
+</html>
