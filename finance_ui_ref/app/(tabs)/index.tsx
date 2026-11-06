@@ -118,6 +118,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.black,
     alignItems: "center",
+    overflow: 'hidden',
   },
   scrollContent: {
     width: "100%",
@@ -125,6 +126,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 10,
     paddingBottom: 90,
+    overflow: 'hidden',
   },
   topSummaryRow: {
     flexDirection: "row",

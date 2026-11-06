@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>FinSpark Addis - Smart Ethiopian Daily Pace Budget</title>
   <!-- Tailwind CSS 3.4.17 -->
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
@@ -67,7 +67,14 @@
       overscroll-behavior-y: contain;
       background: var(--bg-primary);
       transition: background 0.4s ease;
+      overflow-x: hidden !important;
+      max-width: 100vw;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
+    *, *::before, *::after { box-sizing: inherit; }
+    html { overflow-x: hidden !important; max-width: 100vw; }
 
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -532,7 +539,8 @@
         </div>
 
         <!-- Filter Pill Bar -->
-        <div class="flex space-x-1.5 overflow-x-auto hide-scrollbar pb-1 text-xs">
+        <div class="overflow-hidden max-w-full">
+        <div class="flex space-x-1.5 overflow-x-auto hide-scrollbar pb-1 text-xs max-w-full">
           <button class="history-filter-btn px-3 py-1 rounded-full bg-emerald-500 text-slate-950 font-bold transition-all btn-press" data-filter="all">All Logs</button>
           <button class="history-filter-btn px-3 py-1 rounded-full bg-slate-800 text-slate-300 font-medium hover:bg-slate-700 transition-all btn-press" data-filter="living">Living Pool</button>
           <button class="history-filter-btn px-3 py-1 rounded-full bg-slate-800 text-slate-300 font-medium hover:bg-slate-700 transition-all btn-press" data-filter="savings">Savings Buffer</button>

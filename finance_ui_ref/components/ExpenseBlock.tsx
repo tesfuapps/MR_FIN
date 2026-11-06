@@ -53,12 +53,15 @@ const ExpenseBlock: React.FC<Props> = ({ list, onPressAdd }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Expense Categories</Text>
-      <FlatList 
-        data={staticItem.concat(list)} 
-        renderItem={renderItem} 
-        horizontal 
-        showsHorizontalScrollIndicator={false} 
-      />
+      <View style={styles.carouselWrapper}>
+        <FlatList 
+          data={staticItem.concat(list)} 
+          renderItem={renderItem} 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.carouselContent}
+        />
+      </View>
     </View>
   );
 };
@@ -68,6 +71,14 @@ export default ExpenseBlock;
 const styles = StyleSheet.create({
   container: {
     marginVertical: 10,
+    overflow: 'hidden',
+  },
+  carouselWrapper: {
+    overflow: 'hidden',
+    width: '100%',
+  },
+  carouselContent: {
+    paddingRight: 20,
   },
   title: {
     color: Colors.white,

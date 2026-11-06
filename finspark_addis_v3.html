@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>FinSpark Addis - Smart Ethiopian Daily Pace Budget</title>
   <!-- Tailwind CSS 3.4.17 -->
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
@@ -62,7 +62,14 @@
       color: var(--color-white);
       overscroll-behavior-y: contain;
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      overflow-x: hidden !important;
+      max-width: 100vw;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
+    *, *::before, *::after { box-sizing: inherit; }
+    html { overflow-x: hidden !important; max-width: 100vw; }
 
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -122,6 +129,7 @@
       transform: translateX(-50%);
       width: 60%;
       max-width: 260px;
+      max-width: calc(100% - 1.5rem);
       height: 60px;
       background: var(--color-grey);
       border: 1px solid var(--color-grey-border);
@@ -328,9 +336,9 @@
         </div>
 
         <!-- ===== Expense Blocks (horizontal scroll, from ExpenseBlock.tsx) ===== -->
-        <div class="mb-2">
+        <div class="mb-2 overflow-hidden max-w-full">
           <p class="text-base font-bold text-white mb-4">My Expenses</p>
-          <div class="flex overflow-x-auto hide-scrollbar gap-0 pb-2">
+          <div class="flex overflow-x-auto hide-scrollbar gap-0 pb-2 max-w-full">
             <!-- Add Item (dashed border, from ExpenseBlock first item) -->
             <button id="addExpenseQuickBtn" class="h-scroll-card border border-dashed border-gray-500 items-center justify-center text-center btn-press flex">
               <span class="text-3xl text-white">+</span>
@@ -364,9 +372,9 @@
         </div>
 
         <!-- ===== Income Blocks (horizontal scroll, from IncomeBlock.tsx) ===== -->
-        <div class="mb-2">
+        <div class="mb-2 overflow-hidden max-w-full">
           <p class="text-base font-bold text-white mt-6 mb-4">My Income</p>
-          <div class="flex overflow-x-auto hide-scrollbar gap-0 pb-2 stagger">
+          <div class="flex overflow-x-auto hide-scrollbar gap-0 pb-2 stagger max-w-full">
             <!-- Salary -->
             <div class="h-scroll-card-income bg-gray-900 border border-gray-800">
               <div class="flex justify-between items-start">
@@ -533,7 +541,8 @@
         </div>
 
         <!-- Filter Pills -->
-        <div class="flex space-x-2 overflow-x-auto hide-scrollbar pb-2 mb-2 text-xs">
+        <div class="overflow-hidden max-w-full">
+        <div class="flex space-x-2 overflow-x-auto hide-scrollbar pb-2 mb-2 text-xs max-w-full">
           <button class="history-filter-btn px-3 py-1.5 rounded-full bg-emerald-500 text-black font-bold transition-all btn-press" data-filter="all">All</button>
           <button class="history-filter-btn px-3 py-1.5 rounded-full bg-gray-900 text-gray-400 font-medium hover:bg-gray-800 transition-all btn-press border border-gray-800" data-filter="under">Under Target</button>
           <button class="history-filter-btn px-3 py-1.5 rounded-full bg-gray-900 text-gray-400 font-medium hover:bg-gray-800 transition-all btn-press border border-gray-800" data-filter="over">Over Target</button>

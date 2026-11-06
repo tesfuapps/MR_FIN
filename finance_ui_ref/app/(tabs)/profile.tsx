@@ -214,6 +214,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.black,
     alignItems: "center",
+    overflow: "hidden",
   },
   scrollContent: {
     width: "100%",

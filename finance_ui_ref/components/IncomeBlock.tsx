@@ -40,12 +40,15 @@ const IncomeBlock = ({ list }: { list: IncomeType[] }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>My Income & Reserves</Text>
-      <FlatList
-        data={list}
-        renderItem={renderItem}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-      />
+      <View style={styles.carouselWrapper}>
+        <FlatList
+          data={list}
+          renderItem={renderItem}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.carouselContent}
+        />
+      </View>
     </View>
   );
 };
@@ -55,6 +58,14 @@ export default IncomeBlock;
 const styles = StyleSheet.create({
   container: {
     marginVertical: 10,
+    overflow: 'hidden',
+  },
+  carouselWrapper: {
+    overflow: 'hidden',
+    width: '100%',
+  },
+  carouselContent: {
+    paddingRight: 20,
   },
   title: {
     color: Colors.white,
