@@ -1,3 +1,6 @@
+# WorkBuddy internal memory
+.workbuddy-ai/
+
 # Dependencies
 node_modules/
 **/node_modules/
