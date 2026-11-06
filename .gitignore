@@ -5,6 +5,11 @@
 node_modules/
 **/node_modules/
 
+# BUT the Expo web export emits required runtime images under
+# assets/node_modules/ - these are deploy artifacts, not dependencies.
+!assets/node_modules/
+!assets/node_modules/**
+
 # Expo & Build output
 .expo/
 **/.expo/
