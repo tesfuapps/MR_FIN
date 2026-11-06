@@ -10,7 +10,7 @@ import React from "react";
 import Colors from "@/constants/Colors";
 import { IncomeType } from "@/type";
 import { DollarIcon, WalletAddMoneyIcon, WalletCardIcon } from "@/constants/Icons";
-import { Feather } from "@expo/vector-icons";
+import { MoreHorizontalIcon } from "@/components/TabIcons";
 
 const IncomeBlock = ({ list }: { list: IncomeType[] }) => {
   const renderItem: ListRenderItem<Partial<IncomeType>> = ({ item }) => {
@@ -27,8 +27,8 @@ const IncomeBlock = ({ list }: { list: IncomeType[] }) => {
           <View style={styles.iconWrap}>
             {icon}
           </View>
-          <TouchableOpacity>
-            <Feather name="more-horizontal" size={22} color={Colors.textMuted} />
+          <TouchableOpacity hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <MoreHorizontalIcon color={Colors.textMuted} size={18} />
           </TouchableOpacity>
         </View>
         <Text style={styles.nameTxt}>{item.name}</Text>

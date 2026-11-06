@@ -24,3 +24,11 @@ export const UserIcon: React.FC<{ color?: string; size?: number }> = ({ color = 
   </Svg>
 );
 
+export const MoreHorizontalIcon: React.FC<{ color?: string; size?: number }> = ({ color = '#ffffff', size = 20 }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+    <Circle cx="12" cy="12" r="2" />
+    <Circle cx="19" cy="12" r="2" />
+    <Circle cx="5" cy="12" r="2" />
+  </Svg>
+);
+
