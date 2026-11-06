@@ -1,11 +1,25 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { View, Text, StyleSheet, Animated } from "react-native";
 import Colors from "@/constants/Colors";
 import { useFinSpark } from "@/context/FinSparkContext";
 
 const SpendingBlock: React.FC = () => {
-  const { transactions } = useFinSpark();
+  const { transactions, lastTransactionId } = useFinSpark();
   const recentTransactions = transactions.slice(0, 5);
+  const flashAnim = useRef(new Animated.Value(0)).current;
+  const prevTxId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (lastTransactionId && lastTransactionId !== prevTxId.current) {
+      prevTxId.current = lastTransactionId;
+      flashAnim.setValue(1);
+      Animated.timing(flashAnim, {
+        toValue: 0,
+        duration: 2000,
+        useNativeDriver: false,
+      }).start();
+    }
+  }, [lastTransactionId]);
 
   const getCategoryIcon = (category: string, title: string) => {
     if (category === 'Transit') return '🚕';
@@ -29,9 +43,23 @@ const SpendingBlock: React.FC = () => {
       {recentTransactions.map((item) => {
         const icon = getCategoryIcon(item.category, item.title);
         const isLiving = item.ledger === 'LIVING';
+        const isNew = item.id === lastTransactionId;
+
+        const flashBg = isNew
+          ? flashAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [
+                isLiving ? 'rgba(16, 185, 129, 0)' : 'rgba(245, 158, 11, 0)',
+                isLiving ? 'rgba(16, 185, 129, 0.25)' : 'rgba(245, 158, 11, 0.25)',
+              ],
+            })
+          : 'rgba(0,0,0,0)';
 
         return (
-          <View key={item.id} style={styles.blockWrap}>
+          <Animated.View
+            key={item.id}
+            style={[styles.blockWrap, isNew && { backgroundColor: flashBg as any }]}
+          >
             <View style={styles.itemInfoWrap}>
               <View style={styles.iconWrap}>
                 <Text style={styles.iconEmoji}>{icon}</Text>
@@ -46,7 +74,7 @@ const SpendingBlock: React.FC = () => {
             <Text style={isLiving ? styles.amountLiving : styles.amountBulk}>
               -{item.amount.toLocaleString()} ETB
             </Text>
-          </View>
+          </Animated.View>
         );
       })}
     </View>

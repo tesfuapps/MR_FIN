@@ -3,9 +3,10 @@ import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '@/constants/Colors';
 import { useFinSpark, FinTransaction } from '@/context/FinSparkContext';
+import { ToastNotification } from '@/components/ToastNotification';
 
 const TransactionScreen = () => {
-  const { transactions, monthNameAm, monthNameEn } = useFinSpark();
+  const { transactions, monthNameAm, monthNameEn, toast, dismissToast } = useFinSpark();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'ALL' | 'LIVING' | 'BULK_CAPITAL'>('ALL');
 
@@ -57,6 +58,7 @@ const TransactionScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <ToastNotification toast={toast} onDismiss={dismissToast} />
       <View style={styles.innerWrapper}>
         <View style={styles.header}>
           <Text style={styles.screenTitle}>የወጪዎች ዝርዝር (Transactions)</Text>

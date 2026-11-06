@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useMemo } from 'react';
+import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
 import { gregorianToEthiopian, EthiopianDate, getNextEthiopianMonth, ETHIOPIAN_MONTHS } from '@/utils/ethiopianCalendar';
+import { ToastData, ToastType } from '@/components/ToastNotification';
 
 export type LedgerType = 'LIVING' | 'BULK_CAPITAL';
 
@@ -54,6 +55,11 @@ interface FinSparkContextType {
   injectBooster: (amount: number) => void;
   settleShimeTab: () => void;
   resetToSeed: () => void;
+
+  // Toast
+  toast: ToastData | null;
+  dismissToast: () => void;
+  lastTransactionId: string | null;
 }
 
 const FinSparkContext = createContext<FinSparkContextType | undefined>(undefined);
@@ -92,6 +98,8 @@ export const FinSparkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   ];
 
   const [transactions, setTransactions] = useState<FinTransaction[]>(INITIAL_TRANSACTIONS);
+  const [toast, setToast] = useState<ToastData | null>(null);
+  const [lastTransactionId, setLastTransactionId] = useState<string | null>(null);
 
   // Dynamic Pace Calculations
   const daysRemaining = Math.max(1, (totalDays - currentDay) + 1); // e.g. 4 days left
@@ -125,6 +133,48 @@ export const FinSparkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       timeStr: 'Today ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
     setTransactions(prev => [newTx, ...prev]);
+    setLastTransactionId(newTx.id);
+
+    // Compute post-transaction state for toast feedback
+    const newLivingTx = ledger === 'LIVING'
+      ? [...livingTransactions, newTx]
+      : livingTransactions;
+    const newLivingSpent = newLivingTx.reduce((acc, t) => acc + t.amount, 0);
+    const newPoolRem = Math.max(0, livingPoolBaseline - newLivingSpent);
+    const newPace = Math.round(newPoolRem / daysRemaining);
+    const newSpentToday = newLivingTx
+      .filter(t => t.day === currentDay)
+      .reduce((acc, t) => acc + t.amount, 0);
+    const newTodayRem = newPace - newSpentToday;
+
+    // Determine toast type
+    let toastType: ToastType = 'success';
+    if (ledger === 'LIVING') {
+      if (newTodayRem < 0) toastType = 'error';
+      else if (newTodayRem < newPace * 0.3) toastType = 'warning';
+    }
+
+    // Pick icon
+    const iconMap: { [key: string]: string } = {
+      Transit: '🚕', Food: '🍲', Pantry: '🛒', Grooming: '💈', Housing: '🏠',
+    };
+    const toastIcon = iconMap[category] || '💳';
+
+    // Build detail line
+    const ledgerLabel = ledger === 'LIVING' ? 'Living Pool' : 'Pantry/Sink';
+    const detailLine = ledger === 'LIVING'
+      ? `Left today: ${newTodayRem} ETB • Pool: ${newPoolRem.toLocaleString()} ETB`
+      : `${ledgerLabel} • Isolated from pace`;
+
+    setToast({
+      id: newTx.id,
+      type: toastType,
+      icon: toastIcon,
+      title: title.length > 25 ? title.substring(0, 25) + '...' : title,
+      amount: `-${amount.toLocaleString()} ETB`,
+      detail: detailLine,
+      pace: `${newPace.toLocaleString()} ETB/day`,
+    });
   };
 
   const quickLog = (title: string, amount: number, category: string) => {
@@ -133,11 +183,39 @@ export const FinSparkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const injectBooster = (amount: number) => {
     setLivingPoolBaseline(prev => prev + amount);
+
+    // Compute post-booster pace
+    const newBaseline = livingPoolBaseline + amount;
+    const newPoolRem = Math.max(0, newBaseline - livingPoolSpent);
+    const newPace = Math.round(newPoolRem / daysRemaining);
+
+    setToast({
+      id: Date.now().toString(),
+      type: 'info',
+      icon: '⚡',
+      title: `+${amount.toLocaleString()} ETB Booster`,
+      amount: `+${amount.toLocaleString()} ETB`,
+      detail: `Living Pool boosted to ${newBaseline.toLocaleString()} ETB`,
+      pace: `${newPace.toLocaleString()} ETB/day`,
+    });
   };
 
   const settleShimeTab = () => {
     setShimeTabPending(false);
+    setToast({
+      id: Date.now().toString(),
+      type: 'success',
+      icon: '✅',
+      title: 'Shime Shop Tab Settled',
+      amount: '-210 ETB',
+      detail: 'Store tab cleared • No pending tabs',
+      pace: `${dynamicDailyPace.toLocaleString()} ETB/day`,
+    });
   };
+
+  const dismissToast = useCallback(() => {
+    setToast(null);
+  }, []);
 
   const resetToSeed = () => {
     setTransactions(INITIAL_TRANSACTIONS);
@@ -178,6 +256,9 @@ export const FinSparkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       injectBooster,
       settleShimeTab,
       resetToSeed,
+      toast,
+      dismissToast,
+      lastTransactionId,
     }}>
       {children}
     </FinSparkContext.Provider>

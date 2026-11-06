@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '@/constants/Colors';
 import { useFinSpark } from '@/context/FinSparkContext';
+import { ToastNotification } from '@/components/ToastNotification';
 
 const ProfileScreen = () => {
   const {
@@ -16,6 +17,8 @@ const ProfileScreen = () => {
     poolRemaining,
     daysRemaining,
     dynamicDailyPace,
+    toast,
+    dismissToast,
   } = useFinSpark();
 
   const [simAmount, setSimAmount] = useState('');
@@ -39,6 +42,7 @@ const ProfileScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <ToastNotification toast={toast} onDismiss={dismissToast} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         
         {/* User Card */}

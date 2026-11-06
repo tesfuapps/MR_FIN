@@ -11,13 +11,14 @@ import { PaceHero } from "@/components/PaceHero";
 import { EthiopianCalendarCard } from "@/components/EthiopianCalendarCard";
 import { QuickLogPresets } from "@/components/QuickLogPresets";
 import { AddExpenseModal } from "@/components/AddExpenseModal";
+import { ToastNotification } from "@/components/ToastNotification";
 import ExpenseList from "@/data/expenses.json";
 import IncomeList from "@/data/income.json";
 import { useFinSpark } from "@/context/FinSparkContext";
 
 const Page = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const { livingPoolSpent, livingPoolBaseline, percentUsed, monthNameAm } = useFinSpark();
+  const { livingPoolSpent, livingPoolBaseline, percentUsed, monthNameAm, toast, dismissToast } = useFinSpark();
 
   // Pie chart arc calculations
   const remainingPct = Math.max(0, 100 - percentUsed);
@@ -44,6 +45,9 @@ const Page = () => {
         }}
       />
       <View style={styles.container}>
+        {/* Toast Notification Overlay */}
+        <ToastNotification toast={toast} onDismiss={dismissToast} />
+
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           
           {/* Top Summary & Semi-Circle Donut Chart */}
