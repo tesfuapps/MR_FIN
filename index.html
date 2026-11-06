@@ -1,1356 +1,457 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>FinSpark Addis - Smart Ethiopian Daily Pace Budget</title>
-  <!-- Tailwind CSS 3.4.17 -->
-  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <!-- Lucide Icons 0.344.0 -->
-  <script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#ecfdf5',
-              100: '#d1fae5',
-              500: '#10b981',
-              600: '#059669',
-              700: '#047857',
-              800: '#065f46',
-              900: '#064e3b',
-            },
-            ethiopia: {
-              gold: '#f59e0b',
-              red: '#ef4444',
-              green: '#10b981',
-              blue: '#3b82f6'
-            }
-          },
-          fontFamily: {
-            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    /* ===== FinSpark v3 — Design Language from finance-app-ui repo ===== */
-    /* Pure black bg, floating pill tab bar, semi-circle donut, horizontal card carousels */
-
-    :root {
-      --color-black: #000000;
-      --color-grey: #1a1a1a;
-      --color-grey-light: #2a2a2a;
-      --color-grey-border: #333333;
-      --color-white: #ffffff;
-      --color-tint: #10b981;
-      --color-tint-dark: #059669;
-      --color-blue: #3b82f6;
-      --color-muted: #999999;
-      --color-red: #ef4444;
-      --color-amber: #f59e0b;
-    }
-
-    * { -webkit-tap-highlight-color: transparent; }
-
-    body {
-      background: var(--color-black);
-      color: var(--color-white);
-      overscroll-behavior-y: contain;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    }
-
-    .hide-scrollbar::-webkit-scrollbar { display: none; }
-    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-    /* ===== Animations ===== */
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes scaleIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    @keyframes countUp {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes pulseDot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.3); }
-    }
-    @keyframes barGrow {
-      from { height: 0; }
-    }
-    @keyframes ringDraw {
-      from { stroke-dashoffset: 213.6; }
-    }
-
-    .anim-slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
-    .anim-fade-in { animation: fadeIn 0.3s ease both; }
-    .anim-scale-in { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
-    .anim-count { animation: countUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
-    .anim-pulse-dot { animation: pulseDot 2s ease infinite; }
-
-    /* Staggered children */
-    .stagger > *:nth-child(1) { animation-delay: 0ms; }
-    .stagger > *:nth-child(2) { animation-delay: 50ms; }
-    .stagger > *:nth-child(3) { animation-delay: 100ms; }
-    .stagger > *:nth-child(4) { animation-delay: 150ms; }
-    .stagger > *:nth-child(5) { animation-delay: 200ms; }
-    .stagger > *:nth-child(6) { animation-delay: 250ms; }
-    .stagger > *:nth-child(7) { animation-delay: 300ms; }
-    .stagger > *:nth-child(8) { animation-delay: 350ms; }
-
-    /* ===== View Transitions ===== */
-    .view-enter { animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
-
-    /* ===== Floating Pill Tab Bar (from finance-app-ui) ===== */
-    .floating-tab-bar {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60%;
-      max-width: 260px;
-      height: 60px;
-      background: var(--color-grey);
-      border: 1px solid var(--color-grey-border);
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      z-index: 50;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-    }
-
-    .tab-item {
-      width: 40px;
-      height: 40px;
-      border-radius: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.3s ease, transform 0.15s ease;
-      cursor: pointer;
-    }
-    .tab-item:active { transform: scale(0.9); }
-    .tab-item.active {
-      background: var(--color-tint);
-    }
-    .tab-item.active svg { color: var(--color-black) !important; }
-    .tab-item:not(.active) svg { color: var(--color-muted); }
-    .tab-item:not(.active):hover svg { color: var(--color-white); }
-
-    /* ===== Cards ===== */
-    .card-base {
-      background: var(--color-grey);
-      border-radius: 20px;
-      transition: transform 0.15s ease;
-    }
-    .card-base:active { transform: scale(0.98); }
-
-    /* ===== Horizontal Scroll Cards ===== */
-    .h-scroll-card {
-      width: 100px;
-      padding: 15px;
-      border-radius: 15px;
-      margin-right: 20px;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 8px;
-      min-height: 110px;
-    }
-
-    .h-scroll-card-income {
-      width: 150px;
-      padding: 20px;
-      border-radius: 20px;
-      margin-right: 20px;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      min-height: 130px;
-    }
-
-    /* ===== Percentage Badge ===== */
-    .pct-badge {
-      background: rgba(0,0,0,0.2);
-      padding: 3px 8px;
-      border-radius: 10px;
-      font-size: 12px;
-    }
-
-    /* ===== Icon Circle ===== */
-    .icon-circle {
-      border: 1px solid #444;
-      border-radius: 50%;
-      padding: 5px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .icon-circle-solid {
-      background: var(--color-grey);
-      padding: 15px;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* ===== Button Press ===== */
-    .btn-press { transition: transform 0.15s ease; }
-    .btn-press:active { transform: scale(0.94); }
-
-    /* ===== Donut Chart ===== */
-    .donut-bg { stroke: rgba(255,255,255,0.05); }
-    .donut-fill { transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-
-    /* ===== Spark Bars ===== */
-    .spark-bar { transition: height 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-
-    /* ===== Modal ===== */
-    .modal-backdrop { animation: fadeIn 0.25s ease both; }
-    .modal-content { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
-
-    /* ===== Progress Bar Fill ===== */
-    .progress-fill { transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-
-    /* ===== Search ===== */
-    .search-input:focus { box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
-
-    /* ===== Empty State ===== */
-    .empty-icon { animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
-
-    /* ===== Toast ===== */
-    .toast-show { transform: translateY(0) !important; opacity: 1 !important; }
-    .toast-hide { transform: translateY(-80px) !important; opacity: 0 !important; }
-
-    /* ===== Avatar Ring ===== */
-    .avatar-ring {
-      border: 2px solid var(--color-tint);
-      border-radius: 50%;
-      padding: 2px;
-    }
-  </style>
-</head>
-<body class="bg-black text-white min-h-screen flex flex-col items-center antialiased">
-
-  <!-- Mobile Device Frame -->
-  <div id="appContainer" class="w-full max-w-md min-h-screen bg-black flex flex-col relative overflow-hidden pb-32">
-
-    <!-- ================= HEADER (from finance-app-ui) ================= -->
-    <header class="px-5 pt-12 pb-3 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="avatar-ring">
-          <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-black font-black text-lg">
-            T
-          </div>
-        </div>
-        <div>
-          <h1 class="text-xl font-bold text-white leading-tight">Hi, Tesfish</h1>
-          <p class="text-sm text-gray-400">Tikimt Cycle • Day <span class="text-emerald-400 font-semibold">26</span> / 30</p>
-        </div>
-      </div>
-      <button id="openSettingsBtn" class="border border-gray-700 px-3 py-2 rounded-xl text-sm text-white hover:bg-gray-900 transition-colors btn-press">
-        Settings
-      </button>
-    </header>
-
-    <!-- ================= MAIN CONTENT ================= -->
-    <main id="mainContent" class="flex-1 px-5 overflow-y-auto hide-scrollbar">
-
-      <!-- ============ TAB 1: HOME (from finance-app-ui index.tsx) ============ -->
-      <section id="viewHome" class="view-enter pt-2">
-
-        <!-- Expense Summary + Semi-Circle Donut (from finance-app-ui) -->
-        <div class="flex items-center justify-between mb-5">
-          <div>
-            <p class="text-base font-bold text-white">My Expenses</p>
-            <p class="text-4xl font-bold text-white font-mono">
-              <span id="totalSpentDisplay">7,144</span><span class="text-2xl font-normal text-gray-500"> ETB</span>
-            </p>
-            <p class="text-xs text-gray-500 mt-1">of 8,500 ETB Living Pool</p>
-          </div>
-
-          <!-- Semi-circle Donut Chart -->
-          <div class="relative w-36 h-20 flex items-end justify-center">
-            <svg class="w-36 h-20" viewBox="0 0 144 80">
-              <defs>
-                <linearGradient id="donutGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="#10b981" />
-                  <stop offset="100%" stop-color="#2dd4bf" />
-                </linearGradient>
-                <linearGradient id="donutGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="#3b82f6" />
-                  <stop offset="100%" stop-color="#60a5fa" />
-                </linearGradient>
-              </defs>
-              <!-- Background arc -->
-              <path d="M 12 72 A 60 60 0 0 1 132 72" fill="none" stroke="#1a1a1a" stroke-width="16" stroke-linecap="round" />
-              <!-- Housing slice: 61% of expenses → proportion of total 7144 -->
-              <!-- Food: 19%, Other: 20% -->
-              <!-- Housing arc (61% of spent, spent=84% of pool) -->
-              <path id="donutHousing" d="M 12 72 A 60 60 0 0 1 132 72" fill="none"
-                stroke="url(#donutGrad1)" stroke-width="16" stroke-linecap="round"
-                stroke-dasharray="188.5" stroke-dashoffset="188.5"
-                class="donut-fill" />
-              <!-- Food arc -->
-              <path id="donutFood" d="M 12 72 A 60 60 0 0 1 132 72" fill="none"
-                stroke="url(#donutGrad2)" stroke-width="16" stroke-linecap="round"
-                stroke-dasharray="188.5" stroke-dashoffset="188.5"
-                class="donut-fill" />
-              <!-- Other arc -->
-              <path id="donutOther" d="M 12 72 A 60 60 0 0 1 132 72" fill="none"
-                stroke="#444" stroke-width="16" stroke-linecap="round"
-                stroke-dasharray="188.5" stroke-dashoffset="188.5"
-                class="donut-fill" />
-            </svg>
-            <div class="absolute inset-0 flex flex-col items-center justify-end pb-1">
-              <span id="donutCenterPct" class="text-2xl font-bold text-white font-mono">84%</span>
-              <span class="text-[9px] text-gray-500">used</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- ===== Expense Blocks (horizontal scroll, from ExpenseBlock.tsx) ===== -->
-        <div class="mb-2">
-          <p class="text-base font-bold text-white mb-4">My Expenses</p>
-          <div class="flex overflow-x-auto hide-scrollbar gap-0 pb-2">
-            <!-- Add Item (dashed border, from ExpenseBlock first item) -->
-            <button id="addExpenseQuickBtn" class="h-scroll-card border border-dashed border-gray-500 items-center justify-center text-center btn-press flex">
-              <span class="text-3xl text-white">+</span>
-              <span class="text-sm text-white">Add Item</span>
-            </button>
-            <!-- Housing -->
-            <div class="h-scroll-card bg-emerald-500">
-              <span class="text-sm text-black">Housing</span>
-              <span class="text-base font-bold text-black font-mono">3,000 ETB</span>
-              <span class="pct-badge text-black">42%</span>
-            </div>
-            <!-- Food -->
-            <div class="h-scroll-card bg-blue-500">
-              <span class="text-sm text-black">Food & Drinks</span>
-              <span class="text-base font-bold text-black font-mono">2,340 ETB</span>
-              <span class="pct-badge text-black">33%</span>
-            </div>
-            <!-- Transit -->
-            <div class="h-scroll-card bg-white">
-              <span class="text-sm text-black">Transit</span>
-              <span class="text-base font-bold text-black font-mono">980 ETB</span>
-              <span class="pct-badge text-black">14%</span>
-            </div>
-            <!-- Misc -->
-            <div class="h-scroll-card bg-emerald-500">
-              <span class="text-sm text-black">Misc</span>
-              <span class="text-base font-bold text-black font-mono">824 ETB</span>
-              <span class="pct-badge text-black">11%</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- ===== Income Blocks (horizontal scroll, from IncomeBlock.tsx) ===== -->
-        <div class="mb-2">
-          <p class="text-base font-bold text-white mt-6 mb-4">My Income</p>
-          <div class="flex overflow-x-auto hide-scrollbar gap-0 pb-2 stagger">
-            <!-- Salary -->
-            <div class="h-scroll-card-income bg-gray-900 border border-gray-800">
-              <div class="flex justify-between items-start">
-                <div class="icon-circle">
-                  <i data-lucide="banknote" class="w-5 h-5 text-white"></i>
-                </div>
-                <button class="text-gray-400 hover:text-white"><i data-lucide="more-horizontal" class="w-5 h-5"></i></button>
-              </div>
-              <div>
-                <p class="text-sm text-white">Salary</p>
-                <p class="text-lg font-bold text-white font-mono">15,000 ETB</p>
-              </div>
-            </div>
-            <!-- Freelancing -->
-            <div class="h-scroll-card-income bg-gray-900 border border-gray-800">
-              <div class="flex justify-between items-start">
-                <div class="icon-circle">
-                  <i data-lucide="credit-card" class="w-5 h-5 text-white"></i>
-                </div>
-                <button class="text-gray-400 hover:text-white"><i data-lucide="more-horizontal" class="w-5 h-5"></i></button>
-              </div>
-              <div>
-                <p class="text-sm text-white">Freelancing</p>
-                <p class="text-lg font-bold text-white font-mono">6,000 ETB</p>
-              </div>
-            </div>
-            <!-- Equb -->
-            <div class="h-scroll-card-income bg-gray-900 border border-gray-800">
-              <div class="flex justify-between items-start">
-                <div class="icon-circle">
-                  <i data-lucide="wallet" class="w-5 h-5 text-white"></i>
-                </div>
-                <button class="text-gray-400 hover:text-white"><i data-lucide="more-horizontal" class="w-5 h-5"></i></button>
-              </div>
-              <div>
-                <p class="text-sm text-white">Equb Reserve</p>
-                <p class="text-lg font-bold text-white font-mono">2,000 ETB</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ===== Latest Spending (from SpendingBlock.tsx) ===== -->
-        <div class="mt-6 mb-4">
-          <p class="text-base font-bold text-white mb-4">Latest Spending</p>
-          <div id="latestSpendingList" class="space-y-3">
-            <!-- Dynamically populated -->
-          </div>
-        </div>
-
-        <!-- ===== Pace Hero Card (FinSpark unique feature) ===== -->
-        <div class="card-base p-4 mt-6 mb-4 relative overflow-hidden">
-          <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl"></div>
-          <div class="flex items-center justify-between mb-3">
-            <div>
-              <span class="text-xs font-medium uppercase tracking-wide text-gray-400 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 anim-pulse-dot"></span>
-                Today's Pace
-              </span>
-              <div class="flex items-baseline gap-1.5 mt-1">
-                <span id="heroDailyPace" class="text-4xl font-extrabold text-white font-mono anim-count">271</span>
-                <span class="text-sm font-semibold text-gray-400">ETB / day</span>
-              </div>
-            </div>
-            <div id="paceBadge" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-              On Target
-            </div>
-          </div>
-          <div class="space-y-2">
-            <div class="flex justify-between text-xs">
-              <span class="text-gray-400">Spent: <strong class="text-white font-mono" id="heroSpentToday">20 ETB</strong></span>
-              <span class="text-gray-400">Remaining: <strong class="text-emerald-400 font-mono" id="heroRemainingToday">251 ETB</strong></span>
-            </div>
-            <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
-              <div id="heroProgressBar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full progress-fill" style="width: 7%;"></div>
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-gray-800 text-[11px]">
-            <div>
-              <span class="text-gray-500">Pool Remaining</span>
-              <p class="text-sm font-bold text-white font-mono"><span id="heroLivingPool">1,336</span> ETB</p>
-            </div>
-            <div>
-              <span class="text-gray-500">Days Left</span>
-              <p class="text-sm font-bold text-amber-400 font-mono"><span id="heroDaysLeft">5</span> days</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- ===== Quick Log Presets ===== -->
-        <div class="mb-4">
-          <p class="text-base font-bold text-white mb-3">Quick Log</p>
-          <div class="grid grid-cols-4 gap-2 stagger">
-            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 btn-press text-center" data-amount="20" data-cat="Transit" data-desc="Kera to Wello Sefer Taxi">
-              <span class="text-lg">🚕</span>
-              <span class="text-[10px] font-semibold text-gray-200 mt-1">Kera-Wello</span>
-              <span class="text-[10px] font-mono text-emerald-400">20</span>
-            </button>
-            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 btn-press text-center" data-amount="10" data-cat="Transit" data-desc="Wello to Alem Cinema">
-              <span class="text-lg">🚖</span>
-              <span class="text-[10px] font-semibold text-gray-200 mt-1">Alem</span>
-              <span class="text-[10px] font-mono text-emerald-400">10</span>
-            </button>
-            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 btn-press text-center" data-amount="20" data-cat="Transit" data-desc="Taxi to Kera (Return)">
-              <span class="text-lg">🏠</span>
-              <span class="text-[10px] font-semibold text-gray-200 mt-1">Home</span>
-              <span class="text-[10px] font-mono text-emerald-400">20</span>
-            </button>
-            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 btn-press text-center" data-amount="0" data-cat="Transit" data-desc="Lift / Walk">
-              <span class="text-lg">🚶</span>
-              <span class="text-[10px] font-semibold text-gray-200 mt-1">Free</span>
-              <span class="text-[10px] font-mono text-teal-400">0</span>
-            </button>
-            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 btn-press text-center" data-amount="50" data-cat="Food" data-desc="Traditional Buna">
-              <span class="text-lg">☕</span>
-              <span class="text-[10px] font-semibold text-gray-200 mt-1">Buna</span>
-              <span class="text-[10px] font-mono text-emerald-400">50</span>
-            </button>
-            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 btn-press text-center" data-amount="30" data-cat="Food" data-desc="Shay (Tea)">
-              <span class="text-lg">🍵</span>
-              <span class="text-[10px] font-semibold text-gray-200 mt-1">Shay</span>
-              <span class="text-[10px] font-mono text-emerald-400">30</span>
-            </button>
-            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 btn-press text-center" data-amount="50" data-cat="Food" data-desc="2 Injeras">
-              <span class="text-lg">🫓</span>
-              <span class="text-[10px] font-semibold text-gray-200 mt-1">Injera</span>
-              <span class="text-[10px] font-mono text-emerald-400">50</span>
-            </button>
-            <button class="quick-preset-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-gray-900 border border-gray-800 hover:bg-gray-800 btn-press text-center" data-amount="20" data-cat="Food" data-desc="Bread (Dabo)">
-              <span class="text-lg">🥖</span>
-              <span class="text-[10px] font-semibold text-gray-200 mt-1">Bread</span>
-              <span class="text-[10px] font-mono text-emerald-400">20</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- ===== 7-Day Trend Chart ===== -->
-        <div class="card-base p-4 mb-4">
-          <div class="flex items-center justify-between mb-3">
-            <p class="text-sm font-bold text-white flex items-center gap-1.5">
-              <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i>
-              7-Day Trend
-            </p>
-            <span class="text-[10px] text-gray-500" id="sparkAvgLabel">Avg: — ETB</span>
-          </div>
-          <div id="sparkChartContainer" class="flex items-end justify-between gap-1.5 h-24 relative">
-            <div class="absolute left-0 right-0 border-t border-dashed border-gray-800/60" style="bottom: 50%;"></div>
-            <div class="absolute left-0 right-0 border-t border-dashed border-gray-800/30" style="bottom: 25%;"></div>
-          </div>
-        </div>
-
-      </section>
-
-      <!-- ============ TAB 2: TRANSACTIONS (from transaction.tsx — expanded) ============ -->
-      <section id="viewTransactions" class="hidden pt-2">
-        <p class="text-2xl font-bold text-white mb-1">Transactions</p>
-        <p class="text-sm text-gray-500 mb-4">Tikimt 04 – Hidar 03 • All daily logs</p>
-
-        <!-- Search Bar -->
-        <div class="relative mb-3">
-          <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
-          <input type="text" id="historySearchInput" placeholder="Search expenses..."
-            class="search-input w-full bg-gray-900 border border-gray-800 rounded-xl pl-10 pr-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 transition-all">
-        </div>
-
-        <!-- Filter Pills -->
-        <div class="flex space-x-2 overflow-x-auto hide-scrollbar pb-2 mb-2 text-xs">
-          <button class="history-filter-btn px-3 py-1.5 rounded-full bg-emerald-500 text-black font-bold transition-all btn-press" data-filter="all">All</button>
-          <button class="history-filter-btn px-3 py-1.5 rounded-full bg-gray-900 text-gray-400 font-medium hover:bg-gray-800 transition-all btn-press border border-gray-800" data-filter="under">Under Target</button>
-          <button class="history-filter-btn px-3 py-1.5 rounded-full bg-gray-900 text-gray-400 font-medium hover:bg-gray-800 transition-all btn-press border border-gray-800" data-filter="over">Over Target</button>
-        </div>
-
-        <!-- Day Cards -->
-        <div id="historyDaysContainer" class="space-y-3"></div>
-
-        <!-- Empty State -->
-        <div id="historyEmptyState" class="hidden text-center py-12">
-          <div class="empty-icon w-16 h-16 mx-auto rounded-2xl bg-gray-900 border border-gray-800 flex items-center justify-center mb-3">
-            <i data-lucide="search-x" class="w-7 h-7 text-gray-600"></i>
-          </div>
-          <p class="text-sm font-semibold text-gray-300">No matching expenses</p>
-          <p class="text-xs text-gray-600 mt-1">Try a different keyword</p>
-        </div>
-      </section>
-
-      <!-- ============ TAB 3: PROFILE / RESERVES & COACH ============ -->
-      <section id="viewProfile" class="hidden pt-2">
-
-        <!-- Profile Header -->
-        <div class="flex items-center space-x-4 mb-6">
-          <div class="avatar-ring">
-            <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-black font-black text-2xl">
-              T
-            </div>
-          </div>
-          <div>
-            <p class="text-xl font-bold text-white">Tesfish</p>
-            <p class="text-sm text-gray-500">Addis Ababa, Ethiopia</p>
-          </div>
-        </div>
-
-        <!-- Macro Reserves -->
-        <div class="card-base p-4 mb-4">
-          <p class="text-base font-bold text-white mb-3 flex items-center gap-2">
-            <i data-lucide="vault" class="w-4 h-4 text-amber-400"></i>
-            Macro Reserves
-          </p>
-          <div class="grid grid-cols-2 gap-2 text-xs">
-            <div class="p-3 rounded-xl bg-gray-900 border border-gray-800">
-              <span class="text-gray-500">House Rent</span>
-              <p class="text-sm font-bold text-white font-mono mt-0.5">3,000 ETB</p>
-              <span class="text-[10px] text-emerald-400">Paid ✅</span>
-            </div>
-            <div class="p-3 rounded-xl bg-gray-900 border border-gray-800">
-              <span class="text-gray-500">Equb Reserve</span>
-              <p class="text-sm font-bold text-white font-mono mt-0.5">2,000 ETB</p>
-              <span class="text-[10px] text-blue-400">Intact ✅</span>
-            </div>
-            <div class="p-3 rounded-xl bg-gray-900 border border-gray-800">
-              <span class="text-gray-500">Emergency Fund</span>
-              <p class="text-sm font-bold text-white font-mono mt-0.5">2,500 ETB</p>
-              <span class="text-[10px] text-emerald-400">Protected ✅</span>
-            </div>
-            <div class="p-3 rounded-xl bg-gray-900 border border-gray-800">
-              <span class="text-gray-500">Side Earnings</span>
-              <p class="text-sm font-bold text-amber-300 font-mono mt-0.5">+6,000 ETB</p>
-              <span class="text-[10px] text-gray-500">Oct–Nov ✅</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Store Tabs & Peer Loans -->
-        <div class="card-base p-4 mb-4">
-          <div class="flex items-center justify-between mb-3">
-            <p class="text-base font-bold text-white flex items-center gap-2">
-              <i data-lucide="handshake" class="w-4 h-4 text-blue-400"></i>
-              Store Tabs & Peer Loans
-            </p>
-            <button id="addPeerLoanBtn" class="text-xs font-bold text-emerald-400 flex items-center gap-1 btn-press">
-              <i data-lucide="plus" class="w-3 h-3"></i> Add
-            </button>
-          </div>
-          <div class="space-y-2">
-            <div id="shimeTabCard" class="p-3 rounded-xl bg-gray-900 border border-amber-500/30 flex items-center justify-between">
-              <div>
-                <div class="flex items-center gap-1.5">
-                  <span class="font-semibold text-sm text-white">Shime Shop Tab</span>
-                  <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">Pending</span>
-                </div>
-                <p class="text-[11px] text-gray-500 mt-0.5">Counted in past budget</p>
-              </div>
-              <div class="text-right">
-                <span class="text-sm font-bold font-mono text-amber-300">210 ETB</span>
-                <button id="settleShimeBtn" class="block mt-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30 btn-press">Settle</button>
-              </div>
-            </div>
-            <div class="p-2.5 rounded-xl bg-gray-900/60 border border-gray-800 text-[11px] space-y-1.5">
-              <span class="text-gray-500 font-semibold block">Settled Loans:</span>
-              <div class="flex justify-between text-gray-300"><span>Abela</span><span class="font-mono text-emerald-400">400 ✅</span></div>
-              <div class="flex justify-between text-gray-300"><span>Natu Coffee</span><span class="font-mono text-emerald-400">50 ✅</span></div>
-              <div class="flex justify-between text-gray-300"><span>Sami & Sam OLY</span><span class="font-mono text-emerald-400">100 ✅</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Savings Outflows -->
-        <div class="card-base p-4 mb-4">
-          <p class="text-base font-bold text-white mb-3 flex items-center gap-2">
-            <i data-lucide="package" class="w-4 h-4 text-teal-400"></i>
-            Savings Outflows
-          </p>
-          <div id="savingsOutflowsList" class="space-y-1.5 text-xs"></div>
-        </div>
-
-        <!-- Mr. Fin Coach -->
-        <div class="card-base p-4 mb-4">
-          <div class="flex items-center space-x-2.5 mb-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-black font-black text-xl">💎</div>
-            <div>
-              <p class="text-sm font-bold text-white">Mr. Fin Advisor</p>
-              <p class="text-[11px] text-emerald-400">Personalized for Tesfish</p>
-            </div>
-          </div>
-          <p class="text-xs text-gray-400 leading-relaxed mb-3">
-            "With 1,336 ETB across 5 days, your pace is 271 ETB/day. Stay disciplined on transit and leverage homemade stews to finish Tikimt with a surplus."
-          </p>
-
-          <!-- What-If Simulator -->
-          <div class="border-t border-gray-800 pt-3">
-            <p class="text-xs font-bold text-white mb-2 flex items-center gap-1.5">
-              <i data-lucide="calculator" class="w-3.5 h-3.5 text-blue-400"></i>
-              "What-If" Pace Simulator
-            </p>
-            <div class="flex gap-2 mb-2">
-              <input type="number" id="simExpenseInput" placeholder="Planned ETB" class="flex-1 bg-gray-900 border border-gray-800 rounded-lg px-3 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-emerald-500">
-              <button id="simCalculateBtn" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-xs btn-press">Simulate</button>
-            </div>
-            <div id="simResultBox" class="text-xs p-2.5 rounded-lg bg-gray-900 border border-gray-800 text-gray-300 hidden"></div>
-          </div>
-        </div>
-
-        <!-- Quick Liquidity Transfer -->
-        <div class="card-base p-4 mb-4 border border-indigo-500/20">
-          <p class="text-sm font-bold text-white mb-2 flex items-center gap-2">
-            <i data-lucide="arrow-left-right" class="w-4 h-4 text-indigo-400"></i>
-            Quick Liquidity Transfer
-          </p>
-          <p class="text-xs text-gray-500 mb-3">Inject funds from Savings into Living Pool to boost daily pace.</p>
-          <div class="flex gap-2">
-            <button id="quickBooster500Btn" class="flex-1 py-2.5 rounded-xl bg-gray-900 border border-gray-800 text-xs font-bold text-white btn-press">+500 ETB</button>
-            <button id="quickBooster1000Btn" class="flex-1 py-2.5 rounded-xl bg-indigo-600/30 border border-indigo-500/40 text-xs font-bold text-indigo-300 btn-press">+1,000 ETB</button>
-          </div>
-        </div>
-
-        <!-- App Actions -->
-        <div class="flex gap-2 mb-4">
-          <button id="resetDataBtn" class="flex-1 py-2.5 rounded-xl bg-gray-900 border border-gray-800 text-xs font-bold text-gray-300 btn-press flex items-center justify-center gap-1.5">
-            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Reset Data
-          </button>
-        </div>
-
-      </section>
-
-    </main>
-
-    <!-- ================= FLOATING PILL TAB BAR (from _layout.tsx) ================= -->
-    <nav class="floating-tab-bar">
-      <button class="tab-item active" data-target="viewHome" data-index="0" title="Home">
-        <i data-lucide="pie-chart" class="w-5 h-5"></i>
-      </button>
-      <button class="tab-item" data-target="viewTransactions" data-index="1" title="Transactions">
-        <i data-lucide="arrow-left-right" class="w-5 h-5"></i>
-      </button>
-      <button class="tab-item" data-target="viewProfile" data-index="2" title="Profile">
-        <i data-lucide="user" class="w-5 h-5"></i>
-      </button>
-    </nav>
-
-    <!-- ================= MANUAL LOG MODAL ================= -->
-    <div id="logModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-      <div class="modal-content bg-gray-900 border border-gray-800 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-bold text-white">Log Expense</h3>
-          <button id="closeLogModalBtn" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-        </div>
-        <form id="expenseForm" class="space-y-3">
-          <div>
-            <label class="block text-xs text-gray-500 mb-1">Amount (ETB)</label>
-            <input type="number" id="inputAmount" step="1" min="0" placeholder="0" required class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xl font-bold font-mono text-white focus:outline-none focus:border-emerald-500">
-          </div>
-          <div>
-            <label class="block text-xs text-gray-500 mb-1">Bucket</label>
-            <div class="grid grid-cols-2 gap-2">
-              <label class="cursor-pointer">
-                <input type="radio" name="accountBucket" value="living" checked class="peer sr-only">
-                <div class="p-2.5 rounded-xl border border-gray-700 bg-gray-800 peer-checked:border-emerald-500 peer-checked:bg-emerald-500/10 text-center text-xs text-white transition-all">Living Pool</div>
-              </label>
-              <label class="cursor-pointer">
-                <input type="radio" name="accountBucket" value="savings" class="peer sr-only">
-                <div class="p-2.5 rounded-xl border border-gray-700 bg-gray-800 peer-checked:border-blue-500 peer-checked:bg-blue-500/10 text-center text-xs text-white transition-all">Savings Buffer</div>
-              </label>
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs text-gray-500 mb-1">Category</label>
-            <select id="inputCategory" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-              <option value="Transportation">🚕 Transportation</option>
-              <option value="Food" selected>🍲 Food & Drinks</option>
-              <option value="Pantry">🛒 Pantry & Bulk Stock</option>
-              <option value="Personal Care">💈 Personal Care</option>
-              <option value="Entertainment">🎮 Entertainment</option>
-              <option value="Subscriptions">📱 Subscriptions</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs text-gray-500 mb-1">Description</label>
-            <input type="text" id="inputDesc" placeholder="e.g. Afternoon tea" required class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-          </div>
-          <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm btn-press">Save & Update Pace</button>
-        </form>
-      </div>
-    </div>
-
-    <!-- Add Tab Modal -->
-    <div id="addTabModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-      <div class="modal-content bg-gray-900 border border-gray-800 rounded-2xl max-w-xs w-full p-4 space-y-3.5 shadow-2xl">
-        <div class="flex items-center justify-between">
-          <h3 class="text-sm font-bold text-white">Add Peer Loan / Tab</h3>
-          <button id="closeTabModalBtn" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
-        </div>
-        <div class="space-y-2 text-xs">
-          <input type="text" id="tabNameInput" placeholder="Name / Store" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-white">
-          <input type="number" id="tabAmountInput" placeholder="Amount ETB" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-white font-mono">
-        </div>
-        <div class="flex gap-2">
-          <button id="cancelTabModalBtn" class="flex-1 py-2 rounded-lg bg-gray-800 text-gray-300 text-xs font-semibold btn-press">Cancel</button>
-          <button id="saveTabModalBtn" class="flex-1 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold btn-press">Save</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Settings Modal -->
-    <div id="settingsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-      <div class="modal-content bg-gray-900 border border-gray-800 rounded-2xl max-w-sm w-full p-4 space-y-3 shadow-2xl text-xs">
-        <div class="flex items-center justify-between">
-          <h3 class="text-sm font-bold text-white">Cycle Configuration</h3>
-          <button id="closeSettingsModalBtn" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
-        </div>
-        <div class="space-y-1.5 text-gray-300">
-          <p><strong class="text-white">Cycle:</strong> Tikimt 04 – Hidar 03 (30 Days)</p>
-          <p><strong class="text-white">Baseline Salary:</strong> 15,000 ETB</p>
-          <p><strong class="text-white">Living Pool:</strong> 8,500 ETB (7,500 + 1,000 booster)</p>
-          <p><strong class="text-white">Location:</strong> Addis Ababa, Ethiopia</p>
-        </div>
-        <div class="pt-2 border-t border-gray-800 flex justify-end">
-          <button id="dismissSettingsBtn" class="py-1.5 px-3 rounded-lg bg-emerald-600 text-white font-bold text-xs btn-press">Done</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Toast -->
-    <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 max-w-xs w-full bg-gray-900/95 border border-emerald-500/50 shadow-2xl rounded-xl px-3.5 py-2.5 flex items-center gap-2.5 text-xs text-white z-50 toast-hide transition-all duration-300 pointer-events-none">
-      <div id="toastIcon" class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-        <i data-lucide="check" class="w-3.5 h-3.5"></i>
-      </div>
-      <span id="toastMsg" class="flex-1 font-medium">Done!</span>
-    </div>
-
-  </div>
-
-  <!-- ================= APP LOGIC ================= -->
-  <script>
-    // --- State Model (same as v2) ---
-    const INITIAL_DATA = {
-      cycleName: "Tikimt Budget Tracker",
-      period: "Tikimt 04 – Hidar 03",
-      totalDays: 30,
-      currentDay: 26,
-      salary: 15000,
-      rent: 3000,
-      equb: 2000,
-      baseEmergency: 2500,
-      livingPoolBaseline: 8500,
-      sideIncomes: [
-        { date: "Oct 25", amount: 1500, desc: "Side work income" },
-        { date: "Nov 01", amount: 4500, desc: "Side work income (1.5K + 3K)" }
-      ],
-      savingsOutflows: [
-        { date: "Oct 14", amount: 160, desc: "Berbere pantry stock" },
-        { date: "Oct 16", amount: 280, desc: "Monthly Telecom package" },
-        { date: "Oct 24", amount: 110, desc: "1KG Onion pantry stock" },
-        { date: "Oct 24", amount: 450, desc: "Saturday Tibs & Coca lunch" },
-        { date: "Oct 28", amount: 270, desc: "Dinner with self" },
-        { date: "Oct 31", amount: 415, desc: "Saturday Tibs & Coca lunch" },
-        { date: "Nov 01", amount: 200, desc: "Shower Soap (grooming)" },
-        { date: "Nov 01", amount: 500, desc: "Storm Deodorant" },
-        { date: "Nov 01", amount: 200, desc: "Gift for friend Amane" },
-        { date: "Nov 01", amount: 340, desc: "Sunday Evening PS & Cake" },
-        { date: "Oct 31", amount: 480, desc: "Safaricom Data Packages" },
-        { date: "Nov 04", amount: 450, desc: "1L Cooking Oil pantry stock" },
-        { date: "Nov 05", amount: 1000, desc: "Living Pool booster transfer" },
-        { date: "Nov 05", amount: 150, desc: "Monthly Movie player sub" },
-        { date: "Nov 05", amount: 175, desc: "Berbere pantry stock" },
-        { date: "Nov 05", amount: 135, desc: "1KG Onion pantry stock" },
-        { date: "Nov 05", amount: 190, desc: "Dinner with friends" }
-      ],
-      dailyHistory: [
-        { day: 1, date: "Tikimt 04 (Oct 12)", target: 250, total: 140, items: ["Kera-Wello (20)", "Wello-Alem (10)", "Coffee (40)", "Wello-Kera (20)", "2 Injeras (50)"] },
-        { day: 2, date: "Tikimt 05 (Oct 13)", target: 254, total: 170, items: ["Commute (30)", "Breakfast (70)", "Coffee (50)", "Wello-Kera (20)"] },
-        { day: 3, date: "Tikimt 06 (Oct 14)", target: 257, total: 355, items: ["Commute (30)", "Lunch (230)", "Coffee (50)", "Injera (25)", "Taxi (20)"] },
-        { day: 4, date: "Tikimt 07 (Oct 15)", target: 253, total: 145, items: ["Commute (30)", "Bread (20)", "Coffee (50)", "Taxi (20)", "Injera (25)"] },
-        { day: 5, date: "Tikimt 08 (Oct 16)", target: 257, total: 300, items: ["Commute (30)", "Coffee (75)", "PS FIFA (90)", "Pasties (55)", "Sugar (50)"] },
-        { day: 6, date: "Tikimt 09 (Oct 17)", target: 256, total: 710, items: ["Commute (30)", "Group taxi (80)", "Saturday Lunch (450)", "Haircut (150)"] },
-        { day: 7, date: "Tikimt 10 (Oct 18)", target: 237, total: 510, items: ["Siga firfir (320)", "Coffee (70)", "Football & Fanta (70)", "2 Injeras (50)"] },
-        { day: 8, date: "Tikimt 11 (Oct 19)", target: 225, total: 215, items: ["Commute (30)", "Breakfast (85)", "Coffee (50)", "2 Injeras (50)"] },
-        { day: 9, date: "Tikimt 12 (Oct 20)", target: 225, total: 130, items: ["Commute (30)", "Injera (50)", "Dinich (50)"] },
-        { day: 10, date: "Tikimt 13 (Oct 21)", target: 230, total: 270, items: ["Commute (30)", "Breakfast (80)", "Coffee (50)", "Water (40)", "2 Injeras (50)", "Taxi (20)"] },
-        { day: 11, date: "Tikimt 14 (Oct 22)", target: 228, total: 140, items: ["Commute (30)", "Coffee (50)", "Taxi (20)", "Injera (25)", "Bread (15)"] },
-        { day: 12, date: "Tikimt 15 (Oct 23)", target: 232, total: 460, items: ["Commute (30)", "Coffee (75)", "Dabo (20)", "Taxi (20)", "Bread (65)", "PS FIFA (250)"] },
-        { day: 13, date: "Tikimt 16 (Oct 24)", target: 220, total: 315, items: ["Commute (30)", "Breakfast (130)", "Taxi (35)", "Shower (30)", "2 Injeras (50)", "Coffee (40)"] },
-        { day: 14, date: "Tikimt 17 (Oct 25)", target: 214, total: 360, items: ["City transit (85)", "Socks (70)", "Fanta (140)", "2 Injeras (50)", "Bus (15)"] },
-        { day: 15, date: "Tikimt 18 (Oct 26)", target: 205, total: 385, items: ["Commute (30)", "Breakfast & Tea (110)", "Taxi (20)", "Friends dinner (200)", "Injera (25)"] },
-        { day: 16, date: "Tikimt 19 (Oct 27)", target: 193, total: 215, items: ["Commute (30)", "Tea (40)", "Taxi (20)", "Injera (25)", "4 Eggs (100)"] },
-        { day: 17, date: "Tikimt 20 (Oct 28)", target: 191, total: 135, items: ["Commute (30)", "Bread & Tea (60)", "Taxi (20)", "Injera (25)"] },
-        { day: 18, date: "Tikimt 21 (Oct 29)", target: 196, total: 264, items: ["Commute (30)", "Breakfast & Tea (165)", "Taxi (20)", "Injera & Bread (49)"] },
-        { day: 19, date: "Tikimt 22 (Oct 30)", target: 190, total: 115, items: ["Commute (30)", "Tea (40)", "Taxi (20)", "Injera (25)"] },
-        { day: 20, date: "Tikimt 23 (Oct 31)", target: 197, total: 260, items: ["Commute (30)", "Breakfast (130)", "Cross-town transit (65)", "Biscuits (35)"] },
-        { day: 21, date: "Tikimt 24 (Nov 01)", target: 191, total: 510, items: ["Breakfast (350)", "Shower (30)", "Biscuits (60)", "Coca Cola (70)"] },
-        { day: 22, date: "Tikimt 25 (Nov 02)", target: 155, total: 235, items: ["Commute (30)", "Breakfast & Tea (60)", "Coffee (40)", "Taxi (20)", "Injera (25)", "Sossisoya (60)"] },
-        { day: 23, date: "Tikimt 26 (Nov 03)", target: 145, total: 405, items: ["Commute (30)", "Lunch (250)", "Coffee (50)", "Taxi (20)", "Injera & Bread (55)"] },
-        { day: 24, date: "Tikimt 27 (Nov 04)", target: 108, total: 130, items: ["Commute (30)", "Tea (30)", "Packed Lunch (0)", "Taxi (20)", "2 Injeras (50)"] },
-        { day: 25, date: "Tikimt 28 (Nov 05)", target: 271, total: 270, items: ["Commute (30)", "Breakfast (80)", "Afternoon Tea (40)", "Taxi (20)", "2 Injeras (50)", "Dinich (50)"] }
-      ],
-      todayExpenses: [
-        { id: "t1", amount: 20, category: "Transportation", desc: "Kera to Wello Sefer Taxi", time: "8:49 AM", bucket: "living" }
-      ],
-      storeTabs: [
-        { id: "tab1", name: "Shime Shop Grocery Tab", amount: 210, settled: false }
-      ]
-    };
-
-    let AppState = {};
-
-    function loadState() {
-      try {
-        const saved = localStorage.getItem('finspark_state_v1');
-        if (saved) AppState = JSON.parse(saved);
-        else AppState = JSON.parse(JSON.stringify(INITIAL_DATA));
-      } catch (e) { AppState = JSON.parse(JSON.stringify(INITIAL_DATA)); }
-    }
-
-    function saveState() {
-      try { localStorage.setItem('finspark_state_v1', JSON.stringify(AppState)); } catch(e) {}
-    }
-
-    // --- Calculations ---
-    function calc() {
-      const pastTotal = AppState.dailyHistory.reduce((a, d) => a + d.total, 0);
-      const todaySpent = AppState.todayExpenses.filter(i => i.bucket === 'living').reduce((a, i) => a + i.amount, 0);
-      const totalSpent = pastTotal + todaySpent;
-      const remaining = AppState.livingPoolBaseline - totalSpent;
-      const daysLeft = (AppState.totalDays - AppState.currentDay) + 1;
-      const pace = Math.round((AppState.livingPoolBaseline - pastTotal) / daysLeft);
-      const remainingToday = Math.max(0, pace - todaySpent);
-      const pct = pace > 0 ? Math.min(100, Math.round((todaySpent / pace) * 100)) : 0;
-      const poolPct = Math.round((totalSpent / AppState.livingPoolBaseline) * 100);
-      return { pastTotal, todaySpent, totalSpent, remaining, daysLeft, pace, remainingToday, pct, poolPct };
-    }
-
-    // --- Animated Number ---
-    function animateNum(el, target, dur = 600) {
-      const startTime = performance.now();
-      function upd(now) {
-        const p = Math.min((now - startTime) / dur, 1);
-        const e = 1 - Math.pow(1 - p, 3);
-        el.textContent = Math.round(target * e).toLocaleString();
-        if (p < 1) requestAnimationFrame(upd);
-      }
-      requestAnimationFrame(upd);
-    }
-
-    // --- Donut Chart ---
-    function renderDonut() {
-      const m = calc();
-      const arcLen = 188.5; // half circle circumference for r=60
-      const poolUsed = Math.min(100, m.poolPct);
-
-      // Break into 3 segments proportionally
-      // Housing: 42% of total, Food: 33%, Other: 25%
-      const housingPct = 42, foodPct = 33, otherPct = 25;
-      const housingLen = (poolUsed / 100) * (housingPct / (housingPct + foodPct + otherPct)) * arcLen;
-      const foodLen = (poolUsed / 100) * (foodPct / (housingPct + foodPct + otherPct)) * arcLen;
-      const otherLen = (poolUsed / 100) * (otherPct / (housingPct + foodPct + otherPct)) * arcLen;
-
-      // Set dasharray and offset for each segment
-      const housing = document.getElementById('donutHousing');
-      const food = document.getElementById('donutFood');
-      const other = document.getElementById('donutOther');
-
-      housing.setAttribute('stroke-dasharray', `${housingLen} ${arcLen}`);
-      housing.setAttribute('stroke-dashoffset', '0');
-
-      food.setAttribute('stroke-dasharray', `${foodLen} ${arcLen}`);
-      food.setAttribute('stroke-dashoffset', `${-housingLen}`);
-
-      other.setAttribute('stroke-dasharray', `${otherLen} ${arcLen}`);
-      other.setAttribute('stroke-dashoffset', `${-(housingLen + foodLen)}`);
-
-      document.getElementById('donutCenterPct').textContent = `${poolUsed}%`;
-      document.getElementById('totalSpentDisplay').textContent = m.totalSpent.toLocaleString();
-    }
-
-    // --- Latest Spending List (SpendingBlock style) ---
-    function renderLatestSpending() {
-      const container = document.getElementById('latestSpendingList');
-      container.innerHTML = '';
-
-      // Get last 5 days of spending items
-      const recentDays = AppState.dailyHistory.slice(-5).reverse();
-      let allItems = [];
-
-      recentDays.forEach(d => {
-        d.items.forEach(item => {
-          const match = item.match(/\((\d+)\)/);
-          const amount = match ? parseInt(match[1]) : 0;
-          const name = item.replace(/\s*\(\d+\)/, '');
-          if (amount > 0) {
-            allItems.push({
-              name: name,
-              amount: amount,
-              date: d.date.split('(')[1]?.replace(')', '') || d.date
-            });
-          }
-        });
-      });
-
-      // Add today's
-      AppState.todayExpenses.forEach(e => {
-        allItems.unshift({ name: e.desc, amount: e.amount, date: 'Today' });
-      });
-
-      // Take top 6
-      const top = allItems.slice(0, 6);
-
-      top.forEach((item, idx) => {
-        let icon = 'shopping-cart';
-        let iconColor = 'text-white';
-        if (item.name.toLowerCase().includes('coffee') || item.name.toLowerCase().includes('buna')) { icon = 'coffee'; }
-        else if (item.name.toLowerCase().includes('taxi') || item.name.toLowerCase().includes('commute') || item.name.toLowerCase().includes('kera') || item.name.toLowerCase().includes('wello')) { icon = 'car'; }
-        else if (item.name.toLowerCase().includes('injera') || item.name.toLowerCase().includes('bread') || item.name.toLowerCase().includes('breakfast') || item.name.toLowerCase().includes('lunch') || item.name.toLowerCase().includes('firfir') || item.name.toLowerCase().includes('dinner')) { icon = 'utensils'; }
-        else if (item.name.toLowerCase().includes('tea') || item.name.toLowerCase().includes('shay')) { icon = 'mug-hot'; }
-        else if (item.name.toLowerCase().includes('haircut')) { icon = 'scissors'; }
-
-        const row = document.createElement('div');
-        row.className = 'flex items-center justify-between anim-slide-up';
-        row.style.animationDelay = `${idx * 40}ms`;
-        row.innerHTML = `
-          <div class="flex items-center gap-3">
-            <div class="icon-circle-solid">
-              <i data-lucide="${icon}" class="w-5 h-5 text-white"></i>
-            </div>
-            <div>
-              <p class="text-sm font-bold text-white">${item.name}</p>
-              <p class="text-xs text-gray-500">${item.date}</p>
-            </div>
-          </div>
-          <span class="text-base font-bold text-white font-mono">${item.amount} ETB</span>
-        `;
-        container.appendChild(row);
-      });
-
-      lucide.createIcons();
-    }
-
-    // --- Pace Hero ---
-    function renderPaceHero() {
-      const m = calc();
-      animateNum(document.getElementById('heroDailyPace'), m.pace);
-      document.getElementById('heroSpentToday').textContent = `${m.todaySpent} ETB`;
-      document.getElementById('heroRemainingToday').textContent = `${m.remainingToday} ETB`;
-      document.getElementById('heroLivingPool').textContent = m.remaining.toLocaleString();
-      document.getElementById('heroDaysLeft').textContent = m.daysLeft;
-      document.getElementById('heroProgressBar').style.width = `${m.pct}%`;
-
-      const badge = document.getElementById('paceBadge');
-      if (m.pct > 100) {
-        badge.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/20 text-red-300 border border-red-500/30';
-        badge.textContent = 'Over Pace';
-      } else if (m.pct > 80) {
-        badge.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30';
-        badge.textContent = 'Near Pace';
-      } else {
-        badge.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
-        badge.textContent = 'On Target';
-      }
-    }
-
-    // --- Spark Chart ---
-    function renderSparkChart() {
-      const container = document.getElementById('sparkChartContainer');
-      if (!container) return;
-      container.querySelectorAll('.spark-group').forEach(b => b.remove());
-
-      const last7 = AppState.dailyHistory.slice(-7);
-      const todaySpent = AppState.todayExpenses.filter(i => i.bucket === 'living').reduce((a, i) => a + i.amount, 0);
-      const allDays = [...last7, { day: 26, total: todaySpent, target: 271, date: 'Today' }];
-
-      const maxVal = Math.max(...allDays.map(d => d.total), 300);
-      const chartHeight = 80;
-      const avg = Math.round(allDays.reduce((a, d) => a + d.total, 0) / allDays.length);
-
-      allDays.forEach((d, i) => {
-        const barH = Math.max(2, (d.total / maxVal) * chartHeight);
-        const isOver = d.total > d.target;
-        const isToday = i === allDays.length - 1;
-        const targetH = Math.max(2, (d.target / maxVal) * chartHeight);
-
-        const group = document.createElement('div');
-        group.className = 'spark-group flex flex-col items-center justify-end gap-1 flex-1 anim-slide-up';
-        group.style.animationDelay = `${i * 40}ms`;
-        group.innerHTML = `
-          <div class="text-[8px] font-mono ${isOver ? 'text-red-400' : 'text-emerald-400'} font-bold">${d.total}</div>
-          <div class="relative w-full flex justify-center" style="height:${chartHeight}px;">
-            <div class="absolute left-0 right-0 border-t border-dashed border-gray-700/40" style="bottom:${targetH}px;"></div>
-            <div class="spark-bar w-5 rounded-t-md ${isOver ? 'bg-red-500' : 'bg-emerald-500'} ${isToday ? 'ring-2 ring-emerald-300/30' : ''}" style="height:0;opacity:0.8;"></div>
-          </div>
-          <span class="text-[8px] ${isToday ? 'text-emerald-400 font-bold' : 'text-gray-600'}">${isToday ? 'Now' : 'D' + d.day}</span>
-        `;
-        container.appendChild(group);
-
-        setTimeout(() => {
-          const bar = group.querySelector('.spark-bar');
-          if (bar) bar.style.height = barH + 'px';
-        }, 50 + i * 40);
-      });
-
-      document.getElementById('sparkAvgLabel').textContent = `Avg: ${avg.toLocaleString()} ETB`;
-    }
-
-    // --- History (Transactions tab) ---
-    function renderHistory(query = '') {
-      const container = document.getElementById('historyDaysContainer');
-      const emptyState = document.getElementById('historyEmptyState');
-      container.innerHTML = '';
-      const reversed = [...AppState.dailyHistory].reverse();
-      const q = query.toLowerCase().trim();
-      let hasResults = false;
-
-      reversed.forEach(d => {
-        let items = d.items;
-        if (q) {
-          items = d.items.filter(it => it.toLowerCase().includes(q));
-          if (!items.length) return;
-        }
-        hasResults = true;
-        const diff = d.total - d.target;
-        const diffText = diff <= 0 ? `${diff} under` : `+${diff} over`;
-        const diffColor = diff <= 0 ? 'text-emerald-400' : 'text-red-400';
-        const dayPct = Math.min(100, Math.round((d.total / (d.target * 1.5)) * 100));
-
-        const card = document.createElement('div');
-        card.className = 'card-base p-3 space-y-2 anim-slide-up';
-        card.innerHTML = `
-          <div class="flex items-center justify-between">
-            <div>
-              <span class="text-sm font-bold text-white">Day ${d.day}</span>
-              <span class="text-xs text-gray-600 ml-2">${d.date}</span>
-            </div>
-            <div class="text-right">
-              <span class="text-sm font-bold font-mono text-white">${d.total} ETB</span>
-              <span class="text-[10px] block ${diffColor} font-mono">${diffText}</span>
-            </div>
-          </div>
-          <div class="w-full h-1 bg-gray-800 rounded-full overflow-hidden">
-            <div class="h-full rounded-full ${diff <= 0 ? 'bg-emerald-500' : 'bg-red-500'} progress-fill" style="width:${dayPct}%"></div>
-          </div>
-          <div class="text-[11px] text-gray-500 flex flex-wrap gap-1.5 pt-1">
-            ${items.map(it => {
-              const hl = q ? it.replace(new RegExp(`(${q})`, 'gi'), '<mark class="bg-emerald-500/30 text-emerald-200 rounded px-0.5">$1</mark>') : it;
-              return `<span class="bg-gray-800 px-1.5 py-0.5 rounded text-gray-400">${hl}</span>`;
-            }).join('')}
-          </div>
-        `;
-        container.appendChild(card);
-      });
-
-      if (!hasResults && q) {
-        emptyState.classList.remove('hidden');
-        emptyState.classList.add('anim-fade-in');
-      } else {
-        emptyState.classList.add('hidden');
-      }
-      lucide.createIcons();
-    }
-
-    // --- Savings Outflows ---
-    function renderSavings() {
-      const list = document.getElementById('savingsOutflowsList');
-      list.innerHTML = '';
-      if (!AppState.savingsOutflows.length) {
-        list.innerHTML = '<p class="text-center text-gray-600 py-4 text-xs">No savings outflows</p>';
-        return;
-      }
-      AppState.savingsOutflows.slice(0, 10).forEach((item, idx) => {
-        const row = document.createElement('div');
-        row.className = 'flex justify-between p-2 rounded-lg bg-gray-900 border border-gray-800 anim-slide-up';
-        row.style.animationDelay = `${Math.min(idx, 8) * 30}ms`;
-        row.innerHTML = `
-          <div><p class="text-white text-xs font-medium">${item.desc}</p><span class="text-[10px] text-gray-600">${item.date}</span></div>
-          <span class="font-mono font-bold text-blue-300">${item.amount} ETB</span>
-        `;
-        list.appendChild(row);
-      });
-    }
-
-    // --- Toast ---
-    function toast(msg, ok = true) {
-      const t = document.getElementById('toast');
-      document.getElementById('toastMsg').textContent = msg;
-      const icon = document.getElementById('toastIcon');
-      icon.className = ok
-        ? 'w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0'
-        : 'w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0';
-      icon.innerHTML = ok ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : '<i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>';
-      lucide.createIcons();
-      t.classList.remove('toast-hide');
-      t.classList.add('toast-show');
-      setTimeout(() => { t.classList.add('toast-hide'); t.classList.remove('toast-show'); }, 2500);
-    }
-
-    // --- Add Expense ---
-    function addExpense(amount, cat, desc, bucket = 'living') {
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      AppState.todayExpenses.push({ id: "exp_" + Date.now(), amount: Number(amount), category: cat, desc, time: timeStr, bucket });
-      if (bucket === 'savings') {
-        AppState.savingsOutflows.unshift({ date: "Nov 06", amount: Number(amount), desc });
-      }
-      saveState();
-      renderAll();
-      toast(`Logged ${amount} ETB — ${desc}`);
-    }
-
-    function renderAll() {
-      renderDonut();
-      renderPaceHero();
-      renderLatestSpending();
-      renderSparkChart();
-      renderHistory();
-      renderSavings();
-      lucide.createIcons();
-    }
-
-    // --- Tab Navigation ---
-    function switchTab(targetId, btn) {
-      ['viewHome', 'viewTransactions', 'viewProfile'].forEach(v => {
-        const el = document.getElementById(v);
-        if (v === targetId) {
-          el.classList.remove('hidden');
-          el.classList.remove('view-enter');
-          void el.offsetWidth;
-          el.classList.add('view-enter');
-        } else {
-          el.classList.add('hidden');
-        }
-      });
-
-      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-
-      document.querySelector('main').scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // --- Swipe Gestures ---
-    function initSwipe() {
-      const main = document.getElementById('mainContent');
-      let sx, sy;
-      const views = ['viewHome', 'viewTransactions', 'viewProfile'];
-
-      main.addEventListener('touchstart', e => {
-        sx = e.changedTouches[0].screenX;
-        sy = e.changedTouches[0].screenY;
-      }, { passive: true });
-
-      main.addEventListener('touchend', e => {
-        const dx = e.changedTouches[0].screenX - sx;
-        const dy = e.changedTouches[0].screenY - sy;
-        if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx)) return;
-        let ci = 0;
-        views.forEach((v, i) => { if (!document.getElementById(v).classList.contains('hidden')) ci = i; });
-        const ni = dx > 0 ? Math.max(0, ci - 1) : Math.min(views.length - 1, ci + 1);
-        if (ni !== ci) {
-          const btn = document.querySelector(`.tab-item[data-index="${ni}"]`);
-          switchTab(views[ni], btn);
-        }
-      }, { passive: true });
-    }
-
-    // --- Init ---
-    document.addEventListener('DOMContentLoaded', () => {
-      loadState();
-      renderAll();
-      lucide.createIcons();
-      initSwipe();
-
-      // Tab clicks
-      document.querySelectorAll('.tab-item').forEach(btn => {
-        btn.addEventListener('click', () => switchTab(btn.dataset.target, btn));
-      });
-
-      // Quick presets
-      document.querySelectorAll('.quick-preset-btn').forEach(btn => {
-        btn.addEventListener('click', () => addExpense(btn.dataset.amount, btn.dataset.cat, btn.dataset.desc, 'living'));
-      });
-
-      // Add expense modal
-      const logModal = document.getElementById('logModal');
-      document.getElementById('addExpenseQuickBtn').addEventListener('click', () => logModal.classList.remove('hidden'));
-      document.getElementById('closeLogModalBtn').addEventListener('click', () => logModal.classList.add('hidden'));
-      document.getElementById('expenseForm').addEventListener('submit', e => {
-        e.preventDefault();
-        const amt = document.getElementById('inputAmount').value;
-        const cat = document.getElementById('inputCategory').value;
-        const desc = document.getElementById('inputDesc').value;
-        const bucket = document.querySelector('input[name="accountBucket"]:checked').value;
-        if (!amt || Number(amt) < 0) return;
-        addExpense(amt, cat, desc, bucket);
-        logModal.classList.add('hidden');
-        document.getElementById('inputAmount').value = '';
-        document.getElementById('inputDesc').value = '';
-      });
-
-      // Boosters
-      document.getElementById('quickBooster500Btn').addEventListener('click', () => {
-        AppState.livingPoolBaseline += 500;
-        AppState.savingsOutflows.unshift({ date: "Nov 06", amount: 500, desc: "Living Pool booster" });
-        saveState(); renderAll();
-        toast("Injected +500 ETB into Living Pool!");
-      });
-      document.getElementById('quickBooster1000Btn').addEventListener('click', () => {
-        AppState.livingPoolBaseline += 1000;
-        AppState.savingsOutflows.unshift({ date: "Nov 06", amount: 1000, desc: "Living Pool booster" });
-        saveState(); renderAll();
-        toast("Injected +1,000 ETB into Living Pool!");
-      });
-
-      // Shime settle
-      const settleBtn = document.getElementById('settleShimeBtn');
-      if (settleBtn) {
-        settleBtn.addEventListener('click', () => {
-          document.getElementById('shimeTabCard').classList.add('opacity-50');
-          settleBtn.textContent = 'Settled ✅';
-          settleBtn.disabled = true;
-          settleBtn.className = 'block mt-1 text-[10px] font-bold text-gray-500 bg-gray-800 px-2 py-0.5 rounded cursor-default';
-          toast("Shime Shop tab settled!");
-        });
-      }
-
-      // Simulator
-      document.getElementById('simCalculateBtn').addEventListener('click', () => {
-        const val = Number(document.getElementById('simExpenseInput').value);
-        if (isNaN(val) || val < 0) return;
-        const m = calc();
-        const simRemain = Math.max(0, m.remaining - val);
-        const simDays = Math.max(1, m.daysLeft - 1);
-        const simPace = Math.round(simRemain / simDays);
-        const box = document.getElementById('simResultBox');
-        box.classList.remove('hidden');
-        box.classList.add('anim-scale-in');
-        box.innerHTML = `
-          <div class="space-y-1">
-            <div class="flex justify-between"><span class="text-gray-500">Post-expense Pool:</span><span class="font-mono font-bold text-white">${simRemain.toLocaleString()} ETB</span></div>
-            <div class="flex justify-between"><span class="text-gray-500">Weekend Pace:</span><span class="font-mono font-bold ${simPace > m.pace ? 'text-red-400' : 'text-emerald-400'}">${simPace} ETB/day</span></div>
-          </div>`;
-      });
-
-      // Settings modal
-      const sModal = document.getElementById('settingsModal');
-      document.getElementById('openSettingsBtn').addEventListener('click', () => sModal.classList.remove('hidden'));
-      document.getElementById('closeSettingsModalBtn').addEventListener('click', () => sModal.classList.add('hidden'));
-      document.getElementById('dismissSettingsBtn').addEventListener('click', () => sModal.classList.add('hidden'));
-
-      // Add tab modal
-      const tabModal = document.getElementById('addTabModal');
-      document.getElementById('addPeerLoanBtn').addEventListener('click', () => tabModal.classList.remove('hidden'));
-      document.getElementById('closeTabModalBtn').addEventListener('click', () => tabModal.classList.add('hidden'));
-      document.getElementById('cancelTabModalBtn').addEventListener('click', () => tabModal.classList.add('hidden'));
-      document.getElementById('saveTabModalBtn').addEventListener('click', () => {
-        const name = document.getElementById('tabNameInput').value;
-        const amt = document.getElementById('tabAmountInput').value;
-        if (name && amt) {
-          toast(`Tab of ${amt} ETB for ${name} saved!`);
-          tabModal.classList.add('hidden');
-          document.getElementById('tabNameInput').value = '';
-          document.getElementById('tabAmountInput').value = '';
-        }
-      });
-
-      // History search
-      let searchTimer;
-      document.getElementById('historySearchInput').addEventListener('input', e => {
-        clearTimeout(searchTimer);
-        searchTimer = setTimeout(() => renderHistory(e.target.value), 200);
-      });
-
-      // Filter pills
-      document.querySelectorAll('.history-filter-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.history-filter-btn').forEach(b => {
-            b.classList.remove('bg-emerald-500', 'text-black', 'font-bold');
-            b.classList.add('bg-gray-900', 'text-gray-400', 'font-medium', 'border', 'border-gray-800');
-          });
-          btn.classList.add('bg-emerald-500', 'text-black', 'font-bold');
-          btn.classList.remove('bg-gray-900', 'text-gray-400', 'font-medium', 'border', 'border-gray-800');
-        });
-      });
-
-      // Reset
-      document.getElementById('resetDataBtn').addEventListener('click', () => {
-        AppState = JSON.parse(JSON.stringify(INITIAL_DATA));
-        saveState(); renderAll();
-        toast("Restored live Tikimt tracker state!");
-      });
-    });
-  </script>
-</body>
-</html>
+<!DOCTYPE html><html  lang="en"><head><title data-rh="true"></title><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/><style id="expo-reset">#root,body,html{height:100%}body{overflow:hidden}#root{display:flex}</style><style id="react-native-stylesheet">[stylesheet-group="0"]{}
+body{margin:0;}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0;}
+html{-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:rgba(0,0,0,0);}
+input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-webkit-search-results-button,input::-webkit-search-results-decoration{display:none;}
+[stylesheet-group="1"]{}
+.css-11aywtz{-moz-appearance:textfield;-webkit-appearance:none;background-color:rgba(0,0,0,0.00);border-bottom-left-radius:0px;border-bottom-right-radius:0px;border-top-left-radius:0px;border-top-right-radius:0px;border:0 solid black;box-sizing:border-box;font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0px;padding:0px;resize:none;}
+.css-146c3p1{background-color:rgba(0,0,0,0.00);border:0 solid black;box-sizing:border-box;color:rgba(0,0,0,1.00);display:inline;font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;list-style:none;margin:0px;padding:0px;position:relative;text-align:start;text-decoration:none;white-space:pre-wrap;word-wrap:break-word;}
+.css-175oi2r{align-items:stretch;background-color:rgba(0,0,0,0.00);border:0 solid black;box-sizing:border-box;display:flex;flex-basis:auto;flex-direction:column;flex-shrink:0;list-style:none;margin:0px;min-height:0px;min-width:0px;padding:0px;position:relative;text-decoration:none;z-index:0;}
+.css-1jxf684{background-color:rgba(0,0,0,0.00);border:0 solid black;box-sizing:border-box;color:inherit;display:inline;font:inherit;list-style:none;margin:0px;padding:0px;position:relative;text-align:inherit;text-decoration:none;white-space:inherit;word-wrap:break-word;}
+.css-9pa8cd{bottom:0px;height:100%;left:0px;opacity:0;position:absolute;right:0px;top:0px;width:100%;z-index:-1;}
+[stylesheet-group="2"]{}
+.r-10jnvle{border-bottom-left-radius:21px;border-bottom-right-radius:21px;border-top-left-radius:21px;border-top-right-radius:21px;}
+.r-11mg6pl{border-bottom-color:rgba(255,255,255,1.00);border-left-color:rgba(255,255,255,1.00);border-right-color:rgba(255,255,255,1.00);border-top-color:rgba(255,255,255,1.00);}
+.r-13awgt0{flex:1;}
+.r-146eth8{padding:3px;}
+.r-1867qdf{border-bottom-left-radius:16px;border-bottom-right-radius:16px;border-top-left-radius:16px;border-top-right-radius:16px;}
+.r-18nyffw{border-bottom-color:rgba(16,185,129,1.00);border-left-color:rgba(16,185,129,1.00);border-right-color:rgba(16,185,129,1.00);border-top-color:rgba(16,185,129,1.00);}
+.r-1a976y8{border-bottom-left-radius:19px;border-bottom-right-radius:19px;border-top-left-radius:19px;border-top-right-radius:19px;}
+.r-1awa8pu{border-bottom-color:rgba(101,119,134,1.00);border-left-color:rgba(101,119,134,1.00);border-right-color:rgba(101,119,134,1.00);border-top-color:rgba(101,119,134,1.00);}
+.r-1bq2mok{margin:3px;}
+.r-1d4xg89{border-bottom-color:rgba(170,184,194,1.00);border-left-color:rgba(170,184,194,1.00);border-right-color:rgba(170,184,194,1.00);border-top-color:rgba(170,184,194,1.00);}
+.r-1dzdj1l{border-bottom-left-radius:10px;border-bottom-right-radius:10px;border-top-left-radius:10px;border-top-right-radius:10px;}
+.r-1e49q8a{border-bottom-color:rgba(245,158,11,1.00);border-left-color:rgba(245,158,11,1.00);border-right-color:rgba(245,158,11,1.00);border-top-color:rgba(245,158,11,1.00);}
+.r-1f0042m{border-bottom-left-radius:5px;border-bottom-right-radius:5px;border-top-left-radius:5px;border-top-right-radius:5px;}
+.r-1fuqb1j{border-bottom-left-radius:24px;border-bottom-right-radius:24px;border-top-left-radius:24px;border-top-right-radius:24px;}
+.r-1idfib4{padding:22px;}
+.r-1j16mh1{border-bottom-left-radius:100%;border-bottom-right-radius:100%;border-top-left-radius:100%;border-top-right-radius:100%;}
+.r-1jkafct{border-bottom-left-radius:2px;border-bottom-right-radius:2px;border-top-left-radius:2px;border-top-right-radius:2px;}
+.r-1jyn79y{border-bottom-color:rgba(0,150,136,1.00);border-left-color:rgba(0,150,136,1.00);border-right-color:rgba(0,150,136,1.00);border-top-color:rgba(0,150,136,1.00);}
+.r-1llaxt6{border-bottom-left-radius:30px;border-bottom-right-radius:30px;border-top-left-radius:30px;border-top-right-radius:30px;}
+.r-1m7mu0x{border-bottom-left-radius:36px;border-bottom-right-radius:36px;border-top-left-radius:36px;border-top-right-radius:36px;}
+.r-1pcd2l5{padding:20px;}
+.r-1phboty{border-bottom-style:solid;border-left-style:solid;border-right-style:solid;border-top-style:solid;}
+.r-1q9bdsx{border-bottom-left-radius:12px;border-bottom-right-radius:12px;border-top-left-radius:12px;border-top-right-radius:12px;}
+.r-1rf8fdq{border-bottom-width:1.5px;border-left-width:1.5px;border-right-width:1.5px;border-top-width:1.5px;}
+.r-1rvyss1{border-bottom-color:rgba(255,255,255,0.20);border-left-color:rgba(255,255,255,0.20);border-right-color:rgba(255,255,255,0.20);border-top-color:rgba(255,255,255,0.20);}
+.r-1slz7xr{padding:14px;}
+.r-1sp51qo{padding:10px;}
+.r-1udh08x{overflow-x:hidden;overflow-y:hidden;}
+.r-1uu6nss{padding:5px;}
+.r-1wbepn2{border-bottom-color:rgba(139,92,246,1.00);border-left-color:rgba(139,92,246,1.00);border-right-color:rgba(139,92,246,1.00);border-top-color:rgba(139,92,246,1.00);}
+.r-1xfd6ze{border-bottom-left-radius:8px;border-bottom-right-radius:8px;border-top-left-radius:8px;border-top-right-radius:8px;}
+.r-4a18lf{border-bottom-color:rgba(255,0,0,1.00);border-left-color:rgba(255,0,0,1.00);border-right-color:rgba(255,0,0,1.00);border-top-color:rgba(255,0,0,1.00);}
+.r-60ke3l{border-bottom-color:rgba(0,128,0,1.00);border-left-color:rgba(0,128,0,1.00);border-right-color:rgba(0,128,0,1.00);border-top-color:rgba(0,128,0,1.00);}
+.r-6ncur5{border-bottom-left-radius:18px;border-bottom-right-radius:18px;border-top-left-radius:18px;border-top-right-radius:18px;}
+.r-6t2glc{border-bottom-left-radius:40px;border-bottom-right-radius:40px;border-top-left-radius:40px;border-top-right-radius:40px;}
+.r-75jtiq{border-bottom-color:rgba(255,255,255,0.05);border-left-color:rgba(255,255,255,0.05);border-right-color:rgba(255,255,255,0.05);border-top-color:rgba(255,255,255,0.05);}
+.r-77yagm{border-bottom-color:rgba(245,158,11,0.40);border-left-color:rgba(245,158,11,0.40);border-right-color:rgba(245,158,11,0.40);border-top-color:rgba(245,158,11,0.40);}
+.r-9x6qib{border-bottom-color:rgba(204,214,221,1.00);border-left-color:rgba(204,214,221,1.00);border-right-color:rgba(204,214,221,1.00);border-top-color:rgba(204,214,221,1.00);}
+.r-crgep1{margin:0px;}
+.r-d045u9{border-bottom-width:2px;border-left-width:2px;border-right-width:2px;border-top-width:2px;}
+.r-d23pfw{padding:24px;}
+.r-edyy15{padding:8px;}
+.r-eg6o18{border-bottom-style:dashed;border-left-style:dashed;border-right-style:dashed;border-top-style:dashed;}
+.r-fx7oqy{border-bottom-color:rgba(0,0,255,1.00);border-left-color:rgba(0,0,255,1.00);border-right-color:rgba(0,0,255,1.00);border-top-color:rgba(0,0,255,1.00);}
+.r-gf7ktg{border-bottom-color:rgba(45,55,72,1.00);border-left-color:rgba(45,55,72,1.00);border-right-color:rgba(45,55,72,1.00);border-top-color:rgba(45,55,72,1.00);}
+.r-kdyh1x{border-bottom-left-radius:6px;border-bottom-right-radius:6px;border-top-left-radius:6px;border-top-right-radius:6px;}
+.r-krxsd3{display:-webkit-box;}
+.r-nsbfu8{padding:16px;}
+.r-qpntkw{padding:6px;}
+.r-rs99b7{border-bottom-width:1px;border-left-width:1px;border-right-width:1px;border-top-width:1px;}
+.r-t23y2h{border-bottom-left-radius:14px;border-bottom-right-radius:14px;border-top-left-radius:14px;border-top-right-radius:14px;}
+.r-t60dpp{padding:0px;}
+.r-wg31gx{border-bottom-color:rgba(49,53,56,1.00);border-left-color:rgba(49,53,56,1.00);border-right-color:rgba(49,53,56,1.00);border-top-color:rgba(49,53,56,1.00);}
+.r-whuqzp{padding:18px;}
+.r-xoduu5{display:inline-flex;}
+.r-xyw6el{padding:12px;}
+.r-y47klf{border-bottom-left-radius:20px;border-bottom-right-radius:20px;border-top-left-radius:20px;border-top-right-radius:20px;}
+.r-ywje51{margin:auto;}
+.r-z2wwpe{border-bottom-left-radius:4px;border-bottom-right-radius:4px;border-top-left-radius:4px;border-top-right-radius:4px;}
+.r-zhp00w{padding:2px;}
+[stylesheet-group="2.1"]{}
+.r-10a66y3{padding-bottom:50px;padding-top:50px;}
+.r-11f147o{padding-bottom:8px;padding-top:8px;}
+.r-11gswi8{padding-left:3px;padding-right:3px;}
+.r-11o76bp{padding-bottom:1px;padding-top:1px;}
+.r-1559e4e{padding-bottom:2px;padding-top:2px;}
+.r-17q4wm6{margin-left:5px;margin-right:5px;}
+.r-184id4b{margin-bottom:12px;margin-top:12px;}
+.r-18c5d7m{padding-left:6px;padding-right:6px;}
+.r-1apnidv{margin-bottom:14px;margin-top:14px;}
+.r-1d7mnkm{padding-bottom:15px;padding-top:15px;}
+.r-1e084wi{padding-left:0px;padding-right:0px;}
+.r-1ejyzdh{margin-bottom:18px;margin-top:18px;}
+.r-1ml3abn{padding-bottom:14px;padding-top:14px;}
+.r-1mmae3n{padding-bottom:12px;padding-top:12px;}
+.r-1ntr0p{padding-left:5px;padding-right:5px;}
+.r-1rsorjc{padding-left:36px;padding-right:36px;}
+.r-1ubuhtd{padding-left:10px;padding-right:10px;}
+.r-1yd117h{padding-bottom:7px;padding-top:7px;}
+.r-3o4zer{padding-left:12px;padding-right:12px;}
+.r-3pj75a{padding-left:16px;padding-right:16px;}
+.r-bplmwz{margin-bottom:10px;margin-top:10px;}
+.r-bx70bn{margin-bottom:8px;margin-top:8px;}
+.r-c6ipad{padding-left:7px;padding-right:7px;}
+.r-cnw61z{padding-bottom:4px;padding-top:4px;}
+.r-cxgwc0{padding-left:24px;padding-right:24px;}
+.r-f8sm7e{margin-left:auto;margin-right:auto;}
+.r-gu64tb{padding-left:14px;padding-right:14px;}
+.r-is05cd{padding-left:8px;padding-right:8px;}
+.r-jdiy1a{margin-left:11px;margin-right:11px;}
+.r-jusfrs{margin-left:12px;margin-right:12px;}
+.r-l00any{margin-bottom:4px;margin-top:4px;}
+.r-n5f61p{margin-bottom:3px;margin-top:3px;}
+.r-n7gxbd{padding-left:4px;padding-right:4px;}
+.r-rehuqn{padding-bottom:5px;padding-top:5px;}
+.r-u9wvl5{padding-left:20px;padding-right:20px;}
+.r-ugi1tw{padding-left:5%;padding-right:5%;}
+.r-vuvdlw{padding-bottom:6px;padding-top:6px;}
+.r-w7s2jr{padding-bottom:16px;padding-top:16px;}
+.r-xjggfu{padding-bottom:3px;padding-top:3px;}
+.r-ytbthy{padding-bottom:10px;padding-top:10px;}
+[stylesheet-group="2.2"]{}
+.r-10s2tm5{left:0%;}
+.r-16o8guy{right:100%;}
+.r-1a11zyx{margin-right:12px;}
+.r-1cwvpvk{margin-left:12px;}
+.r-1e97lx8{margin-right:3px;}
+.r-1euzeng{padding-left:24px;}
+.r-1g4tz6n{margin-right:-14.5px;}
+.r-1h31txp{padding-right:16px;}
+.r-1lhn9r{margin-left:-14.5px;}
+.r-1sqnqi2{margin-left:3px;}
+.r-1vl2501{padding-right:24px;}
+.r-9mo606{margin-right:10px;}
+.r-c59us2{left:-3px;}
+.r-dqe1q{right:0%;}
+.r-qb41rp{margin-right:5px;}
+.r-rci37q{left:100%;}
+.r-uhung1{margin-left:10px;}
+.r-vpmibe{right:-3px;}
+.r-w67my2{padding-left:16px;}
+.r-wizibn{margin-left:5px;}
+[stylesheet-group="3"]{}
+.r-105ug2t{pointer-events:auto!important;}
+.r-109y4c4{height:1px;}
+.r-10g5efv{width:4px;}
+.r-10ptun7{height:16px;}
+.r-10v3vxq{transform:scaleX(-1);}
+.r-10x49cs{font-size:10px;}
+.r-10xqauy{padding-top:env(safe-area-inset-top);}
+.r-114ovsg{border-right-color:rgba(0,0,0,0.00);}
+.r-117bsoe{margin-bottom:20px;}
+.r-11j9u27{visibility:hidden;}
+.r-11mpjr4{background-color:rgba(223,223,223,1.00);}
+.r-11udlyb{background-color:rgba(0,150,136,1.00);}
+.r-11v9fek{min-width:180px;}
+.r-11yh6sk{overflow-x:hidden;}
+.r-12c3ph5{opacity:0.4;}
+.r-12f6czt{top:17px;}
+.r-12rgx7y{width:7px;}
+.r-12sm5po{letter-spacing:-0.3px;}
+.r-12vffkv>*{pointer-events:auto;}
+.r-12vffkv{pointer-events:none!important;}
+.r-131xog0{width:38px;}
+.r-135wba7{line-height:24px;}
+.r-13aq9py{animation-name:r-1iq689l;}
+.r-13qz1uu{width:100%;}
+.r-13tjlyg{transition-duration:0.1s;}
+.r-13w96dm{background-color:rgba(0,0,0,0.30);}
+.r-1472mwg{height:24px;}
+.r-14gqq1x{margin-top:4px;}
+.r-14lw9ot{background-color:rgba(255,255,255,1.00);}
+.r-14sbq61{background-color:rgba(33,150,243,1.00);}
+.r-14von57{color:rgba(245,158,11,1.00);}
+.r-150rngu{-webkit-overflow-scrolling:touch;}
+.r-156q2ks{margin-top:10px;}
+.r-159ydal{color:rgba(59,130,246,1.00);}
+.r-15d164r{margin-bottom:10px;}
+.r-15g7tld{margin-bottom:80px;}
+.r-15zivkp{margin-bottom:4px;}
+.r-16dba41{font-weight:400;}
+.r-16rap9a{border-top-color:rgba(45,55,72,1.00);}
+.r-16y2uox{flex-grow:1;}
+.r-173mn98{align-self:flex-end;}
+.r-173mzie{transform:scaleY(-1);}
+.r-1777fci{justify-content:center;}
+.r-17bb2tj{animation-duration:0.75s;}
+.r-17leim2{background-repeat:repeat;}
+.r-17s6mgv{justify-content:flex-end;}
+.r-17tloay{opacity:0.6;}
+.r-17u3ijr{background-color:rgba(155,161,166,0.27);}
+.r-17w48nw{max-width:380px;}
+.r-184en5c{z-index:1;}
+.r-18nhz7w{top:-3px;}
+.r-18u1ve8{color:rgba(255,255,255,0.40);}
+.r-18u37iz{flex-direction:row;}
+.r-19oahor{font-size:64px;}
+.r-19wmn03{width:20px;}
+.r-19z077z{touch-action:none;}
+.r-1a2p6p6{-webkit-text-decoration-style:solid;text-decoration-style:solid;}
+.r-1a8msfu{height:38px;}
+.r-1abnn5w{animation-play-state:paused;}
+.r-1acpoxo{width:36px;}
+.r-1aiqnjv{font-family:monospace,monospace;}
+.r-1aockid{width:40px;}
+.r-1awozwy{align-items:center;}
+.r-1ay1djp{animation-duration:1s;}
+.r-1b43r93{font-size:14px;}
+.r-1bymd8e{margin-top:2px;}
+.r-1c6unfx{forced-color-adjust:none;}
+.r-1c85bru{width:270px;}
+.r-1cad53l{margin-bottom:14px;}
+.r-1cmwbt1{gap:8px;}
+.r-1cwl3u0{line-height:16px;}
+.r-1d09ksm{align-items:baseline;}
+.r-1d2f490{left:0px;}
+.r-1d5kdc7{flex-direction:column-reverse;}
+.r-1ddef8g{-webkit-text-decoration-line:underline;text-decoration-line:underline;}
+.r-1dernwh{height:70%;}
+.r-1dtv205{padding-bottom:90px;}
+.r-1e3ykzm{background-color:rgba(245,158,11,0.15);}
+.r-1edbsjc{background-color:rgba(16,185,129,1.00);}
+.r-1ei5mc7{cursor:inherit;}
+.r-1enofrn{font-size:12px;}
+.r-1euycsn{flex-direction:row-reverse;}
+.r-1ewcgjf{box-shadow:0px 1px 3px rgba(0,0,0,0.5);}
+.r-1fdnko3{background-color:rgba(0,0,0,0.75);}
+.r-1ff274t{text-align:right;}
+.r-1ffj0ar{background-color:rgba(0,0,0,0.40);}
+.r-1g80hic{opacity:0.8;}
+.r-1ge9hsw{max-width:960px;}
+.r-1gkfh8e{font-size:11px;}
+.r-1h0z5md{justify-content:flex-start;}
+.r-1h2t8mc{width:0px;}
+.r-1habvwh{align-items:flex-start;}
+.r-1i10wst{font-size:18px;}
+.r-1i6wzkk{-moz-transition-property:opacity;-webkit-transition-property:opacity;transition-property:opacity;}
+.r-1i71y14{gap:14px;}
+.r-1iadsmv{width:150px;}
+.r-1ielgck{animation-duration:300ms;}
+.r-1ifxtd0{margin-bottom:16px;}
+.r-1ikidpy{letter-spacing:0.5px;}
+.r-1iln25a{word-wrap:normal;}
+.r-1inkyih{font-size:17px;}
+.r-1iusvr4{flex-basis:0px;}
+.r-1janqcz{width:16px;}
+.r-1jkjb{margin-left:8px;}
+.r-1kb76zh{margin-right:8px;}
+.r-1kfrs79{font-weight:600;}
+.r-1kihuf0{align-self:center;}
+.r-1ld3bg{top:-4px;}
+.r-1ldzwu0{animation-timing-function:linear;}
+.r-1loqt21{cursor:pointer;}
+.r-1lullxq{width:23%;}
+.r-1mhb1uw{width:42px;}
+.r-1mi0q7o{padding-bottom:10px;}
+.r-1mlwlqe{flex-basis:auto;}
+.r-1mrlafo{background-position:0;}
+.r-1muvv40{animation-iteration-count:infinite;}
+.r-1niwhzg{background-color:rgba(0,0,0,0.00);}
+.r-1nlw0im{bottom:8px;}
+.r-1no09lo{margin-top:28px;}
+.r-1npgj5g{color:rgba(148,163,184,1.00);}
+.r-1nxhmzv{margin-bottom:28px;}
+.r-1ny4l3l{outline-style:none;}
+.r-1oa8saw{margin-right:14px;}
+.r-1ocf4r9{scroll-snap-type:y mandatory;}
+.r-1od2jal{font-weight:300;}
+.r-1ol76an{font-family:SpaceMono;}
+.r-1oszu61{align-items:stretch;}
+.r-1otgn73{touch-action:manipulation;}
+.r-1ow6zhx{margin-left:16px;}
+.r-1ozsyd3{height:7px;}
+.r-1p0dtai{bottom:0px;}
+.r-1p6tffz{bottom:3px;}
+.r-1pi2tsx{height:100%;}
+.r-1pm8pkb{font-family:Courier;}
+.r-1qd0xha{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+.r-1qulhi1{animation-name:r-1pzkwqh;}
+.r-1r4fvd0{color:rgba(82,169,255,1.00);}
+.r-1r74h94{left:8px;}
+.r-1r8g8re{height:36px;}
+.r-1rk1lbf{background-color:rgba(11,15,25,1.00);}
+.r-1rnoaur{overflow-y:auto;}
+.r-1s2bzr4{margin-top:12px;}
+.r-1sc1npi{background-color:rgba(26,34,53,1.00);}
+.r-1sg8ghl{z-index:1000;}
+.r-1smd7e2{letter-spacing:0.8px;}
+.r-1ssbvtb{gap:12px;}
+.r-1sxrcry{background-size:auto;}
+.r-1t9nq9{color:rgba(248,250,252,1.00);}
+.r-1tputim{color:rgba(16,185,129,1.00);}
+.r-1udbk01{text-overflow:ellipsis;}
+.r-1ui5ee8{font-size:32px;}
+.r-1ujkv8a{aspect-ratio:1;}
+.r-1uypc71{animation-timing-function:ease-in;}
+.r-1vr29t4{font-weight:800;}
+.r-1w2pmg{height:0px;}
+.r-1w6e6rj{flex-wrap:wrap;}
+.r-1wbh5a2{flex-shrink:1;}
+.r-1wk2t95{background-color:rgba(128,128,128,1.00);}
+.r-1wtj0ep{justify-content:space-between;}
+.r-1wyyakw{z-index:-1;}
+.r-1x35g6{font-size:24px;}
+.r-1x93onp{width:110px;}
+.r-1xbve24{height:6px;}
+.r-1xcajam{position:fixed;}
+.r-1xnzce8{-moz-user-select:text;-webkit-user-select:text;user-select:text;}
+.r-1xpe3eb{transform:rotate(90deg);}
+.r-1xzupcd{width:13px;}
+.r-1yef0xd{animation-name:r-11cv4x;}
+.r-2eszeu::-webkit-scrollbar{display:none}
+.r-2eszeu{scrollbar-width:none;}
+.r-30o5oe{-moz-appearance:none;-ms-appearance:none;-webkit-appearance:none;appearance:none;}
+.r-356f0p{letter-spacing:0.35px;}
+.r-36ujnk{font-style:italic;}
+.r-3mc0re{right:8px;}
+.r-3s2u2q{white-space:nowrap;}
+.r-417010{z-index:0;}
+.r-4gszlv{background-size:cover;}
+.r-4v7adb{height:5px;}
+.r-56yt86{box-shadow:0px 3px 3px rgba(0,0,0,0.33);}
+.r-5kkj8d{border-top-width:1px;}
+.r-5oul0u{margin-bottom:8px;}
+.r-60vfwk{min-width:1px;}
+.r-633pao{pointer-events:none!important;}
+.r-6dt33c{opacity:1;}
+.r-6gpygo{margin-bottom:12px;}
+.r-6taxm2:-ms-input-placeholder{color:var(--placeholderTextColor);opacity:1;}
+.r-6taxm2::-moz-placeholder{color:var(--placeholderTextColor);opacity:1;}
+.r-6taxm2::-webkit-input-placeholder{color:var(--placeholderTextColor);opacity:1;}
+.r-6taxm2::placeholder{color:var(--placeholderTextColor);opacity:1;}
+.r-726pan{width:31px;}
+.r-76blku{height:21px;}
+.r-7cikom{font-size:inherit;}
+.r-7q8q6z{cursor:default;}
+.r-8akbws{-webkit-box-orient:vertical;}
+.r-8ay8q1{letter-spacing:0.1px;}
+.r-8d26hk{margin-bottom:40px;}
+.r-8hv5mx{width:12.5%;}
+.r-97e31f{padding-bottom:env(safe-area-inset-bottom);}
+.r-a023e6{font-size:15px;}
+.r-a1w0r5{width:48%;}
+.r-adyw6z{font-size:20px;}
+.r-afbznj{letter-spacing:-0.2px;}
+.r-agouwx{transform:translateZ(0);}
+.r-ah5dr5>*{pointer-events:none;}
+.r-ah5dr5{pointer-events:auto!important;}
+.r-aruset{font-weight:200;}
+.r-b88u0q{font-weight:700;}
+.r-b8lwoo{width:100px;}
+.r-bi4vy9{transform:translateY(100%);}
+.r-bnwqim{position:relative;}
+.r-bt1l66{min-height:20px;}
+.r-bual8a{max-width:520px;}
+.r-buy8e9{overflow-y:hidden;}
+.r-bv2aro{padding-left:env(safe-area-inset-left);}
+.r-c68hjy{color:rgba(161,161,161,1.00);}
+.r-cfp7ip{width:60px;}
+.r-cpa5s6{scroll-snap-align:start;}
+.r-cqee49{color:rgba(0,0,0,1.00);}
+.r-dctotb{background-color:rgba(16,185,129,0.20);}
+.r-dkge59{background-color:rgba(170,184,194,1.00);}
+.r-dnmrzs{max-width:100%;}
+.r-dpkc41{background-color:rgba(239,68,68,1.00);}
+.r-eafdt9{transition-duration:0.15s;}
+.r-ebwn4k{animation-name:r-q67da2;}
+.r-ehq7j7{background-size:contain;}
+.r-eqz5dr{flex-direction:column;}
+.r-eu3ka{height:40px;}
+.r-evnaw{font-size:22px;}
+.r-f1odvy{margin-bottom:6px;}
+.r-fdjqy7{text-align:left;}
+.r-foe95m{letter-spacing:-0.4px;}
+.r-fxxt2n{line-height:15px;}
+.r-g3mlsw{animation-name:r-t2lo5v;}
+.r-ghxds0{transform:translateY(0%);}
+.r-gtdqiz{position:-webkit-sticky;position:sticky;}
+.r-h0d30l{height:28px;}
+.r-hdaws3{height:4px;}
+.r-hkr3fv{background-color:rgba(19,27,46,1.00);}
+.r-hr69ez{background-color:rgba(0,0,0,0.15);}
+.r-hxflta{padding-right:env(safe-area-inset-right);}
+.r-i2dsbb{background-color:rgba(245,158,11,0.20);}
+.r-icoktb{opacity:0.5;}
+.r-ipm5af{top:0px;}
+.r-jahcsk{background-color:rgba(139,92,246,0.15);}
+.r-jwli3a{color:rgba(255,255,255,1.00);}
+.r-k200y{align-self:flex-start;}
+.r-kemksi{background-color:rgba(0,0,0,1.00);}
+.r-kizejy{color:rgba(155,161,166,1.00);}
+.r-knv0ih{margin-top:8px;}
+.r-l71dzp{margin-top:14px;}
+.r-lfzo9f{color:rgba(20,184,166,1.00);}
+.r-lltvgl{overflow-x:auto;}
+.r-lpb231{height:168px;}
+.r-lrsllp{width:24px;}
+.r-lrvibr{-moz-user-select:none;-webkit-user-select:none;user-select:none;}
+.r-lxw29t{color:rgba(139,92,246,1.00);}
+.r-m0idy1{background-color:rgba(245,158,11,1.00);}
+.r-m611by{padding-top:10px;}
+.r-majxgm{font-weight:500;}
+.r-mfh4gg{scroll-snap-type:x mandatory;}
+.r-mhe3cw{z-index:10;}
+.r-mro3nb{background-color:rgba(21,23,24,1.00);}
+.r-n6v787{font-size:13px;}
+.r-nvplwv{animation-timing-function:ease-out;}
+.r-o4n3w5{width:23px;}
+.r-obd0qt{align-items:flex-end;}
+.r-ojf8lh{gap:6px;}
+.r-orgf3d{opacity:0;}
+.r-ovu0ai{font-weight:900;}
+.r-q4m81j{text-align:center;}
+.r-qfi6ny{top:30000px;}
+.r-qklmqi{border-bottom-width:1px;}
+.r-qn3fzs{padding-bottom:24px;}
+.r-qqjak8{font-size:9px;}
+.r-rjixqe{line-height:20px;}
+.r-rs94m5{background-image:url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjxzdmcKICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICB4bWxuczpjYz0iaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbnMjIgogICB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiCiAgIHhtbG5zOnN2Zz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICAgdmVyc2lvbj0iMS4xIgogICB2aWV3Qm94PSIwIDAgMSAxIgogICBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWluWU1pbiBtZWV0Ij4KICA8cGF0aAogICAgIGQ9Ik0gMC4wNDAzODA1OSwwLjYyNjc3NjcgMC4xNDY0NDY2MSwwLjUyMDcxMDY4IDAuNDI5Mjg5MzIsMC44MDM1NTMzOSAwLjMyMzIyMzMsMC45MDk2MTk0MSB6IE0gMC4yMTcxNTcyOSwwLjgwMzU1MzM5IDAuODUzNTUzMzksMC4xNjcxNTcyOSAwLjk1OTYxOTQxLDAuMjczMjIzMyAwLjMyMzIyMzMsMC45MDk2MTk0MSB6IgogICAgIGlkPSJyZWN0Mzc4MCIKICAgICBzdHlsZT0iZmlsbDojZmZmZmZmO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTpub25lIiAvPgo8L3N2Zz4K");}
+.r-rv3nkn{color:rgba(11,15,25,1.00);}
+.r-sfbmgh{z-index:9999;}
+.r-so7y2g{line-height:64px;}
+.r-tskmnb{padding-top:8px;}
+.r-tsynxw{text-transform:uppercase;}
+.r-ttdzmv{padding-top:12px;}
+.r-u6sd8q{background-repeat:no-repeat;}
+.r-u8s1d{position:absolute;}
+.r-u92y06{background-color:rgba(255,165,0,1.00);}
+.r-uaa2di{gap:10px;}
+.r-ubezar{font-size:16px;}
+.r-ucwr1w{box-shadow:0px 2px 4px rgba(16,185,129,0.80);}
+.r-uho16t{font-size:34px;}
+.r-ur6pnr{height:42px;}
+.r-uvuy5l{height:60px;}
+.r-vacyoi{padding-bottom:64px;}
+.r-van48c{caret-color:transparent;}
+.r-vboj7i{top:-7px;}
+.r-vvn4in{background-position:center;}
+.r-vw2c0b{font-weight:bold;}
+.r-w0va4e{margin-right:40px;}
+.r-wfqgy4{transition-duration:100ms;}
+.r-ws9h79{left:4px;}
+.r-x3cy2q{background-size:100% 100%;}
+.r-xprqnn{background-color:rgba(16,185,129,0.15);}
+.r-xx3c9p{animation-name:r-imtty0;}
+.r-y7v2we{background-color:rgba(32,36,37,1.00);}
+.r-ywtpjg{min-height:115px;}
+.r-yy2aun{font-size:26px;}
+.r-z80fyv{height:20px;}
+.r-zchlnj{right:0px;}
+.r-zpf9xq{background-color:rgba(59,130,246,1.00);}
+.r-zz5t5d{font-size:28px;}
+@-webkit-keyframes r-11cv4x{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+@-webkit-keyframes r-1iq689l{0%{transform:translateY(0%);}100%{transform:translateY(100%);}}
+@-webkit-keyframes r-1pzkwqh{0%{transform:translateY(100%);}100%{transform:translateY(0%);}}
+@-webkit-keyframes r-imtty0{0%{opacity:0;}100%{opacity:1;}}
+@-webkit-keyframes r-q67da2{0%{transform:translateX(-100%);}100%{transform:translateX(400%);}}
+@-webkit-keyframes r-t2lo5v{0%{opacity:1;}100%{opacity:0;}}
+@keyframes r-11cv4x{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+@keyframes r-1iq689l{0%{transform:translateY(0%);}100%{transform:translateY(100%);}}
+@keyframes r-1pzkwqh{0%{transform:translateY(100%);}100%{transform:translateY(0%);}}
+@keyframes r-imtty0{0%{opacity:0;}100%{opacity:1;}}
+@keyframes r-q67da2{0%{transform:translateX(-100%);}100%{transform:translateX(400%);}}
+@keyframes r-t2lo5v{0%{opacity:1;}100%{opacity:0;}}</style><style id="expo-generated-fonts" type="text/css">@font-face{font-family:SpaceMono;src:url(/assets/assets/fonts/SpaceMono-Regular.49a79d66bdea2debf1832bf4d7aca127.ttf);font-display:auto}</style><link rel="preload" href="/assets/assets/fonts/SpaceMono-Regular.49a79d66bdea2debf1832bf4d7aca127.ttf" as="font" crossorigin="" /><script type="module">globalThis.__EXPO_ROUTER_HYDRATE__=true;</script><link rel="shortcut icon" href="/favicon.ico" /></head><body><div id="root"><div class="css-175oi2r r-13awgt0"><!--$--><div class="css-175oi2r r-13awgt0"><div class="css-175oi2r r-13awgt0 r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj r-ipm5af" style="background-color:rgba(242,242,242,1.00);display:flex"><div class="css-175oi2r r-13awgt0"><div class="css-175oi2r r-13awgt0"><!--$--><div class="css-175oi2r r-13awgt0" style="flex-direction:column"><div class="css-175oi2r r-13awgt0 r-1udh08x"><div class="css-175oi2r r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj r-ipm5af" style="z-index:0"><div class="css-175oi2r r-13awgt0" style="background-color:rgba(242,242,242,1.00)"><div class="css-175oi2r r-184en5c r-12vffkv"><div class="css-175oi2r r-12vffkv" style="height:64px"><div class="css-175oi2r r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj r-ipm5af r-12vffkv"><div class="css-175oi2r r-qklmqi r-13awgt0 r-105ug2t" style="background-color:rgba(255,255,255,1.00);border-bottom-color:rgba(216,216,216,1.00)"></div></div><div class="css-175oi2r r-633pao" style="height:0px"></div><div class="css-175oi2r r-1oszu61 r-13awgt0 r-18u37iz r-12vffkv"><div class="css-175oi2r r-1awozwy r-18u37iz r-1h0z5md r-12vffkv" style="margin-left:0px"></div><div class="css-175oi2r r-1777fci r-12vffkv" style="max-width:-32px;margin-right:16px;margin-left:16px"><h1 dir="auto" aria-level="1" role="heading" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1i10wst" style="color:rgba(28,28,30,1.00);font-family:system-ui, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;font-weight:500">index</h1></div><div class="css-175oi2r r-1awozwy r-18u37iz r-17s6mgv r-1iusvr4 r-16y2uox r-12vffkv" style="margin-right:0px"></div></div></div></div><div class="css-175oi2r r-13awgt0"><!--$--><div class="css-175oi2r r-1awozwy r-1rk1lbf r-13awgt0"><div class="css-175oi2r r-150rngu r-eqz5dr r-16y2uox r-1wbh5a2 r-11yh6sk r-1rnoaur r-agouwx r-2eszeu"><div class="css-175oi2r r-bual8a r-1dtv205 r-u9wvl5 r-m611by r-13qz1uu"><div class="css-175oi2r r-1awozwy r-18u37iz r-1wtj0ep r-15zivkp"><div class="css-175oi2r r-13awgt0"><div dir="auto" class="css-146c3p1 r-1t9nq9 r-a023e6 r-b88u0q">የ<!-- -->ጥቅምት<!-- --> ወር ወጪ (Spent)</div><div dir="auto" class="css-146c3p1 r-1t9nq9 r-1ol76an r-1ui5ee8 r-ovu0ai r-1bymd8e">325<span class="css-1jxf684 r-1npgj5g r-1i10wst r-16dba41"> ETB</span></div><div dir="auto" class="css-146c3p1 r-1npgj5g r-1gkfh8e r-1bymd8e">of <!-- -->8,500<!-- --> ETB Baseline</div></div><div class="css-175oi2r r-1awozwy r-ytbthy"></div></div><div class="css-175oi2r r-hkr3fv r-gf7ktg r-y47klf r-rs99b7 r-184id4b r-whuqzp"><div class="css-175oi2r r-1habvwh r-18u37iz r-1wtj0ep"><div class="css-175oi2r r-13awgt0"><div class="css-175oi2r r-1awozwy r-18u37iz r-ojf8lh"><div class="css-175oi2r r-z2wwpe r-1ozsyd3 r-12rgx7y" style="background-color:rgba(16,185,129,1.00)"></div><div dir="auto" class="css-146c3p1 r-1npgj5g r-10x49cs r-b88u0q r-1smd7e2">ጥቅምት<!-- --> (<!-- -->TIKIMT<!-- -->) • DAY <!-- -->27<!-- --> OF <!-- -->30</div></div><div class="css-175oi2r r-1d09ksm r-18u37iz r-ojf8lh r-14gqq1x"><div dir="auto" class="css-146c3p1 r-1t9nq9 r-1ol76an r-uho16t r-ovu0ai">2044</div><div dir="auto" class="css-146c3p1 r-1npgj5g r-n6v787 r-1kfrs79">ETB / day</div></div></div><div class="css-175oi2r r-1q9bdsx r-rs99b7 r-cnw61z r-1ubuhtd" style="border-top-color:rgba(16,185,129,1.00);border-right-color:rgba(16,185,129,1.00);border-bottom-color:rgba(16,185,129,1.00);border-left-color:rgba(16,185,129,1.00);background-color:rgba(16,185,129,0.10)"><div dir="auto" class="css-146c3p1 r-10x49cs r-1vr29t4 r-1ikidpy" style="color:rgba(16,185,129,1.00)">ON TARGET</div></div></div><div class="css-175oi2r r-18u37iz r-1wtj0ep r-f1odvy r-l71dzp"><div dir="auto" class="css-146c3p1 r-1npgj5g r-1gkfh8e">Spent Today: <span class="css-1jxf684 r-1t9nq9 r-1ol76an r-b88u0q">70<!-- --> ETB</span></div><div dir="auto" class="css-146c3p1 r-1npgj5g r-1gkfh8e">Today&#x27;s Left: <span class="css-1jxf684 r-1ol76an r-b88u0q" style="color:rgba(16,185,129,1.00)">1974<!-- --> ETB</span></div></div><div class="css-175oi2r r-1sc1npi r-z2wwpe r-1xbve24 r-1udh08x"><div class="css-175oi2r r-z2wwpe r-1pi2tsx" style="width:3%;background-color:rgba(16,185,129,1.00)"></div></div><div class="css-175oi2r r-16rap9a r-5kkj8d r-18u37iz r-1wtj0ep r-l71dzp r-ttdzmv"><div class="css-175oi2r r-13awgt0"><div dir="auto" class="css-146c3p1 r-1npgj5g r-10x49cs">Remaining Living Pool</div><div dir="auto" class="css-146c3p1 r-1t9nq9 r-1ol76an r-n6v787 r-b88u0q r-1bymd8e">8,175<!-- --> ETB</div></div><div class="css-175oi2r r-obd0qt"><div dir="auto" class="css-146c3p1 r-1npgj5g r-10x49cs">እስከ <!-- -->ኅዳር<!-- --> ድረስ (Until <!-- -->ኅዳር<!-- -->)</div><div dir="auto" class="css-146c3p1 r-1ol76an r-n6v787 r-b88u0q r-1bymd8e" style="color:rgba(245,158,11,1.00)">4<!-- --> Days Left</div></div></div></div><div class="css-175oi2r r-hkr3fv r-gf7ktg r-y47klf r-rs99b7 r-bplmwz r-nsbfu8"><div class="css-175oi2r r-1habvwh r-18u37iz r-1wtj0ep"><div class="css-175oi2r r-13awgt0"><div class="css-175oi2r r-1awozwy r-18u37iz r-ojf8lh"><div dir="auto" class="css-146c3p1 r-ubezar">🇪🇹</div><div dir="auto" class="css-146c3p1 r-1t9nq9 r-1b43r93 r-1vr29t4 r-afbznj">ዓርብ፣ ጥቅምት 27 ቀን 2019 ዓ.ም</div></div><div dir="auto" class="css-146c3p1 r-1tputim r-1gkfh8e r-b88u0q r-1bymd8e">ጥቅምት<!-- --> (<!-- -->Tikimt<!-- -->) • <!-- -->27<!-- -->ኛው ቀን</div></div><div tabindex="0" class="css-175oi2r r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-1rk1lbf r-gf7ktg r-1q9bdsx r-rs99b7 r-rehuqn r-1ubuhtd" style="transition-duration:0s"><div dir="auto" class="css-146c3p1 r-1npgj5g r-10x49cs r-b88u0q">▼ ቀን መቁጠሪያ (Calendar)</div></div></div><div class="css-175oi2r r-1rk1lbf r-gf7ktg r-1q9bdsx r-rs99b7 r-156q2ks r-11f147o r-3o4zer"><div dir="auto" class="css-146c3p1 r-1npgj5g r-1gkfh8e r-q4m81j">⏳ እስከ <span class="css-1jxf684 r-14von57 r-b88u0q">ኅዳር</span> ድረስ<!-- --> <span class="css-1jxf684 r-1tputim r-1ol76an r-1vr29t4">4<!-- --> ቀናት</span> ቀርተዋል (<!-- -->4<!-- --> days left)</div></div></div><div class="css-175oi2r r-1ejyzdh"><div class="css-175oi2r r-1awozwy r-18u37iz r-1wtj0ep r-15d164r r-n7gxbd"><div dir="auto" class="css-146c3p1 r-1t9nq9 r-a023e6 r-b88u0q r-afbznj">⚡ 1-Tap Addis Quick Log</div><div dir="auto" class="css-146c3p1 r-1npgj5g r-1gkfh8e">Minibus &amp; Buna</div></div><div class="css-175oi2r r-18u37iz r-1w6e6rj r-1cmwbt1"><div tabindex="0" class="css-175oi2r r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-1awozwy r-hkr3fv r-gf7ktg r-t23y2h r-rs99b7 r-1777fci r-ytbthy r-n7gxbd r-1lullxq" style="transition-duration:0s"><div dir="auto" class="css-146c3p1 r-1i10wst r-15zivkp">🚕</div><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1t9nq9 r-10x49cs r-1kfrs79 r-q4m81j">Kera-Wello</div><div dir="auto" class="css-146c3p1 r-1tputim r-1ol76an r-10x49cs r-b88u0q r-1bymd8e">20 ETB</div></div><div tabindex="0" class="css-175oi2r r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-1awozwy r-hkr3fv r-gf7ktg r-t23y2h r-rs99b7 r-1777fci r-ytbthy r-n7gxbd r-1lullxq" style="transition-duration:0s"><div dir="auto" class="css-146c3p1 r-1i10wst r-15zivkp">🚖</div><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1t9nq9 r-10x49cs r-1kfrs79 r-q4m81j">Alem Cinema</div><div dir="auto" class="css-146c3p1 r-1tputim r-1ol76an r-10x49cs r-b88u0q r-1bymd8e">10 ETB</div></div><div tabindex="0" class="css-175oi2r r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-1awozwy r-hkr3fv r-gf7ktg r-t23y2h r-rs99b7 r-1777fci r-ytbthy r-n7gxbd r-1lullxq" style="transition-duration:0s"><div dir="auto" class="css-146c3p1 r-1i10wst r-15zivkp">🏠</div><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1t9nq9 r-10x49cs r-1kfrs79 r-q4m81j">Return</div><div dir="auto" class="css-146c3p1 r-1tputim r-1ol76an r-10x49cs r-b88u0q r-1bymd8e">20 ETB</div></div><div tabindex="0" class="css-175oi2r r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-1awozwy r-hkr3fv r-gf7ktg r-t23y2h r-rs99b7 r-1777fci r-ytbthy r-n7gxbd r-1lullxq" style="transition-duration:0s"><div dir="auto" class="css-146c3p1 r-1i10wst r-15zivkp">🚶</div><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1t9nq9 r-10x49cs r-1kfrs79 r-q4m81j">Walk/Lift</div><div dir="auto" class="css-146c3p1 r-lfzo9f r-1ol76an r-10x49cs r-b88u0q r-1bymd8e">Free</div></div><div tabindex="0" class="css-175oi2r r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-1awozwy r-hkr3fv r-gf7ktg r-t23y2h r-rs99b7 r-1777fci r-ytbthy r-n7gxbd r-1lullxq" style="transition-duration:0s"><div dir="auto" class="css-146c3p1 r-1i10wst r-15zivkp">☕</div><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1t9nq9 r-10x49cs r-1kfrs79 r-q4m81j">Buna</div><div dir="auto" class="css-146c3p1 r-1tputim r-1ol76an r-10x49cs r-b88u0q r-1bymd8e">50 ETB</div></div><div tabindex="0" class="css-175oi2r r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-1awozwy r-hkr3fv r-gf7ktg r-t23y2h r-rs99b7 r-1777fci r-ytbthy r-n7gxbd r-1lullxq" style="transition-duration:0s"><div dir="auto" class="css-146c3p1 r-1i10wst r-15zivkp">🍵</div><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1t9nq9 r-10x49cs r-1kfrs79 r-q4m81j">Shay</div><div dir="auto" class="css-146c3p1 r-1tputim r-1ol76an r-10x49cs r-b88u0q r-1bymd8e">30 ETB</div></div><div tabindex="0" class="css-175oi2r r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-1awozwy r-hkr3fv r-gf7ktg r-t23y2h r-rs99b7 r-1777fci r-ytbthy r-n7gxbd r-1lullxq" style="transition-duration:0s"><div dir="auto" class="css-146c3p1 r-1i10wst r-15zivkp">🫓</div><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1t9nq9 r-10x49cs r-1kfrs79 r-q4m81j">Injera</div><div dir="auto" class="css-146c3p1 r-1tputim r-1ol76an r-10x49cs r-b88u0q r-1bymd8e">50 ETB</div></div><div tabindex="0" class="css-175oi2r r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-1awozwy r-hkr3fv r-gf7ktg r-t23y2h r-rs99b7 r-1777fci r-ytbthy r-n7gxbd r-1lullxq" style="transition-duration:0s"><div dir="auto" class="css-146c3p1 r-1i10wst r-15zivkp">🥖</div><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1t9nq9 r-10x49cs r-1kfrs79 r-q4m81j">Bread</div><div dir="auto" class="css-146c3p1 r-1tputim r-1ol76an r-10x49cs r-b88u0q r-1bymd8e">20 ETB</div></div></div></div><div class="css-175oi2r r-bplmwz"><div dir="auto" class="css-146c3p1 r-1t9nq9 r-ubezar r-b88u0q r-1cad53l">Expense Categories</div><div class="css-175oi2r r-150rngu r-18u37iz r-16y2uox r-1wbh5a2 r-lltvgl r-buy8e9 r-agouwx r-2eszeu"><div class="css-175oi2r r-18u37iz"><div class="css-175oi2r r-18u37iz"><div tabindex="0" class="css-175oi2r r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-1awozwy r-hkr3fv r-gf7ktg r-6ncur5 r-eg6o18 r-1rf8fdq r-ojf8lh r-1777fci r-1oa8saw r-ywtpjg r-1slz7xr r-b8lwoo" style="transition-duration:0s"><div dir="auto" class="css-146c3p1 r-1t9nq9 r-zz5t5d r-1od2jal">+</div><div dir="auto" class="css-146c3p1 r-1t9nq9 r-n6v787 r-1kfrs79">Add Item</div></div></div><div class="css-175oi2r r-18u37iz"><div class="css-175oi2r r-1habvwh r-6ncur5 r-1cmwbt1 r-1wtj0ep r-1oa8saw r-ywtpjg r-1slz7xr r-1x93onp" style="background-color:rgba(16,185,129,1.00)"><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1enofrn r-b88u0q" style="color:rgba(11,15,25,1.00)">Housing</div><div dir="auto" class="css-146c3p1 r-1ol76an r-a023e6 r-1vr29t4" style="color:rgba(11,15,25,1.00)">3,000<!-- --> ETB</div><div class="css-175oi2r r-hr69ez r-1xfd6ze r-1559e4e r-c6ipad"><div dir="auto" class="css-146c3p1 r-1gkfh8e r-b88u0q" style="color:rgba(11,15,25,1.00)">42<!-- -->%</div></div></div></div><div class="css-175oi2r r-18u37iz"><div class="css-175oi2r r-1habvwh r-6ncur5 r-1cmwbt1 r-1wtj0ep r-1oa8saw r-ywtpjg r-1slz7xr r-1x93onp" style="background-color:rgba(59,130,246,1.00)"><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1enofrn r-b88u0q" style="color:rgba(11,15,25,1.00)">Food &amp; Drinks</div><div dir="auto" class="css-146c3p1 r-1ol76an r-a023e6 r-1vr29t4" style="color:rgba(11,15,25,1.00)">2,340<!-- --> ETB</div><div class="css-175oi2r r-hr69ez r-1xfd6ze r-1559e4e r-c6ipad"><div dir="auto" class="css-146c3p1 r-1gkfh8e r-b88u0q" style="color:rgba(11,15,25,1.00)">33<!-- -->%</div></div></div></div><div class="css-175oi2r r-18u37iz"><div class="css-175oi2r r-1habvwh r-6ncur5 r-1cmwbt1 r-1wtj0ep r-1oa8saw r-ywtpjg r-1slz7xr r-1x93onp" style="background-color:rgba(248,250,252,1.00)"><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1enofrn r-b88u0q" style="color:rgba(11,15,25,1.00)">Transit</div><div dir="auto" class="css-146c3p1 r-1ol76an r-a023e6 r-1vr29t4" style="color:rgba(11,15,25,1.00)">980<!-- --> ETB</div><div class="css-175oi2r r-hr69ez r-1xfd6ze r-1559e4e r-c6ipad"><div dir="auto" class="css-146c3p1 r-1gkfh8e r-b88u0q" style="color:rgba(11,15,25,1.00)">14<!-- -->%</div></div></div></div><div class="css-175oi2r r-18u37iz"><div class="css-175oi2r r-1habvwh r-6ncur5 r-1cmwbt1 r-1wtj0ep r-1oa8saw r-ywtpjg r-1slz7xr r-1x93onp" style="background-color:rgba(245,158,11,1.00)"><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1enofrn r-b88u0q" style="color:rgba(11,15,25,1.00)">Misc</div><div dir="auto" class="css-146c3p1 r-1ol76an r-a023e6 r-1vr29t4" style="color:rgba(11,15,25,1.00)">824<!-- --> ETB</div><div class="css-175oi2r r-hr69ez r-1xfd6ze r-1559e4e r-c6ipad"><div dir="auto" class="css-146c3p1 r-1gkfh8e r-b88u0q" style="color:rgba(11,15,25,1.00)">11<!-- -->%</div></div></div></div></div></div></div><div class="css-175oi2r r-bplmwz"><div dir="auto" class="css-146c3p1 r-1t9nq9 r-ubezar r-b88u0q r-1cad53l">My Income &amp; Reserves</div><div class="css-175oi2r r-150rngu r-18u37iz r-16y2uox r-1wbh5a2 r-lltvgl r-buy8e9 r-agouwx r-2eszeu"><div class="css-175oi2r r-18u37iz"><div class="css-175oi2r r-18u37iz"><div class="css-175oi2r r-hkr3fv r-gf7ktg r-y47klf r-rs99b7 r-1cmwbt1 r-1oa8saw r-nsbfu8 r-1iadsmv"><div class="css-175oi2r" style="flex-direction:row;justify-content:space-between"><div class="css-175oi2r r-gf7ktg r-t23y2h r-rs99b7 r-qpntkw"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" x="128" y="128" fill="currentColor" viewBox="0 0 36 36" color="#f8fafc" role="img" style="display:inline-block;vertical-align:middle"><g fill="currentColor"><path fill="currentColor" d="M26 21.15a6.9 6.9 0 0 0-4.38-3.32 26 26 0 0 0-2.62-.64V8.12A10.05 10.05 0 0 1 23.86 10a1 1 0 0 0 1.33-1.5A11.75 11.75 0 0 0 19 6.1V3a1 1 0 0 0-2 0v3c-4.4.1-6.83 2.29-7.57 4.18A5.56 5.56 0 0 0 11.66 17 13.2 13.2 0 0 0 17 18.84V28a12.3 12.3 0 0 1-7.14-2.74 1 1 0 1 0-1.37 1.44A14.1 14.1 0 0 0 17 30v3a1 1 0 0 0 2 0v-3c2.82-.19 6.07-1.09 7.3-4.76a5.33 5.33 0 0 0-.3-4.09m-13.21-5.83a3.57 3.57 0 0 1-1.49-4.39c.11-.3 1.23-2.81 5.7-2.93v8.8a10.7 10.7 0 0 1-4.21-1.48m11.61 9.24c-.72 2.14-2.32 3.17-5.4 3.4v-8.73c.64.14 1.3.3 2 .51a5 5 0 0 1 3.19 2.32 3.34 3.34 0 0 1 .21 2.5" class="clr-i-outline clr-i-outline-path-1"></path><path fill="none" d="M0 0h36v36H0z"></path></g></svg></div><div tabindex="0" class="css-175oi2r r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73" style="transition-duration:0s"><div dir="auto" class="css-146c3p1"></div></div></div><div dir="auto" class="css-146c3p1 r-1t9nq9 r-1b43r93 r-1kfrs79">Salary</div><div dir="auto" class="css-146c3p1 r-1t9nq9 r-1ol76an r-ubezar r-b88u0q">15,000<!-- --> ETB</div></div></div><div class="css-175oi2r r-18u37iz"><div class="css-175oi2r r-hkr3fv r-gf7ktg r-y47klf r-rs99b7 r-1cmwbt1 r-1oa8saw r-nsbfu8 r-1iadsmv"><div class="css-175oi2r" style="flex-direction:row;justify-content:space-between"><div class="css-175oi2r r-gf7ktg r-t23y2h r-rs99b7 r-qpntkw"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" x="128" y="128" fill="currentColor" viewBox="0 0 20 20" color="#f8fafc" role="img" style="display:inline-block;vertical-align:middle"><path fill="currentColor" d="M10.002 1.642a1.5 1.5 0 0 1 2.175-.307l3.27 2.655A1.5 1.5 0 0 1 15.741 6h-1.22l.39-.559a.5.5 0 0 0-.094-.675L13.133 3.4 11.337 6H10.12l2.234-3.232-.808-.656a.5.5 0 0 0-.725.102L8.18 5.999H6.96zM13.5 12a.5.5 0 0 0 0 1h1a.5.5 0 0 0 0-1zm-9-7h2.169l-.7 1H4.5a.5.5 0 0 0 0 1H15a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5.5A2.5 2.5 0 0 1 3 14.5v-8A1.5 1.5 0 0 1 4.5 5M4 14.5A1.5 1.5 0 0 0 5.5 16H15a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H4.5q-.264-.001-.5-.085z"></path></svg></div><div tabindex="0" class="css-175oi2r r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73" style="transition-duration:0s"><div dir="auto" class="css-146c3p1"></div></div></div><div dir="auto" class="css-146c3p1 r-1t9nq9 r-1b43r93 r-1kfrs79">Freelancing</div><div dir="auto" class="css-146c3p1 r-1t9nq9 r-1ol76an r-ubezar r-b88u0q">6,000<!-- --> ETB</div></div></div><div class="css-175oi2r r-18u37iz"><div class="css-175oi2r r-hkr3fv r-gf7ktg r-y47klf r-rs99b7 r-1cmwbt1 r-1oa8saw r-nsbfu8 r-1iadsmv"><div class="css-175oi2r" style="flex-direction:row;justify-content:space-between"><div class="css-175oi2r r-gf7ktg r-t23y2h r-rs99b7 r-qpntkw"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" image-rendering="optimizeQuality" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" viewBox="0 0 474 512.27" width="22" height="22" color="#f59e0b"><path fill="currentColor" d="M352.84 253.82h67.5v-13.06c-3.86-14.29-10-23.98-17.97-29.88-7.94-5.88-18.27-8.4-30.38-8.31l-283.53.06c-6.81 0-12.33-5.52-12.33-12.34 0-6.81 5.52-12.33 12.33-12.33l39.5.01c-4.21-6.56-7.76-13.57-10.59-20.95-1.57-4.17-2.93-8.39-4.05-12.72H66.73c-11.55 0-22.07 4.74-29.7 12.37-7.62 7.62-12.36 18.14-12.36 29.7v259.16c0 11.54 4.75 22.06 12.38 29.68 7.6 7.66 18.13 12.39 29.68 12.39h311.54c11.54 0 22.06-4.75 29.7-12.37 7.62-7.64 12.37-18.17 12.37-29.7v-36.97h-67.5c-20.85 0-39.8-8.53-53.5-22.24l-1.29-1.4c-12.96-13.64-20.95-32.01-20.95-52.1v-3.26c0-20.75 8.52-39.67 22.24-53.42l.13-.13c13.75-13.69 32.64-22.19 53.37-22.19m92.17.7c7.11 1.42 13.48 4.94 18.42 9.88 6.51 6.51 10.57 15.53 10.57 25.46v81.12c0 10.27-4.23 19.66-11.07 26.51a37.3 37.3 0 0 1-17.92 10.07v37.97c0 18.29-7.54 34.97-19.63 47.06l-.05.05c-12.09 12.09-28.77 19.63-47.06 19.63H66.73c-18.28 0-34.98-7.53-47.1-19.64C7.52 480.57 0 463.89 0 445.53V186.37c0-18.37 7.51-35.06 19.59-47.15 12.08-12.08 28.77-19.59 47.14-19.59h43.08c-.05-1.32-.07-2.65-.07-3.99 0-31.9 12.96-60.83 34-81.91 45.05-44.92 118.69-45.02 163.72 0l1.11 1.21c20.31 20.9 32.82 49.37 32.82 80.7 0 1.34-.03 2.67-.07 3.99h36.95c18.31 0 34.99 7.53 47.09 19.63 12.12 12.07 19.65 28.78 19.65 47.11zm-121.85-76.53h48.5c17.41-.16 32.75 3.8 45.36 13.15 1.13.84 2.24 1.72 3.32 2.64v-7.41c0-11.52-4.75-22.05-12.39-29.69-7.59-7.65-18.1-12.38-29.68-12.38H337.8c-1.1 4.34-2.46 8.59-4.04 12.72-2.82 7.4-6.38 14.4-10.6 20.97M206.69 64.7c-.04-4.81-.49-8.26 5.49-8.17l24.46.23c6.23-.03 7.89 1.95 7.82 7.79v23.16h23.01c4.81-.03 8.25-.48 8.16 5.49l-.23 24.46c.03 6.24-1.94 7.9-7.79 7.83h-23.15v23.14c.07 5.85-1.59 7.83-7.82 7.79l-24.46.23c-5.98.09-5.53-3.35-5.49-8.16v-23h-23.16c-5.85.07-7.83-1.6-7.79-7.83l-.23-24.46c-.1-5.97 3.35-5.52 8.16-5.49h23.02zm18.88-45.25c53.12 0 96.18 43.06 96.18 96.19 0 24.7-9.32 47.23-24.63 64.26H154c-15.31-17.03-24.62-39.56-24.62-64.26 0-53.13 43.06-96.19 96.19-96.19m133.52 280.81c8.13 0 15.51 3.31 20.85 8.66 5.38 5.38 8.69 12.76 8.69 20.89 0 8.12-3.31 15.5-8.65 20.85-5.38 5.38-12.76 8.69-20.89 8.69-8.12 0-15.49-3.31-20.85-8.65l-.06-.06c-5.34-5.36-8.63-12.73-8.63-20.83 0-8.12 3.31-15.5 8.65-20.85l.06-.06c5.35-5.33 12.72-8.64 20.83-8.64"></path></svg></div><div tabindex="0" class="css-175oi2r r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73" style="transition-duration:0s"><div dir="auto" class="css-146c3p1"></div></div></div><div dir="auto" class="css-146c3p1 r-1t9nq9 r-1b43r93 r-1kfrs79">Equb Reserve</div><div dir="auto" class="css-146c3p1 r-1t9nq9 r-1ol76an r-ubezar r-b88u0q">2,000<!-- --> ETB</div></div></div></div></div></div><div class="css-175oi2r r-1apnidv r-15g7tld"><div class="css-175oi2r r-1awozwy r-18u37iz r-1wtj0ep r-1cad53l"><div dir="auto" class="css-146c3p1 r-1t9nq9 r-ubezar r-b88u0q">Recent Spending</div><div dir="auto" class="css-146c3p1 r-1npgj5g r-1enofrn">10<!-- --> entries</div></div><div class="css-175oi2r r-1awozwy r-hkr3fv r-gf7ktg r-1867qdf r-rs99b7 r-18u37iz r-1wtj0ep r-5oul0u r-xyw6el"><div class="css-175oi2r r-1awozwy r-13awgt0 r-18u37iz r-1ssbvtb r-1kb76zh"><div class="css-175oi2r r-1awozwy r-1sc1npi r-y47klf r-eu3ka r-1777fci r-1aockid"><div dir="auto" class="css-146c3p1 r-1i10wst">🛒</div></div><div class="css-175oi2r r-13awgt0"><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1t9nq9 r-n6v787 r-b88u0q">5L Sunflower Cooking Oil</div><div dir="auto" class="css-146c3p1 r-1npgj5g r-1gkfh8e r-1bymd8e">Day 1<!-- --> • <span class="css-1jxf684 r-14von57 r-1kfrs79">Pantry/Sink</span></div></div></div><div dir="auto" class="css-146c3p1 r-14von57 r-1ol76an r-1b43r93 r-b88u0q">-<!-- -->3,800<!-- --> ETB</div></div><div class="css-175oi2r r-1awozwy r-hkr3fv r-gf7ktg r-1867qdf r-rs99b7 r-18u37iz r-1wtj0ep r-5oul0u r-xyw6el"><div class="css-175oi2r r-1awozwy r-13awgt0 r-18u37iz r-1ssbvtb r-1kb76zh"><div class="css-175oi2r r-1awozwy r-1sc1npi r-y47klf r-eu3ka r-1777fci r-1aockid"><div dir="auto" class="css-146c3p1 r-1i10wst">🛒</div></div><div class="css-175oi2r r-13awgt0"><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1t9nq9 r-n6v787 r-b88u0q">Berbere &amp; Shiro Stock</div><div dir="auto" class="css-146c3p1 r-1npgj5g r-1gkfh8e r-1bymd8e">Day 1<!-- --> • <span class="css-1jxf684 r-14von57 r-1kfrs79">Pantry/Sink</span></div></div></div><div dir="auto" class="css-146c3p1 r-14von57 r-1ol76an r-1b43r93 r-b88u0q">-<!-- -->2,500<!-- --> ETB</div></div><div class="css-175oi2r r-1awozwy r-hkr3fv r-gf7ktg r-1867qdf r-rs99b7 r-18u37iz r-1wtj0ep r-5oul0u r-xyw6el"><div class="css-175oi2r r-1awozwy r-13awgt0 r-18u37iz r-1ssbvtb r-1kb76zh"><div class="css-175oi2r r-1awozwy r-1sc1npi r-y47klf r-eu3ka r-1777fci r-1aockid"><div dir="auto" class="css-146c3p1 r-1i10wst">🏠</div></div><div class="css-175oi2r r-13awgt0"><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1t9nq9 r-n6v787 r-b88u0q">House Rent (Tikimt)</div><div dir="auto" class="css-146c3p1 r-1npgj5g r-1gkfh8e r-1bymd8e">Day 1<!-- --> • <span class="css-1jxf684 r-14von57 r-1kfrs79">Pantry/Sink</span></div></div></div><div dir="auto" class="css-146c3p1 r-14von57 r-1ol76an r-1b43r93 r-b88u0q">-<!-- -->3,000<!-- --> ETB</div></div><div class="css-175oi2r r-1awozwy r-hkr3fv r-gf7ktg r-1867qdf r-rs99b7 r-18u37iz r-1wtj0ep r-5oul0u r-xyw6el"><div class="css-175oi2r r-1awozwy r-13awgt0 r-18u37iz r-1ssbvtb r-1kb76zh"><div class="css-175oi2r r-1awozwy r-1sc1npi r-y47klf r-eu3ka r-1777fci r-1aockid"><div dir="auto" class="css-146c3p1 r-1i10wst">🚕</div></div><div class="css-175oi2r r-13awgt0"><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1t9nq9 r-n6v787 r-b88u0q">Taxi to Wello Sefer</div><div dir="auto" class="css-146c3p1 r-1npgj5g r-1gkfh8e r-1bymd8e">Day 1<!-- --> • <span class="css-1jxf684 r-1tputim r-1kfrs79">Living Pool</span></div></div></div><div dir="auto" class="css-146c3p1 r-1tputim r-1ol76an r-1b43r93 r-b88u0q">-<!-- -->20<!-- --> ETB</div></div><div class="css-175oi2r r-1awozwy r-hkr3fv r-gf7ktg r-1867qdf r-rs99b7 r-18u37iz r-1wtj0ep r-5oul0u r-xyw6el"><div class="css-175oi2r r-1awozwy r-13awgt0 r-18u37iz r-1ssbvtb r-1kb76zh"><div class="css-175oi2r r-1awozwy r-1sc1npi r-y47klf r-eu3ka r-1777fci r-1aockid"><div dir="auto" class="css-146c3p1 r-1i10wst">☕</div></div><div class="css-175oi2r r-13awgt0"><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1t9nq9 r-n6v787 r-b88u0q">Macchiato at Bole</div><div dir="auto" class="css-146c3p1 r-1npgj5g r-1gkfh8e r-1bymd8e">Day 1<!-- --> • <span class="css-1jxf684 r-1tputim r-1kfrs79">Living Pool</span></div></div></div><div dir="auto" class="css-146c3p1 r-1tputim r-1ol76an r-1b43r93 r-b88u0q">-<!-- -->30<!-- --> ETB</div></div></div></div></div></div><!--/$--></div></div></div></div><div class="css-175oi2r r-zchlnj r-1d2f490 r-105ug2t" style="padding-right:0px;padding-left:0px;box-shadow:0px 8px 16px rgba(0,0,0,0.50);background-color:rgba(19,27,46,1.00);position:absolute;bottom:24px;height:60px;width:220px;border-top-left-radius:22px;border-top-right-radius:22px;border-bottom-right-radius:22px;border-bottom-left-radius:22px;border-right-width:1px;border-bottom-width:1px;border-left-width:1px;border-top-width:1px;border-right-color:rgba(45,55,72,1.00);border-bottom-color:rgba(45,55,72,1.00);border-left-color:rgba(45,55,72,1.00);border-top-color:rgba(45,55,72,1.00);align-self:center;left:50%;padding-top:8px;padding-bottom:8px;transform:translateX(-110px)"><div class="css-175oi2r r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj r-ipm5af r-633pao"></div><div role="tablist" class="css-175oi2r r-13awgt0 r-18u37iz"><div class="css-175oi2r r-13awgt0" style="border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;overflow-x:visible;overflow-y:visible"><a href="/" role="tab" tabindex="0" class="css-175oi2r r-1otgn73 r-1awozwy r-eqz5dr r-1h0z5md r-1uu6nss" style="cursor:pointer;flex:1;background-color:rgba(0,0,0,0.00);border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;opacity:1"><div class="css-175oi2r r-h0d30l r-726pan"><div class="css-175oi2r r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:1;min-width:25px"><div class="css-175oi2r" style="border-top-left-radius:14px;border-top-right-radius:14px;border-bottom-right-radius:14px;border-bottom-left-radius:14px;background-color:rgba(16,185,129,1.00);align-items:center;justify-content:center;width:38px;height:38px"><div dir="auto" class="css-146c3p1"></div></div></div><div class="css-175oi2r r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:0"><div class="css-175oi2r" style="border-top-left-radius:14px;border-top-right-radius:14px;border-bottom-right-radius:14px;border-bottom-left-radius:14px;background-color:rgba(0,0,0,0.00);align-items:center;justify-content:center;width:38px;height:38px"><div dir="auto" class="css-146c3p1"></div></div></div></div></a></div><div class="css-175oi2r r-13awgt0" style="border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;overflow-x:visible;overflow-y:visible"><a href="/transaction" role="tab" tabindex="0" class="css-175oi2r r-1otgn73 r-1awozwy r-eqz5dr r-1h0z5md r-1uu6nss" style="cursor:pointer;flex:1;background-color:rgba(0,0,0,0.00);border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;opacity:1"><div class="css-175oi2r r-h0d30l r-726pan"><div class="css-175oi2r r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:0;min-width:25px"><div class="css-175oi2r" style="border-top-left-radius:14px;border-top-right-radius:14px;border-bottom-right-radius:14px;border-bottom-left-radius:14px;background-color:rgba(16,185,129,1.00);align-items:center;justify-content:center;width:38px;height:38px"><div dir="auto" class="css-146c3p1"></div></div></div><div class="css-175oi2r r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:1"><div class="css-175oi2r" style="border-top-left-radius:14px;border-top-right-radius:14px;border-bottom-right-radius:14px;border-bottom-left-radius:14px;background-color:rgba(0,0,0,0.00);align-items:center;justify-content:center;width:38px;height:38px"><div dir="auto" class="css-146c3p1"></div></div></div></div></a></div><div class="css-175oi2r r-13awgt0" style="border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;overflow-x:visible;overflow-y:visible"><a href="/profile" role="tab" tabindex="0" class="css-175oi2r r-1otgn73 r-1awozwy r-eqz5dr r-1h0z5md r-1uu6nss" style="cursor:pointer;flex:1;background-color:rgba(0,0,0,0.00);border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;opacity:1"><div class="css-175oi2r r-h0d30l r-726pan"><div class="css-175oi2r r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:0;min-width:25px"><div class="css-175oi2r" style="border-top-left-radius:14px;border-top-right-radius:14px;border-bottom-right-radius:14px;border-bottom-left-radius:14px;background-color:rgba(16,185,129,1.00);align-items:center;justify-content:center;width:38px;height:38px"><div dir="auto" class="css-146c3p1"></div></div></div><div class="css-175oi2r r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:1"><div class="css-175oi2r" style="border-top-left-radius:14px;border-top-right-radius:14px;border-bottom-right-radius:14px;border-bottom-left-radius:14px;background-color:rgba(0,0,0,0.00);align-items:center;justify-content:center;width:38px;height:38px"><div dir="auto" class="css-146c3p1"></div></div></div></div></a></div></div></div></div><!--/$--></div></div></div></div><!--/$--></div></div><script src="/_expo/static/js/web/entry-225d9261dca7083c63e2940507dcd3a1.js" defer></script>
+</body></html>

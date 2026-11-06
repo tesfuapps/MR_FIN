@@ -48,6 +48,9 @@ export default Header;
 
 const styles = StyleSheet.create({
   container: {
+    width: "100%",
+    maxWidth: 520,
+    alignSelf: "center",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",

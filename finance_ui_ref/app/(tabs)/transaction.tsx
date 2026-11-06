@@ -57,63 +57,65 @@ const TransactionScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.screenTitle}>የወጪዎች ዝርዝር (Transactions)</Text>
-        <Text style={styles.periodText}>የ{monthNameAm} ({monthNameEn}) ወር መዝገብ</Text>
-      </View>
+      <View style={styles.innerWrapper}>
+        <View style={styles.header}>
+          <Text style={styles.screenTitle}>የወጪዎች ዝርዝር (Transactions)</Text>
+          <Text style={styles.periodText}>የ{monthNameAm} ({monthNameEn}) ወር መዝገብ</Text>
+        </View>
 
-      {/* Search Bar */}
-      <View style={styles.searchWrapper}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="በመግለጫ ወይም በዓይነት ፈልግ..."
-          placeholderTextColor={Colors.textMuted}
-          value={search}
-          onChangeText={setSearch}
+        {/* Search Bar */}
+        <View style={styles.searchWrapper}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="በመግለጫ ወይም በዓይነት ፈልግ..."
+            placeholderTextColor={Colors.textMuted}
+            value={search}
+            onChangeText={setSearch}
+          />
+        </View>
+
+        {/* Filter Tabs */}
+        <View style={styles.filterRow}>
+          <TouchableOpacity
+            style={[styles.filterPill, filter === 'ALL' && styles.filterPillActive]}
+            onPress={() => setFilter('ALL')}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.filterText, filter === 'ALL' && styles.filterTextActive]}>ሁሉም ({transactions.length})</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.filterPill, filter === 'LIVING' && styles.filterPillActiveLiving]}
+            onPress={() => setFilter('LIVING')}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.filterText, filter === 'LIVING' && styles.filterTextActive]}>🌿 የዕለት</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.filterPill, filter === 'BULK_CAPITAL' && styles.filterPillActiveBulk]}
+            onPress={() => setFilter('BULK_CAPITAL')}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.filterText, filter === 'BULK_CAPITAL' && styles.filterTextActive]}>📦 የጅምላ/መጠባበቂያ</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Transaction List */}
+        <FlatList
+          data={filtered}
+          keyExtractor={item => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyTitle}>የተገኘ መዝገብ የለም</Text>
+              <Text style={styles.emptySub}>ምንም የሚመሳሰል የወጪ መረጃ አልተገኘም</Text>
+            </View>
+          }
         />
       </View>
-
-      {/* Filter Tabs */}
-      <View style={styles.filterRow}>
-        <TouchableOpacity
-          style={[styles.filterPill, filter === 'ALL' && styles.filterPillActive]}
-          onPress={() => setFilter('ALL')}
-          activeOpacity={0.7}
-        >
-          <Text style={[styles.filterText, filter === 'ALL' && styles.filterTextActive]}>ሁሉም ({transactions.length})</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.filterPill, filter === 'LIVING' && styles.filterPillActiveLiving]}
-          onPress={() => setFilter('LIVING')}
-          activeOpacity={0.7}
-        >
-          <Text style={[styles.filterText, filter === 'LIVING' && styles.filterTextActive]}>🌿 የዕለት</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.filterPill, filter === 'BULK_CAPITAL' && styles.filterPillActiveBulk]}
-          onPress={() => setFilter('BULK_CAPITAL')}
-          activeOpacity={0.7}
-        >
-          <Text style={[styles.filterText, filter === 'BULK_CAPITAL' && styles.filterTextActive]}>📦 የጅምላ/መጠባበቂያ</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Transaction List */}
-      <FlatList
-        data={filtered}
-        keyExtractor={item => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyTitle}>የተገኘ መዝገብ የለም</Text>
-            <Text style={styles.emptySub}>ምንም የሚመሳሰል የወጪ መረጃ አልተገኘም</Text>
-          </View>
-        }
-      />
     </SafeAreaView>
   );
 };
@@ -124,6 +126,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.black,
+    alignItems: 'center',
+  },
+  innerWrapper: {
+    width: '100%',
+    maxWidth: 520,
+    flex: 1,
     paddingHorizontal: 20,
   },
   header: {

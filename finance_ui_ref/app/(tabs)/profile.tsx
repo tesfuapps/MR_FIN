@@ -213,8 +213,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.black,
+    alignItems: "center",
   },
   scrollContent: {
+    width: "100%",
+    maxWidth: 520,
     paddingHorizontal: 20,
     paddingTop: 10,
     paddingBottom: 90, // Space for bottom floating bar
