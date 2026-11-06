@@ -8,6 +8,11 @@ const Layout = () => {
   return (
     <Tabs
       screenOptions={{
+        // Without this, Expo's static web export emits a default white header
+        // titled "index" into index.html. React removes it on hydration, but if
+        // the JS bundle ever fails to load the raw SSR shell stays on screen as
+        // a white "index" board. Hide the header for every tab at the source.
+        headerShown: false,
         tabBarStyle: {
           backgroundColor: Colors.cardBg,
           position: "absolute",

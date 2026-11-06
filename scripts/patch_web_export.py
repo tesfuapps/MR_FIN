@@ -32,6 +32,9 @@ LEGACY_BUNDLE_HASHES = (
     "entry-c252f6d7f392298190d873af943131a5.js",
     "entry-d5f5440a6b06dccaf5fd45ac551f4562.js",
     "entry-cc517c36b841230e9d33093c2ddcb992.js",
+    # Shipped publicly with the "Mr. Fin" rebrand; keep it resolvable so a
+    # phone that cached that index.html still hydrates after this deploy.
+    "entry-482c5a2a2f72544fb1d281f66aadde6b.js",
 )
 
 VIEWPORT = (
@@ -91,6 +94,73 @@ PWA_TAGS = (
     '<script src="/pwa-register.js" defer></script>'
 )
 PWA_BLOCK = PWA_START + PWA_TAGS + PWA_END
+
+# ---------------------------------------------------------------------------
+# Reload / hydration guard.
+#
+# An Expo static export contains a fully rendered SSR shell. If the JS bundle
+# cannot load (expired preview session, offline, blocked CDN), React never
+# hydrates and the browser keeps showing that raw shell: Expo's default white
+# header titled "index" plus stale prerendered numbers. Users see a white
+# "Index" board after a reload.
+#
+# Three defences, all portable (no sharecode, no external assets):
+#   1. Hide the SSR-only white header and force a dark background.
+#   2. Cover the shell with a branded boot splash until React hydrates.
+#   3. Always remove the splash (mutation / load / hard timeout) so it can
+#      never trap the app behind an overlay.
+# ---------------------------------------------------------------------------
+BOOT_START = "<!-- mrfin-boot:start -->"
+BOOT_END = "<!-- mrfin-boot:end -->"
+
+BOOT_BLOCK = BOOT_START + """<style id="mrfin-boot-css">
+html,body,#root{background-color:#0b0f19!important}
+#root h1[role="heading"][dir="auto"]{display:none!important}
+#root div[style*="background-color:rgba(255,255,255,1.00)"][style*="border-bottom-color:rgba(216,216,216,1.00)"]{display:none!important}
+#wb-boot{position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#0b0f19;color:#f8fafc;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;transition:opacity .25s ease}
+#wb-boot .wb-mark{font-size:36px;font-weight:800;letter-spacing:-1.5px}
+#wb-boot .wb-mark span{color:#11ef8c}
+#wb-boot .wb-sub{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#94a3b8}
+#wb-boot .wb-bar{width:132px;height:3px;border-radius:3px;background:#243049;overflow:hidden;margin-top:10px}
+#wb-boot .wb-bar i{display:block;width:42%;height:100%;background:#11ef8c;animation:wb-slide 1.1s ease-in-out infinite}
+@keyframes wb-slide{0%{transform:translateX(-110%)}100%{transform:translateX(350%)}}
+</style>
+<div id="wb-boot" aria-hidden="true">
+<div class="wb-mark">Mr. <span>Fin</span></div>
+<div class="wb-sub">Addis daily pace</div>
+<div class="wb-bar"><i></i></div>
+</div>
+<script>
+(function(){
+  var el=document.getElementById('wb-boot');
+  if(!el) return;
+  var done=false;
+  function hide(){
+    if(done) return; done=true;
+    el.style.opacity='0';
+    setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); },280);
+  }
+  function watch(){
+    try{
+      var root=document.getElementById('root');
+      if(!root || !window.MutationObserver) return;
+      var mo=new MutationObserver(function(){ hide(); mo.disconnect(); });
+      mo.observe(root,{childList:true,subtree:true});
+    }catch(e){}
+  }
+  if(document.readyState==='loading')
+    document.addEventListener('DOMContentLoaded',watch,{once:true});
+  else watch();
+  if(document.readyState==='complete') setTimeout(hide,150);
+  else window.addEventListener('load',function(){ setTimeout(hide,150); },{once:true});
+  setTimeout(hide,3000);
+})();
+</script>""" + BOOT_END
+
+BOOT_RE = re.compile(
+    re.escape(BOOT_START) + r".*?" + re.escape(BOOT_END),
+    re.S,
+)
 
 # Defensive single-property overrides. Class names are content hashes and can
 # change between builds, so match on the property/value instead of the name.
@@ -163,6 +233,21 @@ def patch_html(source: str) -> str:
         html = PWA_RE.sub(lambda _m: PWA_BLOCK, html, count=1)
     else:
         html = html.replace("</head>", PWA_BLOCK + "</head>", 1)
+
+    # 8. Branded boot guard. Inject right after <body> so the CSS applies
+    #    before Expo's SSR shell is parsed, but the <div> stays valid markup.
+    #    Idempotent: re-patching an already patched export replaces the block.
+    if BOOT_RE.search(html):
+        html = BOOT_RE.sub(lambda _m: BOOT_BLOCK, html, count=1)
+    elif re.search(r"<body[^>]*>", html):
+        html = re.sub(
+            r"<body[^>]*>",
+            lambda m: m.group(0) + BOOT_BLOCK,
+            html,
+            count=1,
+        )
+    else:
+        html = BOOT_BLOCK + html
 
     return html
 
