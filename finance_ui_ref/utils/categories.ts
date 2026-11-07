@@ -1,3 +1,4 @@
+import Colors from '@/constants/Colors';
 import { Language } from './i18n';
 
 export interface CategoryDef {
@@ -13,18 +14,21 @@ export interface CustomCategory {
   icon: string;
 }
 
-/** Canonical English ids are stored on transactions; labels are localised. */
+/**
+ * Category colours all come from the Phase 1 token palette — no module
+ * outside `constants/Colors.ts` declares a hex value.
+ */
 export const BUILTIN_CATEGORIES: CategoryDef[] = [
-  { id: 'Food', icon: '🍲', color: '#3b82f6', label: { en: 'Food', am: 'ምግብ' } },
-  { id: 'Transit', icon: '🚕', color: '#f8fafc', label: { en: 'Transit', am: 'ትራንስፖርት' } },
-  { id: 'Pantry', icon: '🛒', color: '#f59e0b', label: { en: 'Pantry', am: 'የጅምላ ግዢ' } },
-  { id: 'Housing', icon: '🏠', color: '#8b5cf6', label: { en: 'Housing', am: 'መኖሪያ' } },
-  { id: 'Grooming', icon: '💈', color: '#14b8a6', label: { en: 'Grooming', am: 'ውበትና ጸጉር' } },
-  { id: 'Health', icon: '💊', color: '#ef4444', label: { en: 'Health', am: 'ጤና' } },
-  { id: 'Utilities', icon: '💡', color: '#eab308', label: { en: 'Utilities', am: 'አገልግሎቶች' } },
-  { id: 'Airtime', icon: '📱', color: '#22d3ee', label: { en: 'Airtime', am: 'የስልክ ክፍያ' } },
-  { id: 'Education', icon: '📚', color: '#a78bfa', label: { en: 'Education', am: 'ትምህርት' } },
-  { id: 'Other', icon: '💳', color: '#94a3b8', label: { en: 'Other', am: 'ሌላ' } },
+  { id: 'Food', icon: '🍲', color: Colors.info, label: { en: 'Food', am: 'ምግብ' } },
+  { id: 'Transit', icon: '🚕', color: Colors.text, label: { en: 'Transit', am: 'ትራንስፖርት' } },
+  { id: 'Pantry', icon: '🛒', color: Colors.warning, label: { en: 'Pantry', am: 'የጅምላ ግዢ' } },
+  { id: 'Housing', icon: '🏠', color: Colors.purple, label: { en: 'Housing', am: 'መኖሪያ' } },
+  { id: 'Grooming', icon: '💈', color: Colors.teal, label: { en: 'Grooming', am: 'ውበትና ጸጉር' } },
+  { id: 'Health', icon: '💊', color: Colors.danger, label: { en: 'Health', am: 'ጤና' } },
+  { id: 'Utilities', icon: '💡', color: Colors.categoryYellow, label: { en: 'Utilities', am: 'አገልግሎቶች' } },
+  { id: 'Airtime', icon: '📱', color: Colors.categoryCyan, label: { en: 'Airtime', am: 'የስልክ ክፍያ' } },
+  { id: 'Education', icon: '📚', color: Colors.categoryViolet, label: { en: 'Education', am: 'ትምህርት' } },
+  { id: 'Other', icon: '💳', color: Colors.textMuted, label: { en: 'Other', am: 'ሌላ' } },
 ];
 
 export function allCategoryDefs(custom: CustomCategory[]): CategoryDef[] {
@@ -33,7 +37,7 @@ export function allCategoryDefs(custom: CustomCategory[]): CategoryDef[] {
     ...custom.map(c => ({
       id: c.id,
       icon: c.icon,
-      color: '#10b981',
+      color: Colors.accent,
       label: { en: c.label, am: c.label } as Record<Language, string>,
     })),
   ];
@@ -52,5 +56,5 @@ export function getCategoryLabel(
 }
 
 export function getCategoryColor(id: string, custom: CustomCategory[]): string {
-  return allCategoryDefs(custom).find(c => c.id === id)?.color || '#94a3b8';
+  return allCategoryDefs(custom).find(c => c.id === id)?.color || Colors.textMuted;
 }

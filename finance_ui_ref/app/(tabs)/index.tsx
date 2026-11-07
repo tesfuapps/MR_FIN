@@ -1,40 +1,45 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
-import React, { useState } from "react";
-import Colors from "@/constants/Colors";
-import { Stack } from "expo-router";
-import Header from "@/components/Header";
-import { PieChart } from "react-native-gifted-charts";
-import ExpenseBlock from "@/components/ExpenseBlock";
-import IncomeBlock from "@/components/IncomeBlock";
-import SpendingBlock from "@/components/SpendingBlock";
-import { PaceHero } from "@/components/PaceHero";
-import { EthiopianCalendarCard } from "@/components/EthiopianCalendarCard";
-import { QuickLogPresets } from "@/components/QuickLogPresets";
-import { AddExpenseModal } from "@/components/AddExpenseModal";
-import ExpenseList from "@/data/expenses.json";
-import IncomeList from "@/data/income.json";
-import { useFinSpark } from "@/context/FinSparkContext";
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Stack } from 'expo-router';
+import { PieChart } from 'react-native-gifted-charts';
+import Colors from '@/constants/Colors';
+import Header from '@/components/Header';
+import ExpenseBlock from '@/components/ExpenseBlock';
+import IncomeBlock from '@/components/IncomeBlock';
+import SpendingBlock from '@/components/SpendingBlock';
+import { PaceHero } from '@/components/PaceHero';
+import { EthiopianCalendarCard } from '@/components/EthiopianCalendarCard';
+import { QuickLogPresets } from '@/components/QuickLogPresets';
+import { AddExpenseModal } from '@/components/AddExpenseModal';
+import { EditProfileModal } from '@/components/EditProfileModal';
+import { EmptyState } from '@/components/EmptyState';
+import ExpenseList from '@/data/expenses.json';
+import IncomeList from '@/data/income.json';
+import { useFinSpark } from '@/context/FinSparkContext';
 
 const Page = () => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [profileVisible, setProfileVisible] = useState(false);
   const {
-    livingPoolSpent, livingPoolBaseline, percentUsed,
+    livingPoolSpent, livingPoolBaseline, bulkBudget, transactions, percentUsed,
     monthNameAm, monthNameEn, language, t,
   } = useFinSpark();
 
   const monthLabel = language === 'am' ? monthNameAm : monthNameEn;
+  // Phase 1.1 — no transactions and no budgets means a genuinely fresh start.
+  const isEmpty = transactions.length === 0 && livingPoolBaseline === 0 && bulkBudget === 0;
 
   const remainingPct = Math.max(0, 100 - percentUsed);
   const pieData = [
     {
       value: percentUsed,
-      color: percentUsed > 90 ? Colors.red : Colors.tintColor,
+      color: percentUsed > 90 ? Colors.status.overPace : Colors.status.onTarget,
       focused: true,
       text: `${percentUsed}%`,
     },
     {
       value: remainingPct,
-      color: Colors.grey,
+      color: Colors.surfaceAlt,
       focused: false,
       text: `${remainingPct}%`,
     },
@@ -45,6 +50,16 @@ const Page = () => {
       <Stack.Screen options={{ header: () => <Header /> }} />
       <View style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+
+          {isEmpty && (
+            <EmptyState
+              icon="wallet"
+              title={t('emptyHomeTitle')}
+              body={t('emptyHomeSub')}
+              actionLabel={t('emptyHomeAction')}
+              onAction={() => setProfileVisible(true)}
+            />
+          )}
 
           {/* Top Summary & Semi-Circle Donut Chart */}
           <View style={styles.topSummaryRow}>
@@ -70,7 +85,7 @@ const Page = () => {
                 semiCircle
                 radius={58}
                 innerRadius={44}
-                innerCircleColor={Colors.black}
+                innerCircleColor={Colors.bg}
                 centerLabelComponent={() => (
                   <View style={styles.chartCenterLabel}>
                     <Text style={styles.chartCenterPct}>{percentUsed}%</Text>
@@ -102,6 +117,7 @@ const Page = () => {
 
         {/* Add Expense Modal (with category selector) */}
         <AddExpenseModal visible={modalVisible} onClose={() => setModalVisible(false)} />
+        <EditProfileModal visible={profileVisible} onClose={() => setProfileVisible(false)} />
       </View>
     </>
   );
@@ -112,12 +128,12 @@ export default Page;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.black,
-    alignItems: "center",
+    backgroundColor: Colors.bg,
+    alignItems: 'center',
     overflow: 'hidden',
   },
   scrollContent: {
-    width: "100%",
+    width: '100%',
     maxWidth: 520,
     paddingHorizontal: 16,
     paddingTop: 10,
@@ -125,26 +141,26 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   topSummaryRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 4,
   },
   summaryTextCol: { flex: 1 },
-  summaryLabel: { color: Colors.white, fontWeight: "700", fontSize: 14 },
+  summaryLabel: { color: Colors.text, fontWeight: '700', fontSize: 14 },
   summaryAmount: {
-    color: Colors.white,
-    fontWeight: "900",
+    color: Colors.text,
+    fontWeight: '900',
     fontSize: 28,
-    fontFamily: "SpaceMono",
+    fontFamily: 'SpaceMono',
     marginTop: 2,
   },
-  currencySub: { fontSize: 16, fontWeight: "400", color: Colors.textMuted },
+  currencySub: { fontSize: 16, fontWeight: '400', color: Colors.textMuted },
   poolBaselineText: { color: Colors.textMuted, fontSize: 10, marginTop: 2 },
-  chartWrapper: { paddingVertical: 8, alignItems: "center", marginLeft: 8 },
-  chartCenterLabel: { justifyContent: "center", alignItems: "center" },
+  chartWrapper: { paddingVertical: 8, alignItems: 'center', marginLeft: 8 },
+  chartCenterLabel: { justifyContent: 'center', alignItems: 'center' },
   chartCenterPct: {
-    fontSize: 16, color: Colors.white, fontWeight: "bold", fontFamily: "SpaceMono",
+    fontSize: 16, color: Colors.text, fontWeight: 'bold', fontFamily: 'SpaceMono',
   },
   chartCenterSub: { fontSize: 8, color: Colors.textMuted },
 });

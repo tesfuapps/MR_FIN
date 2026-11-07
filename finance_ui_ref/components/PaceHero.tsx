@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import Colors from '@/constants/Colors';
 import { useFinSpark } from '@/context/FinSparkContext';
 
@@ -12,16 +12,19 @@ export const PaceHero: React.FC = () => {
 
   const isOver = todayRemaining < 0;
   const isTight = todayRemaining >= 0 && todayRemaining < dynamicDailyPace * 0.3;
-  const statusColor = isOver ? Colors.red : isTight ? Colors.gold : Colors.tintColor;
+  const statusKey = isOver ? 'overPace' : isTight ? 'nearPace' : 'onTarget';
+  const statusColor = Colors.status[statusKey];
+  const statusTint = Colors.statusTint[statusKey];
   const statusLabel = isOver ? t('overPace') : isTight ? t('tight') : t('onTarget');
 
   const periodLabel = language === 'am'
     ? `${monthNameAm} • ${currentDay}ኛው ቀን ${t('of')} ${totalDays}`
     : `${monthNameEn.toUpperCase()} • DAY ${currentDay} OF ${totalDays}`;
 
+  // Phase 1.1 — a zero baseline must not render a full red "100% used" bar.
   const spendProgress = dynamicDailyPace > 0
     ? Math.min(100, Math.round((spentToday / dynamicDailyPace) * 100))
-    : 100;
+    : (spentToday > 0 ? 100 : 0);
 
   return (
     <View style={styles.card}>
@@ -37,7 +40,7 @@ export const PaceHero: React.FC = () => {
           </View>
         </View>
 
-        <View style={[styles.badge, { borderColor: statusColor, backgroundColor: `${statusColor}1A` }]}>
+        <View style={[styles.badge, { borderColor: statusColor, backgroundColor: statusTint }]}>
           <Text style={[styles.badgeText, { color: statusColor }]}>{statusLabel}</Text>
         </View>
       </View>
@@ -62,7 +65,7 @@ export const PaceHero: React.FC = () => {
         </View>
         <View style={styles.footerColRight}>
           <Text style={styles.footerLabel}>{t('until')} {nextMonthAm}</Text>
-          <Text style={[styles.footerValue, { color: Colors.gold }]}>{daysRemaining} {t('daysLeft')}</Text>
+          <Text style={[styles.footerValue, { color: Colors.warning }]}>{daysRemaining} {t('daysLeft')}</Text>
         </View>
       </View>
     </View>
@@ -71,7 +74,7 @@ export const PaceHero: React.FC = () => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.cardBg, borderRadius: 20, borderWidth: 1,
+    backgroundColor: Colors.surface, borderRadius: 20, borderWidth: 1,
     borderColor: Colors.border, padding: 18, marginVertical: 12,
   },
   topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
@@ -80,14 +83,14 @@ const styles = StyleSheet.create({
   pulseDot: { width: 7, height: 7, borderRadius: 4 },
   sectionTitle: { color: Colors.textMuted, fontSize: 9, fontWeight: '700', letterSpacing: 0.6 },
   paceNumberRow: { flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 4 },
-  paceNumber: { color: Colors.white, fontSize: 30, fontWeight: '900', fontFamily: 'SpaceMono' },
+  paceNumber: { color: Colors.text, fontSize: 30, fontWeight: '900', fontFamily: 'SpaceMono' },
   paceUnit: { color: Colors.textMuted, fontSize: 12, fontWeight: '600' },
   badge: { borderWidth: 1, paddingVertical: 4, paddingHorizontal: 8, borderRadius: 12 },
   badgeText: { fontSize: 9, fontWeight: '800', letterSpacing: 0.5 },
   metricRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14, marginBottom: 6 },
   subText: { color: Colors.textMuted, fontSize: 11 },
-  subBold: { color: Colors.white, fontWeight: '700', fontFamily: 'SpaceMono' },
-  trackBg: { height: 6, backgroundColor: Colors.grey, borderRadius: 4, overflow: 'hidden' },
+  subBold: { color: Colors.text, fontWeight: '700', fontFamily: 'SpaceMono' },
+  trackBg: { height: 6, backgroundColor: Colors.surfaceAlt, borderRadius: 4, overflow: 'hidden' },
   trackFill: { height: '100%', borderRadius: 4 },
   footerRow: {
     flexDirection: 'row', justifyContent: 'space-between', marginTop: 14,
@@ -96,5 +99,5 @@ const styles = StyleSheet.create({
   footerCol: { flex: 1 },
   footerColRight: { alignItems: 'flex-end' },
   footerLabel: { color: Colors.textMuted, fontSize: 10 },
-  footerValue: { color: Colors.white, fontSize: 13, fontWeight: '700', marginTop: 2, fontFamily: 'SpaceMono' },
+  footerValue: { color: Colors.text, fontSize: 13, fontWeight: '700', marginTop: 2, fontFamily: 'SpaceMono' },
 });

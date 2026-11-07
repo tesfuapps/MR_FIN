@@ -23,39 +23,39 @@
 *Theme: "Make it clean and consistent."*
 
 ### 1.1 Clear all information
-- [ ] Remove all seed/demo transactions (`INITIAL_TRANSACTIONS` in `context/FinSparkContext.tsx`)
-- [ ] Replace hardcoded baseline values (`salary`, `rent`, `equb`, `emergencyFund`) with user-owned, empty-by-default state
-- [ ] Add a `clearAllData()` action that wipes transactions + resets every baseline
-- [ ] Add **"Clear my information"** control in Settings with a confirmation step
-- [ ] Design empty states for Home / Transaction / Advice screens (no data → friendly prompt, not a blank screen)
-- [ ] Persist cleared state so it survives reload (storage layer)
+- [x] Remove all seed/demo transactions (`INITIAL_TRANSACTIONS` in `context/FinSparkContext.tsx`)
+- [x] Replace hardcoded baseline values (`salary`, `rent`, `equb`, `emergencyFund`) with user-owned, empty-by-default state
+- [x] Add a `clearAllData()` action that wipes transactions + resets every baseline
+- [x] Add **"Clear my information"** control in Settings with a confirmation step
+- [x] Design empty states for Home / Transaction screens (no data → friendly prompt, not a blank screen)
+- [x] Persist cleared state so it survives reload (storage layer)
 
 ### 1.2 README
-- [ ] Project overview & screenshots
-- [ ] Setup: install, start, web export, deploy
-- [ ] Architecture: Expo Router tabs, `FinSparkContext`, two-ledger model (LIVING / BULK_CAPITAL)
-- [ ] Ethiopian calendar module (`utils/ethiopianCalendar.ts`) explained
-- [ ] The 4-rule engine documented (see Phase 2)
-- [ ] Roadmap pointer → this file
+- [x] Project overview (screenshots intentionally omitted — no screenshots per execution rules)
+- [x] Setup: install, start, web export, deploy
+- [x] Architecture: Expo Router tabs, `FinSparkContext`, two-ledger model (LIVING / BULK_CAPITAL)
+- [x] Ethiopian calendar module (`utils/ethiopianCalendar.ts`) explained
+- [x] The 4-rule engine documented (see Phase 2)
+- [x] Roadmap pointer → this file
 
 ### 1.3 Unified color system
-- [ ] Consolidate every color into `constants/Colors.ts` as named semantic tokens
+- [x] Consolidate every color into `constants/Colors.ts` as named semantic tokens
   (`bg`, `surface`, `border`, `text`, `textMuted`, `accent`, `success`, `warning`, `danger`, `info`)
-- [ ] Audit all components — remove hardcoded hex/rgba literals
-- [ ] Define and document **status colors** used by pace badges: `On Target` / `Near Pace` / `Over Pace`
-- [ ] Verify contrast (WCAG AA) on all text tokens
+- [x] Audit all components — remove hardcoded hex/rgba literals
+- [x] Define and document **status colors** used by pace badges: `On Target` / `Near Pace` / `Over Pace`
+- [x] Verify contrast (WCAG AA) on all text tokens
 
 ### 1.4 Tabler Icons — outline variant
 - Source: <https://github.com/tabler/tabler-icons> (MIT), **outline** style only
-- [ ] Settle on delivery method: `react-native-svg` components (preferred — already a dependency) vs. web SVG sprite
-- [ ] Replace all icons in: bottom tab bar, header, blocks (Income/Expense/Spending), modals, settings
-- [ ] Remove legacy glyph/vector-font icon code and its assets
-- [ ] Standardize icon sizes (24 default / 20 compact / 28 hero) and stroke width (2)
+- [x] Settle on delivery method: `react-native-svg` components (preferred — already a dependency) vs. web SVG sprite
+- [x] Replace all icons in: bottom tab bar, header, blocks (Income/Expense/Spending), modals, settings
+- [x] Remove legacy glyph/vector-font icon code and its assets
+- [x] Standardize icon sizes (24 default / 20 compact / 28 hero) and stroke width (2)
 
 ### 1.5 Compact chip toast
-- [ ] One reusable `<ChipToast>` component (replaces current `ToastNotification` behavior)
-- [ ] Compact pill shape, icon + message, auto-dismiss, queue support (no overlap)
-- [ ] Wire into: expense logging, income logging, clear-data confirmation, errors
+- [x] One reusable `<ChipToast>` component (replaces current `ToastNotification` behavior)
+- [x] Compact pill shape, icon + message, auto-dismiss, queue support (no overlap)
+- [x] Wire into: expense logging, clear-data confirmation, import/export, errors
 
 **Exit criteria:** app boots with zero demo data, README present, zero stray hex colors, all icons are Tabler outline, every user action fires a chip toast.
 

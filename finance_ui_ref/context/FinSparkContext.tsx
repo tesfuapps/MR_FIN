@@ -31,10 +31,11 @@ import {
   DEFAULT_PROFILE,
   DEFAULT_PREFERENCES,
   DEFAULT_CUSTOM_CATEGORIES,
+  DEFAULT_SHIME_PENDING,
   ProfileData,
   Preferences,
 } from '@/utils/defaults';
-import { loadRawState, saveRawState, clearRawState } from '@/utils/storage';
+import { loadRawState, saveRawState } from '@/utils/storage';
 import {
   AppState,
   ImportMode,
@@ -57,20 +58,6 @@ export type { FinTransaction, LedgerType } from '@/utils/types';
  */
 const SSR_ANCHOR = new Date(2026, 10, 6, 12, 0, 0); // 2019 ጥቅምት 27
 export const INITIAL_ETH_DATE: EthiopianDate = gregorianToEthiopian(SSR_ANCHOR);
-const SEED_DAY = INITIAL_ETH_DATE.day;
-
-const SEED_TRANSACTIONS: FinTransaction[] = [
-  { id: '1', title: '5L Sunflower Cooking Oil', amount: 3800, ledger: 'BULK_CAPITAL', category: 'Pantry', day: 1, dateStr: 'Tikimt 01', ethDateStr: 'ጥቅምት 01', timeStr: 'Day 1' },
-  { id: '2', title: 'Berbere & Shiro Stock', amount: 2500, ledger: 'BULK_CAPITAL', category: 'Pantry', day: 1, dateStr: 'Tikimt 01', ethDateStr: 'ጥቅምት 01', timeStr: 'Day 1' },
-  { id: '3', title: 'House Rent (Tikimt)', amount: 3000, ledger: 'BULK_CAPITAL', category: 'Housing', day: 1, dateStr: 'Tikimt 01', ethDateStr: 'ጥቅምት 01', timeStr: 'Day 1' },
-  { id: '4', title: 'Taxi to Wello Sefer', amount: 20, ledger: 'LIVING', category: 'Transit', day: 1, dateStr: 'Tikimt 01', ethDateStr: 'ጥቅምት 01', timeStr: 'Day 1' },
-  { id: '5', title: 'Macchiato at Bole', amount: 30, ledger: 'LIVING', category: 'Food', day: 1, dateStr: 'Tikimt 01', ethDateStr: 'ጥቅምት 01', timeStr: 'Day 1' },
-  { id: '6', title: 'Minibus to Mexico', amount: 25, ledger: 'LIVING', category: 'Transit', day: 5, dateStr: 'Tikimt 05', ethDateStr: 'ጥቅምት 05', timeStr: 'Day 5' },
-  { id: '7', title: 'Haircut & Beard Trim', amount: 450, ledger: 'BULK_CAPITAL', category: 'Grooming', day: 12, dateStr: 'Tikimt 12', ethDateStr: 'ጥቅምት 12', timeStr: 'Day 12' },
-  { id: '8', title: 'Special Shiro Lunch', amount: 180, ledger: 'LIVING', category: 'Food', day: 26, dateStr: 'Tikimt 26', ethDateStr: 'ጥቅምት 26', timeStr: 'Day 26' },
-  { id: '9', title: 'Taxi to Kera', amount: 20, ledger: 'LIVING', category: 'Transit', day: SEED_DAY, dateStr: `Tikimt ${SEED_DAY}`, ethDateStr: `ጥቅምት ${SEED_DAY}`, timeStr: 'Today 08:30' },
-  { id: '10', title: 'Buna at Cafe', amount: 50, ledger: 'LIVING', category: 'Food', day: SEED_DAY, dateStr: `Tikimt ${SEED_DAY}`, ethDateStr: `ጥቅምት ${SEED_DAY}`, timeStr: 'Today 09:15' },
-];
 
 interface FinSparkContextType {
   // Ethiopian calendar
@@ -110,7 +97,6 @@ interface FinSparkContextType {
   quickLog: (title: string, amount: number, category: string) => void;
   injectBooster: (amount: number) => void;
   settleShimeTab: () => void;
-  resetToSeed: () => void;
   clearAllData: () => void;
 
   // Localisation
@@ -156,8 +142,10 @@ export const FinSparkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [profile, setProfile] = useState<ProfileData>(DEFAULT_PROFILE);
   const [preferences, setPreferences] = useState<Preferences>(DEFAULT_PREFERENCES);
   const [customCategories, setCustomCategories] = useState<CustomCategory[]>(DEFAULT_CUSTOM_CATEGORIES);
-  const [transactions, setTransactions] = useState<FinTransaction[]>(SEED_TRANSACTIONS);
-  const [shimeTabPending, setShimeTabPending] = useState(true);
+  // Phase 1.1: the app boots with zero demo data. Every number belongs to the
+  // user; nothing is prefilled until they enter it in Edit Profile.
+  const [transactions, setTransactions] = useState<FinTransaction[]>([]);
+  const [shimeTabPending, setShimeTabPending] = useState(DEFAULT_SHIME_PENDING);
   const [toast, setToast] = useState<ToastData | null>(null);
   const [lastTransactionId, setLastTransactionId] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
@@ -199,7 +187,7 @@ export const FinSparkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [applyState]);
 
   // Persist every change. Skipped until hydration so we never overwrite saved
-  // data with the seed state.
+  // user data with the empty-by-default state.
   useEffect(() => {
     if (!hydrated) return;
     const state: AppState = {
@@ -233,7 +221,10 @@ export const FinSparkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     .filter(tx => tx.day === currentDay)
     .reduce((acc, tx) => acc + tx.amount, 0);
   const todayRemaining = dynamicDailyPace - spentToday;
-  const percentUsed = Math.min(100, Math.round((livingPoolSpent / livingPoolBaseline) * 100));
+  // Guard the empty state: a zero baseline must not produce NaN% in the donut.
+  const percentUsed = livingPoolBaseline > 0
+    ? Math.min(100, Math.round((livingPoolSpent / livingPoolBaseline) * 100))
+    : 0;
   const bulkSpent = transactions
     .filter(tx => tx.ledger === 'BULK_CAPITAL')
     .reduce((acc, tx) => acc + tx.amount, 0);
@@ -356,15 +347,28 @@ export const FinSparkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   }, [t, todayRemaining, dynamicDailyPace]);
 
-  const resetToSeed = () => {
-    setTransactions(SEED_TRANSACTIONS);
-    setProfile(DEFAULT_PROFILE);
-    setShimeTabPending(true);
-  };
-
+  /**
+   * Phase 1.1 — a real wipe. No transactions, no baselines, no custom
+   * categories, no pending tabs, default preferences. Writing the empty state
+   * (rather than removing the key) guarantees it survives a reload on both
+   * the localStorage and AsyncStorage paths.
+   */
   const clearAllData = () => {
-    clearRawState();
-    resetToSeed();
+    const empty: AppState = {
+      version: 1,
+      profile: DEFAULT_PROFILE,
+      preferences: DEFAULT_PREFERENCES,
+      transactions: [],
+      customCategories: DEFAULT_CUSTOM_CATEGORIES,
+      shimeTabPending: DEFAULT_SHIME_PENDING,
+    };
+    setTransactions(empty.transactions);
+    setProfile(empty.profile);
+    setPreferences(empty.preferences);
+    setCustomCategories(empty.customCategories);
+    setShimeTabPending(empty.shimeTabPending);
+    setLastTransactionId(null);
+    saveRawState(JSON.stringify(empty));
   };
 
   const updateProfile = (next: ProfileData) => setProfile(next);
@@ -441,7 +445,6 @@ export const FinSparkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       quickLog,
       injectBooster,
       settleShimeTab,
-      resetToSeed,
       clearAllData,
       language: preferences.language,
       setLanguage,

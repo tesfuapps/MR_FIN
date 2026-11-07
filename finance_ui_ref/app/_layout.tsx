@@ -5,7 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import { FinSparkProvider } from "@/context/FinSparkContext";
-import { ToastNotification } from "@/components/ToastNotification";
+import { ChipToast } from "@/components/ChipToast";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -30,8 +30,8 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
-      {/* One global toast so a style change / preview is consistent across tabs. */}
-      <ToastNotification />
+      {/* One global chip toast, queued so rapid actions never overlap. */}
+      <ChipToast />
     </FinSparkProvider>
   );
 }

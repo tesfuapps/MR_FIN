@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, Modal, TextInput, TouchableOpacity, ScrollView,
 } from 'react-native';
 import Colors from '@/constants/Colors';
+import { TablerIcon, ICON_SIZE } from '@/components/TablerIcons';
 import { useFinSpark } from '@/context/FinSparkContext';
 import { ProfileData } from '@/utils/defaults';
 import { TranslationKey } from '@/utils/i18n';
@@ -29,6 +30,15 @@ const NUMBER_FIELDS: { key: FieldKey; labelKey: TranslationKey }[] = [
 
 export const EditProfileModal: React.FC<Props> = ({ visible, onClose }) => {
   const { profile, updateProfile, t, showToast } = useFinSpark();
+  const fireError = (message: string) => showToast({
+    id: `profile-error-${Date.now()}`,
+    type: 'error',
+    icon: '',
+    title: t('invalid'),
+    amount: '',
+    detail: message,
+    pace: '',
+  });
 
   const [draft, setDraft] = useState<ProfileData>({ ...profile });
   const [error, setError] = useState('');
@@ -47,6 +57,7 @@ export const EditProfileModal: React.FC<Props> = ({ visible, onClose }) => {
   const handleSave = () => {
     if (!draft.name.trim()) {
       setError(t('invalidEntryMsg'));
+      fireError(t('invalidEntryMsg'));
       return;
     }
     const numeric: NumericField[] = [
@@ -57,6 +68,7 @@ export const EditProfileModal: React.FC<Props> = ({ visible, onClose }) => {
       const value = Number(draft[key]);
       if (!Number.isFinite(value) || value < 0) {
         setError(t('invalidAmount'));
+        fireError(t('invalidAmount'));
         return;
       }
       parsed[key] = value;
@@ -98,11 +110,14 @@ export const EditProfileModal: React.FC<Props> = ({ visible, onClose }) => {
         <View style={styles.modalBox}>
           <View style={styles.headerRow}>
             <View style={styles.headerTextBox}>
-              <Text style={styles.modalTitle}>✏️ {t('editProfileTitle')}</Text>
+              <View style={styles.titleRow}>
+                <TablerIcon name="pencil" color={Colors.accent} size={ICON_SIZE.compact} />
+                <Text style={styles.modalTitle}>{t('editProfileTitle')}</Text>
+              </View>
               <Text style={styles.modalSub}>{t('settingsSub')}</Text>
             </View>
             <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Text style={styles.closeBtn}>✕</Text>
+              <TablerIcon name="x" color={Colors.textMuted} size={ICON_SIZE.compact} />
             </TouchableOpacity>
           </View>
 
@@ -154,7 +169,7 @@ export const EditProfileModal: React.FC<Props> = ({ visible, onClose }) => {
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.78)',
+    backgroundColor: Colors.overlay.backdropStrong,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 18,
@@ -176,6 +191,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   headerTextBox: { flex: 1, marginRight: 10 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   modalTitle: { color: Colors.white, fontSize: 17, fontWeight: '800' },
   modalSub: { color: Colors.textMuted, fontSize: 11, marginTop: 2 },
   closeBtn: { color: Colors.textMuted, fontSize: 18, fontWeight: '700' },

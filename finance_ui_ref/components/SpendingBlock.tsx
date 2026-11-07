@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from "react";
-import { View, Text, StyleSheet, Animated } from "react-native";
-import Colors from "@/constants/Colors";
-import { useFinSpark } from "@/context/FinSparkContext";
+import React, { useEffect, useRef } from 'react';
+import { Animated, StyleSheet, Text, View } from 'react-native';
+import Colors from '@/constants/Colors';
+import { EmptyState } from '@/components/EmptyState';
+import { useFinSpark } from '@/context/FinSparkContext';
 
 const SpendingBlock: React.FC = () => {
   const { transactions, lastTransactionId, t, categoryIcon, categoryLabel } = useFinSpark();
@@ -15,7 +16,7 @@ const SpendingBlock: React.FC = () => {
       flashAnim.setValue(1);
       Animated.timing(flashAnim, { toValue: 0, duration: 2000, useNativeDriver: false }).start();
     }
-  }, [lastTransactionId]);
+  }, [lastTransactionId, flashAnim]);
 
   return (
     <View style={styles.container}>
@@ -23,6 +24,10 @@ const SpendingBlock: React.FC = () => {
         <Text style={styles.title}>{t('recentSpending')}</Text>
         <Text style={styles.subtitle}>{transactions.length} {t('entries')}</Text>
       </View>
+
+      {transactions.length === 0 && (
+        <EmptyState icon="receipt-2" title={t('emptyTxTitle')} body={t('emptyFeed')} compact />
+      )}
 
       {recentTransactions.map((item) => {
         const isLiving = item.ledger === 'LIVING';
@@ -32,11 +37,11 @@ const SpendingBlock: React.FC = () => {
           ? flashAnim.interpolate({
               inputRange: [0, 1],
               outputRange: [
-                isLiving ? 'rgba(16, 185, 129, 0)' : 'rgba(245, 158, 11, 0)',
-                isLiving ? 'rgba(16, 185, 129, 0.25)' : 'rgba(245, 158, 11, 0.25)',
+                isLiving ? Colors.tint.accent0 : Colors.tint.warning0,
+                isLiving ? Colors.tint.accent25 : Colors.tint.warning25,
               ],
             })
-          : 'rgba(0,0,0,0)';
+          : Colors.overlay.transparent;
 
         return (
           <Animated.View
@@ -72,24 +77,24 @@ export default SpendingBlock;
 const styles = StyleSheet.create({
   container: { marginVertical: 14, marginBottom: 80 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
-  title: { color: Colors.white, fontWeight: "700", fontSize: 16 },
+  title: { color: Colors.text, fontWeight: '700', fontSize: 16 },
   subtitle: { color: Colors.textMuted, fontSize: 12 },
   blockWrap: {
-    flexDirection: "row", justifyContent: "space-between", alignItems: "center",
-    backgroundColor: Colors.cardBg, borderWidth: 1, borderColor: Colors.border,
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border,
     padding: 12, borderRadius: 16, marginBottom: 8,
   },
-  itemInfoWrap: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1, marginRight: 8 },
+  itemInfoWrap: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1, marginRight: 8 },
   iconWrap: {
-    backgroundColor: Colors.grey, width: 40, height: 40, borderRadius: 20,
+    backgroundColor: Colors.surfaceAlt, width: 40, height: 40, borderRadius: 20,
     alignItems: 'center', justifyContent: 'center',
   },
   iconEmoji: { fontSize: 18 },
   textWrap: { flex: 1 },
-  nameTxt: { color: Colors.white, fontSize: 13, fontWeight: "700" },
+  nameTxt: { color: Colors.text, fontSize: 13, fontWeight: '700' },
   dateTxt: { color: Colors.textMuted, fontSize: 10, marginTop: 2 },
-  ledgerLiving: { color: Colors.tintColor, fontWeight: "600" },
-  ledgerBulk: { color: Colors.gold, fontWeight: "600" },
-  amountLiving: { color: Colors.tintColor, fontSize: 14, fontWeight: "700", fontFamily: "SpaceMono" },
-  amountBulk: { color: Colors.gold, fontSize: 14, fontWeight: "700", fontFamily: "SpaceMono" },
+  ledgerLiving: { color: Colors.accent, fontWeight: '600' },
+  ledgerBulk: { color: Colors.warning, fontWeight: '600' },
+  amountLiving: { color: Colors.accent, fontSize: 14, fontWeight: '700', fontFamily: 'SpaceMono' },
+  amountBulk: { color: Colors.warning, fontSize: 14, fontWeight: '700', fontFamily: 'SpaceMono' },
 });

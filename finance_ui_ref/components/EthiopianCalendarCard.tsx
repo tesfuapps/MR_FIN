@@ -362,9 +362,9 @@ const styles = StyleSheet.create({
   dayCellFuture: {
     width: '12.5%',
     aspectRatio: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: Colors.overlay.scrimStrong,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: Colors.overlay.hairline,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   todayPill: {
-    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    backgroundColor: Colors.tint.accent20,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 6,

@@ -1,8 +1,15 @@
-import { Tabs } from "expo-router";
-import React from "react";
-import TabItems from "@/components/TabItems";
-import { PieChartIcon, SwapIcon, UserIcon, SettingsIcon } from "@/components/TabIcons";
-import Colors from "@/constants/Colors";
+import React from 'react';
+import { Tabs } from 'expo-router';
+import Colors from '@/constants/Colors';
+import TabItems from '@/components/TabItems';
+import { TablerIcon, ICON_SIZE, TablerIconName } from '@/components/TablerIcons';
+
+/** Phase 1.4 — Tabler outline icons, 20px compact size, stroke width 2. */
+const tabIcon = (name: TablerIconName, focused: boolean) => (
+  <TabItems focused={focused}>
+    <TablerIcon name={name} size={ICON_SIZE.compact} color={focused ? Colors.onAccent : Colors.textMuted} />
+  </TabItems>
+);
 
 const Layout = () => {
   return (
@@ -14,24 +21,24 @@ const Layout = () => {
         // a white "index" board. Hide the header for every tab at the source.
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: Colors.cardBg,
-          position: "absolute",
+          backgroundColor: Colors.surface,
+          position: 'absolute',
           bottom: 24,
           left: 0,
           right: 0,
           height: 60,
           width: 288,
-          maxWidth: "92%",
+          maxWidth: '92%',
           borderRadius: 22,
           borderWidth: 1,
           borderTopWidth: 1,
           borderColor: Colors.border,
           borderTopColor: Colors.border,
-          alignSelf: "center",
-          marginHorizontal: "auto",
+          alignSelf: 'center',
+          marginHorizontal: 'auto',
           paddingTop: 8,
           paddingBottom: 8,
-          shadowColor: "#000",
+          shadowColor: Colors.shadow,
           shadowOffset: { width: 0, height: 8 },
           shadowOpacity: 0.5,
           shadowRadius: 16,
@@ -39,49 +46,31 @@ const Layout = () => {
         },
         tabBarShowLabel: false,
         tabBarInactiveTintColor: Colors.textMuted,
-        tabBarActiveTintColor: "#000000",
+        tabBarActiveTintColor: Colors.onAccent,
       }}
     >
       <Tabs.Screen
         name="index"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <TabItems focused={focused}>
-              <PieChartIcon color={focused ? "#000000" : Colors.textMuted} size={19} />
-            </TabItems>
-          ),
-        }}
+        options={{ tabBarIcon: ({ focused }) => tabIcon('chart-pie', focused) }}
       />
       <Tabs.Screen
         name="transaction"
         options={{
-          tabBarIcon: ({ focused }) => (
-            <TabItems focused={focused}>
-              <SwapIcon color={focused ? "#000000" : Colors.textMuted} size={19} />
-            </TabItems>
-          ),
+          tabBarIcon: ({ focused }) => tabIcon('arrows-exchange', focused),
           headerShown: false,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          tabBarIcon: ({ focused }) => (
-            <TabItems focused={focused}>
-              <UserIcon color={focused ? "#000000" : Colors.textMuted} size={19} />
-            </TabItems>
-          ),
+          tabBarIcon: ({ focused }) => tabIcon('user', focused),
           headerShown: false,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          tabBarIcon: ({ focused }) => (
-            <TabItems focused={focused}>
-              <SettingsIcon color={focused ? "#000000" : Colors.textMuted} size={19} />
-            </TabItems>
-          ),
+          tabBarIcon: ({ focused }) => tabIcon('settings', focused),
           headerShown: false,
         }}
       />

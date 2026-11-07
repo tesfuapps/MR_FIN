@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, Modal, TextInput, TouchableOpacity, Alert, ScrollView,
+  View, Text, StyleSheet, Modal, TextInput, TouchableOpacity, ScrollView,
 } from 'react-native';
 import Colors from '@/constants/Colors';
+import { TablerIcon, ICON_SIZE } from '@/components/TablerIcons';
 import { useFinSpark, LedgerType } from '@/context/FinSparkContext';
 
 interface Props {
@@ -13,7 +14,7 @@ interface Props {
 export const AddExpenseModal: React.FC<Props> = ({ visible, onClose }) => {
   const {
     addTransaction, monthNameAm, monthNameEn, currentDay, language, t,
-    categoryDefs, categoryLabel, addCustomCategory,
+    categoryDefs, categoryLabel, addCustomCategory, showToast,
   } = useFinSpark();
 
   const [title, setTitle] = useState('');
@@ -33,7 +34,15 @@ export const AddExpenseModal: React.FC<Props> = ({ visible, onClose }) => {
   const handleSubmit = () => {
     const num = parseFloat(amount);
     if (!title.trim() || isNaN(num) || num <= 0) {
-      Alert.alert(t('invalidEntry'), t('invalidEntryMsg'));
+      showToast({
+        id: `invalid-${Date.now()}`,
+        type: 'error',
+        icon: '',
+        title: t('invalidEntry'),
+        amount: '',
+        detail: t('invalidEntryMsg'),
+        pace: '',
+      });
       return;
     }
     addTransaction(title.trim(), num, category, ledger);
@@ -65,7 +74,7 @@ export const AddExpenseModal: React.FC<Props> = ({ visible, onClose }) => {
               </Text>
             </View>
             <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Text style={styles.closeBtn}>✕</Text>
+              <TablerIcon name="x" color={Colors.textMuted} size={ICON_SIZE.compact} />
             </TouchableOpacity>
           </View>
 
@@ -179,7 +188,7 @@ export const AddExpenseModal: React.FC<Props> = ({ visible, onClose }) => {
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.75)',
+    backgroundColor: Colors.overlay.backdrop,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 18,
@@ -242,10 +251,10 @@ const styles = StyleSheet.create({
     maxWidth: 140,
   },
   catChipActive: {
-    borderColor: Colors.tintColor,
-    backgroundColor: 'rgba(16,185,129,0.16)',
+    borderColor: Colors.accent,
+    backgroundColor: Colors.tint.accent16,
   },
-  catChipNew: { borderStyle: 'dashed', borderColor: 'rgba(16,185,129,0.6)' },
+  catChipNew: { borderStyle: 'dashed', borderColor: Colors.tint.accent60 },
   catIcon: { fontSize: 14 },
   catText: { color: Colors.textMuted, fontSize: 11, fontWeight: '600' },
   catTextActive: { color: Colors.white, fontWeight: '800' },
@@ -277,8 +286,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 12,
   },
-  ledgerBtnActiveLiving: { borderColor: Colors.tintColor, backgroundColor: 'rgba(16, 185, 129, 0.15)' },
-  ledgerBtnActiveBulk: { borderColor: Colors.gold, backgroundColor: 'rgba(245, 158, 11, 0.15)' },
+  ledgerBtnActiveLiving: { borderColor: Colors.accent, backgroundColor: Colors.tint.accent15 },
+  ledgerBtnActiveBulk: { borderColor: Colors.warning, backgroundColor: Colors.tint.warning15 },
   ledgerBtnText: { color: Colors.textMuted, fontSize: 11, fontWeight: '600' },
   ledgerBtnTextActive: { color: Colors.white, fontWeight: '700' },
   submitBtn: {

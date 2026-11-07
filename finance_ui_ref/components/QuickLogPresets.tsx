@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Colors from '@/constants/Colors';
+import { TablerIcon, ICON_SIZE } from '@/components/TablerIcons';
 import { useFinSpark } from '@/context/FinSparkContext';
 
 interface PresetItem {
@@ -37,7 +38,10 @@ export const QuickLogPresets: React.FC<Props> = ({ onPressCustom }) => {
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>⚡ {t('quickLogTitle')}</Text>
+        <View style={styles.titleRow}>
+          <TablerIcon name="bolt" color={Colors.accent} size={ICON_SIZE.compact} />
+          <Text style={styles.title}>{t('quickLogTitle')}</Text>
+        </View>
         <Text style={styles.subtitle}>{t('quickLogSub')}</Text>
       </View>
 
@@ -89,6 +93,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 4,
   },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 1 },
   title: {
     color: Colors.white,
     fontWeight: '700',
@@ -156,8 +161,8 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: 'rgba(16,185,129,0.45)',
-    backgroundColor: 'rgba(16,185,129,0.06)',
+    borderColor: Colors.tint.accent45,
+    backgroundColor: Colors.tint.accent06,
   },
   customPlus: {
     color: Colors.tintColor,

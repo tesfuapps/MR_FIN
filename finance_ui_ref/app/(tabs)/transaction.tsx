@@ -4,6 +4,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '@/constants/Colors';
+import { EmptyState } from '@/components/EmptyState';
 import { useFinSpark, FinTransaction } from '@/context/FinSparkContext';
 
 const TransactionScreen = () => {
@@ -140,10 +141,14 @@ const TransactionScreen = () => {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyTitle}>{t('emptyTitle')}</Text>
-              <Text style={styles.emptySub}>{t('emptySub')}</Text>
-            </View>
+            transactions.length === 0 ? (
+              <EmptyState icon="receipt-2" title={t('emptyTxTitle')} body={t('emptyTxSub')} />
+            ) : (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyTitle}>{t('emptyTitle')}</Text>
+                <Text style={styles.emptySub}>{t('emptySub')}</Text>
+              </View>
+            )
           }
         />
       </View>
@@ -181,7 +186,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.black, borderWidth: 1, borderColor: Colors.border,
     paddingVertical: 5, paddingHorizontal: 10, borderRadius: 16, maxWidth: 130,
   },
-  catPillActive: { borderColor: Colors.tintColor, backgroundColor: 'rgba(16,185,129,0.16)' },
+  catPillActive: { borderColor: Colors.accent, backgroundColor: Colors.tint.accent16 },
   catPillIcon: { fontSize: 12 },
   catPillText: { color: Colors.textMuted, fontSize: 10, fontWeight: '700' },
   catPillTextActive: { color: Colors.white, fontWeight: '800' },
